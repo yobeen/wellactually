@@ -16,10 +16,10 @@ from dataclasses import dataclass
 # Import existing components
 import sys
 sys.path.append('src')
-from multi_model_engine import MultiModelEngine, ModelResponse
-from level1_prompts import Level1PromptGenerator
-from level2_prompts import Level2PromptGenerator  
-from level3_prompts import Level3PromptGenerator
+from uncertainty_calibration.multi_model_engine import MultiModelEngine, ModelResponse
+from uncertainty_calibration.level1_prompts import Level1PromptGenerator
+from uncertainty_calibration.level2_prompts import Level2PromptGenerator  
+from uncertainty_calibration.level3_prompts import Level3PromptGenerator
 from uncertainty_calibration.model_metadata import (
     MODEL_PARAMS, TEMPERATURE_SWEEP, get_model_metadata, validate_model_id
 )
