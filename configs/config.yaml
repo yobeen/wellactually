@@ -1,0 +1,47 @@
+# @package _global_
+
+# Main configuration file for Cross-Model Uncertainty Aggregation
+defaults:
+  - llm_augmentation: default
+  - uncertainty_aggregation: default
+  - _self_
+
+# Project settings
+project:
+  name: "cross_model_uncertainty_aggregation"
+  version: "0.1.0"
+  description: "Aggregating uncertainty measures from multiple LLMs"
+
+# Experiment tracking
+experiment:
+  name: null  # Override in command line or experiment configs
+  notes: null
+  tags: []
+
+# Data paths
+data:
+  raw_dir: "data/raw"
+  processed_dir: "data/processed"
+  augmented_dir: "data/augmented"
+  splits_dir: "data/splits"
+  external_dir: "data/external"
+
+# Model paths
+models:
+  calibrators_dir: "models/calibrators"
+  meta_models_dir: "models/meta_models"
+  checkpoints_dir: "models/checkpoints"
+
+# Output paths
+outputs:
+  logs_dir: "logs"
+  results_dir: "results"
+  plots_dir: "plots"
+
+# Hydra configuration
+hydra:
+  run:
+    dir: outputs/${now:%Y-%m-%d}/${now:%H-%M-%S}
+  sweep:
+    dir: multirun/${now:%Y-%m-%d}/${now:%H-%M-%S}
+    subdir: ${hydra.job.num}

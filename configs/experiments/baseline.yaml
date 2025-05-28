@@ -1,0 +1,18 @@
+# @package _global_
+defaults:
+  - /config
+  - override /uncertainty_aggregation: default
+
+experiment:
+  name: "baseline_uncertainty_aggregation"
+  notes: "Baseline experiment with all uncertainty aggregation methods"
+  tags: ["baseline", "full_methods"]
+
+# Override specific settings for baseline
+uncertainty_aggregation:
+  enabled_methods:
+    calibration_based: true
+    rank_based: true
+    temperature_scaling: true
+    meta_learning: true
+    bayesian_averaging: true
