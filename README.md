@@ -1,144 +1,156 @@
-# Cross-Model Uncertainty Aggregation Methods
+# LightGBM Uncertainty Calibration Framework
 
-A comprehensive framework for aggregating uncertainty measures from multiple Large Language Models (LLMs) to produce reliable, calibrated uncertainty estimates for question-answering tasks.
+A framework for calibrating uncertainty estimates from heterogeneous Large Language Models (LLMs) using gradient boosting.
 
 ## Overview
 
-This project implements multiple uncertainty aggregation methods to combine heterogeneous uncertainty scores from 10+ different LLMs, transforming them into meaningful, calibrated uncertainty estimates.
+This framework solves the problem of incomparable uncertainty scores across different LLMs by training a LightGBM model that maps `[raw_uncertainty, model_metadata]` → `P(answer_is_correct)`.
 
-## Features
+## Key Features
 
-### Uncertainty Aggregation Methods
-- **Calibration-Based Normalization**: Maps raw uncertainty to calibrated confidence using validation data
-- **Rank-Based Normalization**: Converts scores to percentiles within historical distributions
-- **Temperature Scaling**: Calibrates raw perplexity scores using learned temperature parameters
-- **Meta-Learning Approach**: Trains models to predict optimal aggregated uncertainty
-- **Bayesian Model Averaging**: Treats each model as expert opinion in Bayesian framework
-
-### LLM Data Augmentation Pipeline
-- **Level 1**: Seed repository comparisons (A vs B vs Equal)
-- **Level 2**: Originality assessments (1-10 scale)
-- **Level 3**: Dependency comparisons within repositories
-
-## Project Structure
-
-```
-├── configs/                    # Hydra configuration files
-│   ├── llm_augmentation/      # LLM pipeline configs
-│   ├── uncertainty_aggregation/ # Uncertainty method configs
-│   └── experiments/           # Experiment-specific configs
-├── src/
-│   ├── llm_augmentation/      # LLM data generation
-│   │   ├── prompts/          # Level 1-3 prompt generators
-│   │   └── engines/          # Multi-model API engine
-│   ├── uncertainty_aggregation/ # Core aggregation methods
-│   │   ├── methods/          # Individual aggregation methods
-│   │   ├── pipelines/        # Training/inference pipelines
-│   │   └── evaluation/       # Metrics and calibration
-│   └── utils/                # Utility functions
-├── data/
-│   ├── raw/                  # Original data (train.csv)
-│   ├── processed/            # Cleaned/preprocessed data
-│   └── augmented/            # LLM-generated synthetic data
-├── notebooks/                # Jupyter notebooks for analysis
-├── tests/                    # Unit and integration tests
-└── scripts/                  # Training and evaluation scripts
-```
+- **Universal Calibration**: Maps raw perplexity scores from any model to meaningful confidence
+- **Model-Aware**: Accounts for model size, architecture, and sampling parameters
+- **Temperature Handling**: Automatically adjusts for different sampling temperatures
+- **Ensemble Support**: Aggregates calibrated uncertainties across multiple models
+- **Evaluation Metrics**: Comprehensive calibration quality assessment
 
 ## Quick Start
 
-### 1. Installation
-
-```bash
-# Clone repository
-git clone <repository_url>
-cd cross-model-uncertainty-aggregation
-
-# Install dependencies
-pip install -r requirements.txt
-```
-
-### 2. Data Setup
-
-Place your `train.csv` file in `data/raw/`:
-
-```bash
-# Preprocess the data
-python scripts/data_processing/preprocess_data.py
-```
-
-### 3. Training
-
-```bash
-# Run baseline experiment
-python scripts/train.py experiment=baseline
-
-# Run with custom config
-python scripts/train.py uncertainty_aggregation.enabled_methods.meta_learning=false
-```
-
-### 4. Evaluation
-
-```bash
-# Evaluate trained models
-python scripts/evaluate.py
-
-# Run specific evaluation
-python scripts/evaluate.py experiment=baseline
-```
-
-## Configuration
-
-The project uses [Hydra](https://hydra.cc/) for configuration management. Key configuration files:
-
-- `configs/config.yaml`: Main configuration
-- `configs/uncertainty_aggregation/default.yaml`: Uncertainty method settings
-- `configs/llm_augmentation/default.yaml`: LLM pipeline settings
-
-### Example Usage
+### 1. Training
 
 ```python
-from src.uncertainty_aggregation.pipelines import InferencePipeline
+from uncertainty_calibration import UncertaintyCalibrationPipeline
+from uncertainty_calibration.lightgbm_trainer import train_calibration_model
 
-# Initialize pipeline
-pipeline = InferencePipeline.from_config(config)
-
-# Aggregate uncertainties from multiple models
-raw_uncertainties = [0.2, 0.3, 0.15, ...]  # From 10 models
-aggregated_uncertainty = pipeline.aggregate(raw_uncertainties)
+# Train from collected responses
+pipeline = train_calibration_model(training_df, model_save_path="calibration_model.pkl")
 ```
 
-## Methods
+### 2. Inference
 
-### 1. Calibration-Based Normalization
-Maps raw uncertainty scores to calibrated confidence using isotonic regression on validation data.
+```python
+# Load trained pipeline
+pipeline = UncertaintyCalibrationPipeline("calibration_model.pkl")
 
-### 2. Rank-Based Normalization  
-Converts each model's score to its percentile within the model's historical distribution.
+# Calibrate single response
+response = {
+    'model_id': 'openai/gpt-4o',
+    'raw_uncertainty': 1.2,
+    'temperature': 0.0,
+    'prediction': 'A'
+}
 
-### 3. Temperature Scaling
-Learns temperature parameters to calibrate perplexity scores using cross-entropy loss.
+calibrated = pipeline.calibrate_single_response(response)
+print(f"Confidence: {calibrated['calibrated_confidence']:.3f}")
+```
 
-### 4. Meta-Learning
-Trains a meta-model to predict optimal aggregated uncertainty from individual model outputs.
+### 3. Multi-Model Aggregation
 
-### 5. Bayesian Model Averaging
-Treats each model as an expert and uses Bayesian updating to combine opinions.
+```python
+# Calibrate responses from multiple models
+model_responses = {
+    'gpt-4o': {'raw_uncertainty': 0.8, 'temperature': 0.0, 'prediction': 'A'},
+    'llama-405b': {'raw_uncertainty': 1.5, 'temperature': 0.0, 'prediction': 'B'},
+    'deepseek': {'raw_uncertainty': 2.1, 'temperature': 0.0, 'prediction': 'A'}
+}
 
-## Evaluation Metrics
+calibrated = pipeline.calibrate_model_responses(model_responses)
+aggregated = pipeline.aggregate_calibrated_uncertainties(calibrated)
 
-- **Predictive Accuracy**: How well uncertainty predicts correctness
-- **Calibration Error**: Expected Calibration Error (ECE) 
-- **Sharpness**: How discriminative the uncertainty scores are
-- **Ensemble Diversity**: Agreement between individual models
+print(f"Ensemble confidence: {aggregated['aggregated_confidence']:.3f}")
+```
 
-## Contributing
+## Data Collection
 
-1. Follow PEP 8 style guidelines
-2. Add unit tests for new functionality
-3. Update configuration files as needed
-4. Document new methods and APIs
+The framework includes a data collection pipeline that performs temperature sweeps across multiple models:
 
-## License
+```python
+from uncertainty_calibration.data_collection import collect_calibration_dataset
 
-[License information]
+# Collect training data across temperature range [0.0, 0.2, 0.4, 0.6, 0.8, 1.0]
+training_df = collect_calibration_dataset(config, "training_data.csv")
+```
+
+## Feature Engineering
+
+Automatic feature engineering from raw responses:
+
+- **Core Features**: `raw_uncertainty`, `model_name`, `param_count`, `temperature`
+- **Derived Features**: Normalized uncertainty, temperature interactions, model categories
+- **Ensemble Features**: Cross-model statistics for same questions
+
+## Model Architecture
+
+**LightGBM Configuration**:
+- Objective: Binary classification (predict answer correctness)
+- Categorical features: Model name, size category, temperature bins
+- Early stopping with validation monitoring
+- Feature importance analysis
+
+## Evaluation
+
+Comprehensive calibration quality metrics:
+
+```python
+from uncertainty_calibration.evaluation import CalibrationEvaluator
+
+evaluator = CalibrationEvaluator()
+metrics = evaluator.comprehensive_evaluation(y_true, y_prob)
+
+print(f"Expected Calibration Error: {metrics['ECE']:.4f}")
+print(f"Brier Score: {metrics['Brier_Score']:.4f}")
+```
+
+## Scripts
+
+### Training Script
+
+```bash
+# Train complete pipeline
+python scripts/train_calibrator.py
+
+# Individual steps
+python scripts/train_calibrator.py --collect-data
+python scripts/train_calibrator.py --train
+python scripts/train_calibrator.py --evaluate
+```
+
+### Demo Usage
+
+```bash
+# See calibration in action
+python scripts/demo_usage.py
+```
+
+## Expected Benefits
+
+1. **Unified Scale**: `uncertainty=0.7` means the same thing across all models
+2. **Automatic Learning**: Discovers model-specific calibration behaviors
+3. **Temperature Handling**: Accounts for sampling parameter effects
+4. **Model Size Awareness**: Larger models automatically get different treatment
+5. **Ensemble Ready**: Meaningful aggregation of multiple model outputs
+
+## File Structure
+
+```
+src/uncertainty_calibration/
+├── __init__.py                 # Package initialization
+├── model_metadata.py           # Model parameter definitions
+├── data_collection.py          # Temperature sweep data collection
+├── feature_engineering.py      # Response to feature conversion
+├── lightgbm_trainer.py        # LightGBM training logic
+├── calibration_pipeline.py    # Production inference pipeline
+└── evaluation.py              # Calibration quality metrics
+```
+
+## Dependencies
+
+- `lightgbm` - Gradient boosting model
+- `pandas` - Data manipulation
+- `numpy` - Numerical computing
+- `scikit-learn` - ML utilities
+- `matplotlib` - Plotting
+
+## Key Insight
+
+The model learns that "uncertainty 0.7 from GPT-4 at temp=0.2" means something completely different than "uncertainty 0.7 from Llama-7B at temp=0.8", and maps both to appropriate confidence levels that actually predict answer correctness.
