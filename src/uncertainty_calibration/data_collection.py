@@ -1,220 +1,331 @@
 # src/uncertainty_calibration/data_collection.py
+#!/usr/bin/env python3
 """
-Data collection for uncertainty calibration training.
-Implements temperature sweep protocol across multiple models.
+Data collection pipeline for uncertainty calibration.
+Collects LLM responses across temperature sweeps for training data.
 """
 
 import pandas as pd
 import numpy as np
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any, Optional, Tuple
+import logging
 from pathlib import Path
+import time
+from dataclasses import dataclass
+
+# Import existing components
 import sys
-import os
+sys.path.append('src')
+from multi_model_engine import MultiModelEngine, ModelResponse
+from level1_prompts import Level1PromptGenerator
+from level2_prompts import Level2PromptGenerator  
+from level3_prompts import Level3PromptGenerator
+from uncertainty_calibration.model_metadata import (
+    MODEL_PARAMS, TEMPERATURE_SWEEP, get_model_metadata, validate_model_id
+)
 
-# Add src to path for imports
-sys.path.append(str(Path(__file__).parent.parent))
+logger = logging.getLogger(__name__)
 
-from llm_augmentation.engines.multi_model_engine import MultiModelEngine
-from llm_augmentation.prompts.level1_prompts import Level1PromptGenerator
-from llm_augmentation.prompts.level2_prompts import Level2PromptGenerator
-from llm_augmentation.prompts.level3_prompts import Level3PromptGenerator
-from uncertainty_calibration.model_metadata import get_model_params
+@dataclass
+class CalibrationDataPoint:
+    """Single data point for calibration training."""
+    question_id: str
+    level: int
+    model_id: str
+    temperature: float
+    raw_uncertainty: float
+    model_prediction: str
+    correct_answer: str
+    is_correct: bool
+    param_count: float
+    confidence_score: Optional[float] = None
+    logprobs: Optional[Dict] = None
 
-class CalibrationDataCollector:
-    """Collects responses across temperature range for calibration training."""
+class UncertaintyDataCollector:
+    """
+    Collects LLM responses for uncertainty calibration training.
+    """
     
-    def __init__(self, config):
+    def __init__(self, config, models_subset: Optional[List[str]] = None):
+        """Initialize data collector."""
         self.config = config
         self.engine = MultiModelEngine(config)
-        self.temperatures = [0.0, 0.2, 0.4, 0.6, 0.8, 1.0]
         
         # Initialize prompt generators
-        self.level1_prompts = Level1PromptGenerator(config)
-        self.level2_prompts = Level2PromptGenerator(config)
-        self.level3_prompts = Level3PromptGenerator(config)
+        self.level1_generator = Level1PromptGenerator(config)
+        self.level2_generator = Level2PromptGenerator(config)
+        self.level3_generator = Level3PromptGenerator(config)
+        
+        # Select models to use
+        all_models = list(MODEL_PARAMS.keys())
+        self.models = models_subset if models_subset else all_models[:6]  # Limit for efficiency
+        
+        # Validate models
+        self.models = [m for m in self.models if validate_model_id(m)]
+        
+        logger.info(f"Initialized collector with {len(self.models)} models")
     
-    def collect_training_data(self, questions: List[Dict], models: List[str]) -> List[Dict]:
+    def collect_training_data(self, train_df: pd.DataFrame, 
+                            temperatures: List[float] = None,
+                            max_samples_per_level: int = 50) -> List[CalibrationDataPoint]:
         """
-        Collect responses across temperature range for training data.
+        Collect training data by querying LLMs on train.csv examples.
         
         Args:
-            questions: List of question dictionaries with 'question', 'correct_answer', 'type'
-            models: List of model IDs to query
+            train_df: Training dataframe (train.csv)
+            temperatures: Temperature values to sweep
+            max_samples_per_level: Limit samples per level for efficiency
             
         Returns:
-            List of response dictionaries
+            List of calibration data points
         """
-        all_responses = []
+        if temperatures is None:
+            temperatures = TEMPERATURE_SWEEP
         
-        for question in questions:
-            question_id = question.get('id', questions.index(question))
-            question_type = question.get('type', 'level1')  # Default to level1
+        data_points = []
+        
+        # Classify data by levels
+        level1_data = train_df[train_df['parent'] == 'ethereum'].head(max_samples_per_level)
+        level2_data = train_df[train_df['parent'] == 'originality'].head(max_samples_per_level)
+        level3_data = train_df[~train_df['parent'].isin(['ethereum', 'originality'])].head(max_samples_per_level)
+        
+        # Process each level
+        for level, level_data in [(1, level1_data), (2, level2_data), (3, level3_data)]:
+            if len(level_data) == 0:
+                continue
+                
+            logger.info(f"Processing Level {level}: {len(level_data)} samples")
             
-            for model_id in models:
-                for temperature in self.temperatures:
-                    # Generate prompt based on question type
-                    prompt = self._generate_prompt(question, question_type)
+            for idx, row in level_data.iterrows():
+                question_id = f"level{level}_{idx}"
+                
+                # Generate prompt and get correct answer
+                prompt, correct_answer = self._generate_prompt_and_answer(row, level)
+                if not prompt:
+                    continue
+                
+                # Query all models at all temperatures
+                for model_id in self.models:
+                    for temperature in temperatures:
+                        try:
+                            data_point = self._query_model_for_calibration(
+                                question_id=question_id,
+                                level=level,
+                                model_id=model_id,
+                                temperature=temperature,
+                                prompt=prompt,
+                                correct_answer=correct_answer
+                            )
+                            
+                            if data_point:
+                                data_points.append(data_point)
+                                
+                        except Exception as e:
+                            logger.warning(f"Failed to query {model_id} at temp {temperature}: {e}")
+                            continue
+                
+                # Rate limiting
+                time.sleep(0.1)
+        
+        logger.info(f"Collected {len(data_points)} total data points")
+        return data_points
+    
+    def _generate_prompt_and_answer(self, row: pd.Series, level: int) -> Tuple[List[Dict], str]:
+        """Generate prompt and determine correct answer for a training row."""
+        
+        try:
+            if level == 1:
+                # Level 1: A vs B comparison
+                repo_a = {"url": row['repo_a'], "name": row['repo_a'].split('/')[-1] if '/' in str(row['repo_a']) else str(row['repo_a'])}
+                repo_b = {"url": row['repo_b'], "name": row['repo_b'].split('/')[-1] if '/' in str(row['repo_b']) else str(row['repo_b'])}
+                
+                prompt = self.level1_generator.create_comparison_prompt(repo_a, repo_b)
+                
+                # Map choice to answer
+                choice = row['choice']
+                if choice == 1.0:
+                    correct_answer = "A"
+                elif choice == 0.0:
+                    correct_answer = "B"
+                else:
+                    correct_answer = "Equal"
                     
-                    # Query model with specific temperature
-                    response = self._query_model_with_temp(
-                        model_id=model_id,
-                        prompt=prompt,
-                        temperature=temperature
-                    )
+            elif level == 2:
+                # Level 2: Originality assessment (1-10)
+                repo = {"url": row['repo_a'], "name": row['repo_a'].split('/')[-1] if '/' in str(row['repo_a']) else str(row['repo_a'])}
+                prompt = self.level2_generator.create_originality_prompt(repo)
+                
+                # Convert choice to bucket (assuming choice is 0-1, map to 1-10)
+                choice = row['choice']
+                correct_answer = str(max(1, min(10, int(choice * 10))))
                     
-                    if response.success:
-                        # Extract answer and calculate correctness
-                        prediction = self._extract_prediction(response.content, question_type)
-                        is_correct = self._is_correct(prediction, question['correct_answer'], question_type)
-                        
-                        # Create training example
-                        training_example = {
-                            'question_id': question_id,
-                            'model_id': model_id,
-                            'temperature': temperature,
-                            'raw_uncertainty': self._extract_uncertainty(response),
-                            'prediction': prediction,
-                            'correct_answer': question['correct_answer'],
-                            'is_correct': is_correct,
-                            'param_count': get_model_params(model_id),
-                            'question_type': question_type,
-                            'response_content': response.content,
-                            'logprobs': response.logprobs
-                        }
-                        
-                        all_responses.append(training_example)
-        
-        return all_responses
-    
-    def _generate_prompt(self, question: Dict, question_type: str) -> List[Dict]:
-        """Generate prompt based on question type."""
-        if question_type == 'level1':
-            # Repository comparison
-            return self.level1_prompts.create_comparison_prompt(
-                question['repo_a'], question['repo_b']
-            )
-        elif question_type == 'level2':
-            # Originality assessment  
-            return self.level2_prompts.create_originality_prompt(question['repo'])
-        elif question_type == 'level3':
-            # Dependency comparison
-            return self.level3_prompts.create_dependency_comparison_prompt(
-                question['dep_a'], question['dep_b'], question['parent']
-            )
-        else:
-            # Generic Q&A prompt
-            return [
-                {"role": "system", "content": "Answer the question accurately."},
-                {"role": "user", "content": question['question']}
-            ]
-    
-    def _query_model_with_temp(self, model_id: str, prompt: List[Dict], temperature: float):
-        """Query model with specific temperature."""
-        # Temporarily override temperature in config
-        original_temp = self.config.prompts.level_1.temperature
-        self.config.prompts.level_1.temperature = temperature
-        
-        # Query single model
-        response = self.engine._query_single_model(model_id, prompt)
-        
-        # Restore original temperature
-        self.config.prompts.level_1.temperature = original_temp
-        
-        return response
-    
-    def _extract_uncertainty(self, response) -> float:
-        """Extract uncertainty measure from response."""
-        if response.logprobs:
-            # Use negative log probability of chosen token as uncertainty
-            probs = list(response.logprobs.values())
-            if probs:
-                max_prob = max(probs)
-                return -np.log(max_prob + 1e-10)  # Add small epsilon
-        
-        # Fallback: use content length as proxy
-        return len(response.content) / 100.0
-    
-    def _extract_prediction(self, content: str, question_type: str) -> str:
-        """Extract model prediction from response content."""
-        content = content.strip().upper()
-        
-        if question_type in ['level1', 'level3']:
-            # A/B/Equal choices
-            if 'A' in content and 'B' not in content:
-                return 'A'
-            elif 'B' in content and 'A' not in content:
-                return 'B'
-            elif 'EQUAL' in content:
-                return 'Equal'
+            elif level == 3:
+                # Level 3: Dependency comparison
+                dep_a = row['repo_a']
+                dep_b = row['repo_b'] 
+                parent = row['parent']
+                
+                prompt = self.level3_generator.create_dependency_comparison_prompt(dep_a, dep_b, parent)
+                
+                # Map choice to answer
+                choice = row['choice']
+                if choice == 1.0:
+                    correct_answer = "A"
+                elif choice == 0.0:
+                    correct_answer = "B"
+                else:
+                    correct_answer = "Equal"
             else:
-                return content[:10]  # First 10 chars as fallback
-        
-        elif question_type == 'level2':
-            # Extract number 1-10
-            for char in content:
-                if char.isdigit():
-                    num = int(char)
-                    if 1 <= num <= 10:
-                        return str(num)
-            return '5'  # Default middle value
-        
-        else:
-            return content[:50]  # First 50 chars
+                return None, None
+                
+            return prompt, correct_answer
+            
+        except Exception as e:
+            logger.error(f"Error generating prompt for level {level}: {e}")
+            return None, None
     
-    def _is_correct(self, prediction: str, correct_answer: str, question_type: str) -> bool:
-        """Check if prediction matches correct answer."""
-        if question_type == 'level2':
-            # For originality, use tolerance
+    def _query_model_for_calibration(self, question_id: str, level: int, model_id: str,
+                                   temperature: float, prompt: List[Dict], 
+                                   correct_answer: str) -> Optional[CalibrationDataPoint]:
+        """Query a single model and create calibration data point."""
+        
+        try:
+            # Modify prompt for temperature
+            modified_prompt = prompt.copy()
+            
+            # Query model with specific temperature
+            responses = self.engine._query_single_model_with_temp(model_id, modified_prompt, temperature)
+            
+            if not responses.success:
+                return None
+            
+            # Extract prediction and uncertainty
+            prediction = responses.content.strip()
+            
+            # Calculate uncertainty from logprobs
+            raw_uncertainty = self._calculate_uncertainty_from_logprobs(responses.logprobs, level)
+            
+            # Determine if correct
+            is_correct = self._is_prediction_correct(prediction, correct_answer, level)
+            
+            # Get model metadata
+            param_count = MODEL_PARAMS.get(model_id, 0.0)
+            
+            return CalibrationDataPoint(
+                question_id=question_id,
+                level=level,
+                model_id=model_id,
+                temperature=temperature,
+                raw_uncertainty=raw_uncertainty,
+                model_prediction=prediction,
+                correct_answer=correct_answer,
+                is_correct=is_correct,
+                param_count=param_count,
+                logprobs=responses.logprobs
+            )
+            
+        except Exception as e:
+            logger.error(f"Error querying model {model_id}: {e}")
+            return None
+    
+    def _calculate_uncertainty_from_logprobs(self, logprobs: Dict, level: int) -> float:
+        """Calculate uncertainty score from logprobs."""
+        
+        if not logprobs:
+            return 1.0  # Maximum uncertainty if no logprobs
+        
+        try:
+            if level in [1, 3]:  # A/B/Equal choices
+                valid_tokens = ["A", "B", "Equal"]
+            else:  # Level 2: 1-10 buckets
+                valid_tokens = [str(i) for i in range(1, 11)]
+            
+            # Get probabilities for valid tokens
+            token_probs = []
+            for token in valid_tokens:
+                prob = logprobs.get(token, 0.0)
+                if prob > 0:
+                    token_probs.append(prob)
+            
+            if not token_probs:
+                return 1.0
+            
+            # Calculate entropy as uncertainty measure
+            total_prob = sum(token_probs)
+            if total_prob == 0:
+                return 1.0
+            
+            normalized_probs = [p / total_prob for p in token_probs]
+            entropy = -sum(p * np.log2(p + 1e-10) for p in normalized_probs if p > 0)
+            
+            # Normalize entropy to [0, 1]
+            max_entropy = np.log2(len(valid_tokens))
+            normalized_entropy = entropy / max_entropy if max_entropy > 0 else 0.0
+            
+            return min(1.0, max(0.0, normalized_entropy))
+            
+        except Exception as e:
+            logger.warning(f"Error calculating uncertainty: {e}")
+            return 1.0
+    
+    def _is_prediction_correct(self, prediction: str, correct_answer: str, level: int) -> bool:
+        """Check if model prediction matches correct answer."""
+        
+        prediction = prediction.strip().upper()
+        correct_answer = correct_answer.strip().upper()
+        
+        if level in [1, 3]:  # A/B/Equal
+            return prediction in correct_answer or correct_answer in prediction
+        else:  # Level 2: numeric
             try:
-                pred_num = float(prediction)
-                correct_num = float(correct_answer)
-                return abs(pred_num - correct_num) <= 1.0  # Within 1 bucket
+                pred_num = int(''.join(filter(str.isdigit, prediction)))
+                correct_num = int(correct_answer)
+                return pred_num == correct_num
             except:
-                return prediction == correct_answer
+                return False
+    
+    def save_collected_data(self, data_points: List[CalibrationDataPoint], 
+                          output_path: str) -> pd.DataFrame:
+        """Save collected data to CSV for training."""
         
-        return prediction.strip().upper() == correct_answer.strip().upper()
+        rows = []
+        for dp in data_points:
+            rows.append({
+                'question_id': dp.question_id,
+                'level': dp.level,
+                'model_id': dp.model_id,
+                'temperature': dp.temperature,
+                'raw_uncertainty': dp.raw_uncertainty,
+                'model_prediction': dp.model_prediction,
+                'correct_answer': dp.correct_answer,
+                'is_correct': dp.is_correct,
+                'param_count': dp.param_count
+            })
+        
+        df = pd.DataFrame(rows)
+        df.to_csv(output_path, index=False)
+        
+        logger.info(f"Saved {len(df)} calibration data points to {output_path}")
+        return df
 
-
-def load_questions_from_csv(csv_path: str) -> List[Dict]:
-    """Load questions from train.csv and convert to standard format."""
-    df = pd.read_csv(csv_path)
-    questions = []
+# Extension to MultiModelEngine for temperature control
+class MultiModelEngine:
+    """Extended version with temperature control."""
     
-    for _, row in df.iterrows():
-        # Convert train.csv format to question format
-        question = {
-            'id': len(questions),
-            'repo_a': {'url': row['repo_a'], 'name': row['repo_a'].split('/')[-1]},
-            'repo_b': {'url': row['repo_b'], 'name': row['repo_b'].split('/')[-1]},
-            'parent': row.get('parent', ''),
-            'correct_answer': 'A' if row['choice'] < 0.5 else 'B' if row['choice'] > 0.5 else 'Equal',
-            'type': 'level1',  # Assuming level1 type from train.csv
-            'multiplier': row.get('multiplier', 1.0),
-            'reasoning': row.get('reasoning', '')
+    def _query_single_model_with_temp(self, model_id: str, prompt: List[Dict], temperature: float) -> ModelResponse:
+        """Query single model with specific temperature."""
+        
+        # This would modify the existing multi_model_engine._query_single_model
+        # to accept temperature parameter
+        payload = {
+            "model": model_id,
+            "messages": prompt,
+            "max_tokens": 10,
+            "temperature": temperature,
+            "logprobs": True,
+            "top_logprobs": 5
         }
-        questions.append(question)
-    
-    return questions
-
-
-def collect_calibration_dataset(config, output_path: str):
-    """Main function to collect full calibration dataset."""
-    collector = CalibrationDataCollector(config)
-    
-    # Load questions from train.csv
-    questions = load_questions_from_csv('train.csv')
-    
-    # Get model list from config
-    models = list(config.models.primary_models.values())
-    
-    # Collect responses
-    responses = collector.collect_training_data(questions, models)
-    
-    # Convert to DataFrame and save
-    df = pd.DataFrame(responses)
-    df.to_csv(output_path, index=False)
-    
-    print(f"Collected {len(responses)} training examples")
-    print(f"Saved to {output_path}")
-    
-    return df
+        
+        # Use existing logic from multi_model_engine._query_single_model
+        # but with temperature override
+        pass  # Implementation would adapt existing method

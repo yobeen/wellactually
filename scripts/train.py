@@ -1,273 +1,186 @@
+# scripts/train.py
 #!/usr/bin/env python3
 """
-Training script for LightGBM uncertainty calibration model.
+Complete training pipeline for LightGBM uncertainty calibration.
 """
 
-import pandas as pd
-import numpy as np
-import sys
-from pathlib import Path
 import argparse
+import sys
+import logging
+from pathlib import Path
 import yaml
-from omegaconf import DictConfig, OmegaConf
+import pandas as pd
 
-# Add src to path
-sys.path.append(str(Path(__file__).parent.parent / "src"))
+# Add src to Python path
+sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from uncertainty_calibration.data_collection import collect_calibration_dataset, CalibrationDataCollector
-from uncertainty_calibration.feature_engineering import CalibrationFeatureEngineer, create_train_test_split
-from uncertainty_calibration.lightgbm_trainer import LightGBMCalibrationTrainer
-from uncertainty_calibration.calibration_pipeline import UncertaintyCalibrationPipeline
-from uncertainty_calibration.evaluation import CalibrationEvaluator, evaluate_pipeline_calibration
+from src.uncertainty_calibration import (
+    UncertaintyCalibrationPipeline,
+    CalibrationPipelineConfig,
+    create_pipeline_from_config
+)
 
-def load_config(config_path: str = "configs/config.yaml") -> DictConfig:
-    """Load configuration from YAML file."""
-    with open(config_path, 'r') as f:
-        config_dict = yaml.safe_load(f)
-    
-    return OmegaConf.create(config_dict)
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler(),
+        logging.FileHandler('uncertainty_calibration.log')
+    ]
+)
 
-def create_sample_config():
-    """Create a minimal config for testing."""
-    config = {
-        'api': {
-            'openrouter': {
-                'base_url': 'https://openrouter.ai/api/v1/chat/completions',
-                'api_key_env': 'OPENROUTER_API_KEY'
-            },
-            'rate_limiting': {
-                'requests_per_minute': 60,
-                'max_retries': 3,
-                'backoff_factor': 2,
-                'timeout_seconds': 30
-            }
-        },
-        'models': {
-            'primary_models': {
-                'gpt_4o': 'openai/gpt-4o',
-                'llama_3_1_405b': 'meta-llama/llama-3.1-405b-instruct',
-                'deepseek_v3': 'deepseek/deepseek-chat'
-            }
-        },
-        'prompts': {
-            'level_1': {
-                'max_tokens': 10,
-                'temperature': 0.7,
-                'choice_options': ['A', 'B', 'Equal']
-            }
-        },
-        'cost_management': {
-            'track_costs': True,
-            'total_budget_usd': 100.0,
-            'cost_per_1k_tokens': 0.01
-        }
-    }
-    return OmegaConf.create(config)
-
-def collect_training_data(config: DictConfig, output_path: str = "data/calibration_training.csv"):
-    """Collect training data using temperature sweep."""
-    print("Collecting training data...")
-    
-    # This would normally collect real data, but for demo we'll create synthetic data
-    collector = CalibrationDataCollector(config)
-    
-    # Create synthetic training data for demo
-    np.random.seed(42)
-    n_samples = 1000
-    
-    models = ['openai/gpt-4o', 'meta-llama/llama-3.1-405b-instruct', 'deepseek/deepseek-chat']
-    temperatures = [0.0, 0.2, 0.4, 0.6, 0.8, 1.0]
-    
-    training_data = []
-    
-    for i in range(n_samples):
-        model_id = np.random.choice(models)
-        temperature = np.random.choice(temperatures)
-        
-        # Simulate uncertainty that correlates with correctness
-        base_uncertainty = np.random.exponential(1.0)
-        
-        # Larger models tend to be more calibrated
-        model_factor = {'openai/gpt-4o': 0.8, 'meta-llama/llama-3.1-405b-instruct': 0.9, 'deepseek/deepseek-chat': 1.2}[model_id]
-        
-        # Higher temperature increases uncertainty
-        temp_factor = 1 + temperature * 0.5
-        
-        raw_uncertainty = base_uncertainty * model_factor * temp_factor
-        
-        # Probability correct inversely related to uncertainty (with noise)
-        prob_correct = 1 / (1 + np.exp(raw_uncertainty - 2)) + np.random.normal(0, 0.1)
-        prob_correct = np.clip(prob_correct, 0.1, 0.9)
-        
-        is_correct = np.random.random() < prob_correct
-        
-        training_data.append({
-            'question_id': i % 100,  # 100 unique questions
-            'model_id': model_id,
-            'temperature': temperature,
-            'raw_uncertainty': raw_uncertainty,
-            'prediction': 'A' if np.random.random() > 0.5 else 'B',
-            'correct_answer': 'A',
-            'is_correct': is_correct
-        })
-    
-    df = pd.DataFrame(training_data)
-    df.to_csv(output_path, index=False)
-    
-    print(f"Created synthetic training data: {len(df)} examples")
-    print(f"Saved to {output_path}")
-    
-    return df
-
-def train_calibration_model(training_df: pd.DataFrame, 
-                          model_save_path: str = "models/calibration_model.pkl"):
-    """Train the LightGBM calibration model."""
-    print("Training calibration model...")
-    
-    # Split data
-    train_df, test_df = create_train_test_split(training_df, test_size=0.2)
-    val_df, test_df = create_train_test_split(test_df, test_size=0.5)
-    
-    print(f"Train: {len(train_df)}, Val: {len(val_df)}, Test: {len(test_df)}")
-    
-    # Train model
-    trainer = LightGBMCalibrationTrainer()
-    model = trainer.train(train_df, val_df)
-    
-    # Evaluate on test set
-    test_metrics = trainer.evaluate(test_df)
-    print("\nTest Set Evaluation:")
-    for metric, value in test_metrics.items():
-        print(f"{metric}: {value:.4f}")
-    
-    # Feature importance
-    importance = trainer.get_feature_importance()
-    print("\nFeature Importance:")
-    print(importance.head(10))
-    
-    # Cross-validation
-    cv_results = trainer.cross_validate(training_df)
-    print(f"\nCross-validation AUC: {cv_results['cv_auc_mean']:.4f} ± {cv_results['cv_auc_std']:.4f}")
-    
-    # Save model
-    Path(model_save_path).parent.mkdir(parents=True, exist_ok=True)
-    trainer.save_model(model_save_path)
-    
-    return trainer, test_metrics
-
-def evaluate_calibration_quality(model_path: str, test_df: pd.DataFrame):
-    """Evaluate calibration quality of trained model."""
-    print("Evaluating calibration quality...")
-    
-    # Load pipeline
-    pipeline = UncertaintyCalibrationPipeline(model_path)
-    
-    # Comprehensive evaluation
-    eval_results = evaluate_pipeline_calibration(pipeline, test_df)
-    
-    print("\nOverall Calibration Metrics:")
-    for metric, value in eval_results['overall_metrics'].items():
-        print(f"{metric}: {value:.4f}")
-    
-    print("\nBy-Model Metrics:")
-    for model_id, metrics in eval_results['by_model_metrics'].items():
-        print(f"\n{model_id}:")
-        print(f"  ECE: {metrics['ECE']:.4f}")
-        print(f"  Brier Score: {metrics['Brier_Score']:.4f}")
-        print(f"  AUC: {metrics['AUC']:.4f}")
-    
-    # Plot reliability diagram
-    evaluator = CalibrationEvaluator()
-    calibrated_df = eval_results['calibrated_data']
-    
-    fig = evaluator.plot_reliability_diagram(
-        calibrated_df['is_correct'].values,
-        calibrated_df['calibrated_confidence'].values,
-        title="LightGBM Calibration",
-        save_path="plots/reliability_diagram.png"
-    )
-    
-    # Plot by-model comparison
-    fig = evaluator.plot_calibration_by_group(
-        calibrated_df, 'model_id',
-        title="Calibration by Model",
-        save_path="plots/calibration_by_model.png"
-    )
-    
-    print("\nPlots saved to plots/ directory")
-    
-    return eval_results
+logger = logging.getLogger(__name__)
 
 def main():
+    """Main training function."""
+    
     parser = argparse.ArgumentParser(description="Train LightGBM uncertainty calibration model")
-    parser.add_argument("--config", default="configs/config.yaml", help="Config file path")
-    parser.add_argument("--collect-data", action="store_true", help="Collect new training data")
-    parser.add_argument("--train", action="store_true", help="Train calibration model")
-    parser.add_argument("--evaluate", action="store_true", help="Evaluate trained model")
-    parser.add_argument("--data-path", default="data/calibration_training.csv", help="Training data path")
-    parser.add_argument("--model-path", default="models/calibration_model.pkl", help="Model save path")
+    parser.add_argument(
+        "--config", 
+        type=str, 
+        default="configs/uncertainty_calibration/llm.yaml",
+        help="Path to configuration file"
+    )
+    parser.add_argument(
+        "--train_data",
+        type=str,
+        default="train.csv",
+        help="Path to training data CSV"
+    )
+    parser.add_argument(
+        "--models",
+        nargs="+",
+        help="Specific models to use (overrides config)"
+    )
+    parser.add_argument(
+        "--max_samples",
+        type=int,
+        help="Maximum samples per level (overrides config)"
+    )
+    parser.add_argument(
+        "--quick_test",
+        action="store_true",
+        help="Run quick test with minimal data"
+    )
     
     args = parser.parse_args()
     
-    # Create output directories
-    Path("data").mkdir(exist_ok=True)
-    Path("models").mkdir(exist_ok=True)
-    Path("plots").mkdir(exist_ok=True)
+    # Load configuration
+    logger.info(f"Loading configuration from {args.config}")
     
-    # Load or create config
-    if Path(args.config).exists():
-        config = load_config(args.config)
-    else:
-        print(f"Config file {args.config} not found, using sample config")
-        config = create_sample_config()
+    if not Path(args.config).exists():
+        logger.error(f"Configuration file not found: {args.config}")
+        return 1
     
-    training_df = None
+    try:
+        with open(args.config, 'r') as f:
+            config = yaml.safe_load(f)
+    except Exception as e:
+        logger.error(f"Failed to load configuration: {e}")
+        return 1
     
-    # Collect data
-    if args.collect_data:
-        training_df = collect_training_data(config, args.data_path)
+    # Override config with command line arguments
+    if args.models:
+        logger.info(f"Overriding models with: {args.models}")
+        # Validate models exist in config
+        all_models = {**config['models']['primary_models'], **config['models']['secondary_models']}
+        valid_models = [m for m in args.models if m in all_models.values()]
+        if not valid_models:
+            logger.error(f"No valid models found in: {args.models}")
+            return 1
+        config['models']['primary_models'] = {f"model_{i}": m for i, m in enumerate(valid_models)}
     
-    # Load existing data if not collected
-    if training_df is None and Path(args.data_path).exists():
-        training_df = pd.read_csv(args.data_path)
-        print(f"Loaded existing training data: {len(training_df)} examples")
+    if args.max_samples:
+        logger.info(f"Overriding max samples per level: {args.max_samples}")
+        config['data_collection']['max_samples_per_level'] = args.max_samples
     
-    # Train model
-    if args.train and training_df is not None:
-        trainer, test_metrics = train_calibration_model(training_df, args.model_path)
+    if args.quick_test:
+        logger.info("Running in quick test mode")
+        config['data_collection']['max_samples_per_level'] = 5
+        config['temperature_sweep']['temperatures'] = [0.0, 0.5]
+        config['models']['primary_models'] = dict(list(config['models']['primary_models'].items())[:2])
+        config['lightgbm']['training']['num_boost_round'] = 10
+        config['lightgbm']['training']['early_stopping_rounds'] = 5
     
-    # Evaluate model
-    if args.evaluate:
-        if training_df is None:
-            if Path(args.data_path).exists():
-                training_df = pd.read_csv(args.data_path)
-            else:
-                print("No training data available for evaluation")
-                return
+    # Verify training data exists
+    if not Path(args.train_data).exists():
+        logger.error(f"Training data not found: {args.train_data}")
+        return 1
+    
+    # Create pipeline configuration
+    pipeline_config = CalibrationPipelineConfig(
+        train_data_path=args.train_data,
+        output_dir=config['output_dir'],
+        model_output_dir=config['model_output_dir'],
+        models_to_use=list(config['models']['primary_models'].values()),
+        temperatures=config['temperature_sweep']['temperatures'],
+        max_samples_per_level=config['data_collection']['max_samples_per_level'],
+        validation_fraction=config['lightgbm']['training']['validation_fraction'],
+        cross_validation=config['evaluation']['cross_validation']['enabled'],
+        cv_folds=config['evaluation']['cross_validation']['folds'],
+        max_ece=config['quality_thresholds']['max_ece'],
+        min_roc_auc=config['quality_thresholds']['min_roc_auc']
+    )
+    
+    # Initialize and run pipeline
+    logger.info("Initializing uncertainty calibration pipeline...")
+    
+    try:
+        pipeline = UncertaintyCalibrationPipeline(pipeline_config, config)
         
-        if Path(args.model_path).exists():
-            # Use a portion of data for evaluation
-            _, test_df = create_train_test_split(training_df, test_size=0.3)
-            eval_results = evaluate_calibration_quality(args.model_path, test_df)
+        logger.info("Running complete calibration pipeline...")
+        results = pipeline.run_complete_pipeline()
+        
+        # Print results summary
+        print("\n" + "="*60)
+        print("UNCERTAINTY CALIBRATION RESULTS")
+        print("="*60)
+        
+        if results['status'] == 'success':
+            print(f"✅ Training completed successfully!")
+            print(f"\nData Collection:")
+            print(f"  - Total data points: {results['data_collection']['total_data_points']}")
+            print(f"  - Models used: {len(results['data_collection']['models_used'])}")
+            print(f"  - Temperatures: {results['data_collection']['temperatures']}")
+            
+            print(f"\nFeature Engineering:")
+            print(f"  - Total features: {results['feature_engineering']['total_features']}")
+            print(f"  - Training samples: {results['feature_engineering']['training_samples']}")
+            print(f"  - Validation samples: {results['feature_engineering']['validation_samples']}")
+            
+            print(f"\nModel Training:")
+            print(f"  - Best iteration: {results['training']['best_iteration']}")
+            print(f"  - Best score: {results['training']['best_score']:.4f}")
+            
+            print(f"\nCalibration Quality:")
+            eval_results = results['evaluation']['overall_metrics']
+            print(f"  - Expected Calibration Error: {eval_results['ECE']:.4f}")
+            print(f"  - ROC AUC: {eval_results['ROC_AUC']:.4f}")
+            print(f"  - Brier Score: {eval_results['Brier_Score']:.4f}")
+            print(f"  - Log Loss: {eval_results['Log_Loss']:.4f}")
+            
+            quality_check = results['quality_check']
+            print(f"\nQuality Thresholds:")
+            print(f"  - ECE threshold met: {'✅' if quality_check['ece_threshold'] else '❌'}")
+            print(f"  - ROC AUC threshold met: {'✅' if quality_check['roc_auc_threshold'] else '❌'}")
+            print(f"  - Overall quality: {'✅' if quality_check['overall_quality'] else '❌'}")
+            
+            print(f"\nOutputs saved to:")
+            print(f"  - Data: {pipeline_config.output_dir}")
+            print(f"  - Model: {pipeline_config.model_output_dir}")
+            
         else:
-            print(f"Model file {args.model_path} not found")
+            print(f"❌ Training failed: {results['error']}")
+            return 1
+            
+    except Exception as e:
+        logger.error(f"Pipeline execution failed: {e}")
+        return 1
     
-    # Run all steps if no specific flags
-    if not any([args.collect_data, args.train, args.evaluate]):
-        print("Running complete pipeline...")
-        
-        # Collect data
-        training_df = collect_training_data(config, args.data_path)
-        
-        # Train model
-        trainer, test_metrics = train_calibration_model(training_df, args.model_path)
-        
-        # Evaluate model
-        _, test_df = create_train_test_split(training_df, test_size=0.3)
-        eval_results = evaluate_calibration_quality(args.model_path, test_df)
-        
-        print("\nPipeline completed successfully!")
+    logger.info("Uncertainty calibration training completed successfully!")
+    return 0
 
 if __name__ == "__main__":
-    main()
-    
+    exit_code = main()
+    sys.exit(exit_code)

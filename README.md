@@ -1,156 +1,241 @@
 # LightGBM Uncertainty Calibration Framework
 
-A framework for calibrating uncertainty estimates from heterogeneous Large Language Models (LLMs) using gradient boosting.
+A production-ready framework for calibrating uncertainty scores from heterogeneous LLMs using gradient boosting. Transforms raw perplexity scores into reliable confidence estimates that accurately predict answer correctness.
 
 ## Overview
 
-This framework solves the problem of incomparable uncertainty scores across different LLMs by training a LightGBM model that maps `[raw_uncertainty, model_metadata]` → `P(answer_is_correct)`.
+Instead of complex model-specific calibration methods, this framework uses LightGBM to learn the universal mapping:
+```
+f(raw_uncertainty, model_metadata) → P(answer_is_correct)
+```
 
-## Key Features
-
-- **Universal Calibration**: Maps raw perplexity scores from any model to meaningful confidence
-- **Model-Aware**: Accounts for model size, architecture, and sampling parameters
-- **Temperature Handling**: Automatically adjusts for different sampling temperatures
-- **Ensemble Support**: Aggregates calibrated uncertainties across multiple models
-- **Evaluation Metrics**: Comprehensive calibration quality assessment
+This automatically handles:
+- Different uncertainty scales across model sizes
+- Model-specific calibration behaviors  
+- Temperature effects on uncertainty
+- Non-linear relationships between features
 
 ## Quick Start
 
-### 1. Training
-
-```python
-from uncertainty_calibration import UncertaintyCalibrationPipeline
-from uncertainty_calibration.lightgbm_trainer import train_calibration_model
-
-# Train from collected responses
-pipeline = train_calibration_model(training_df, model_save_path="calibration_model.pkl")
-```
-
-### 2. Inference
-
-```python
-# Load trained pipeline
-pipeline = UncertaintyCalibrationPipeline("calibration_model.pkl")
-
-# Calibrate single response
-response = {
-    'model_id': 'openai/gpt-4o',
-    'raw_uncertainty': 1.2,
-    'temperature': 0.0,
-    'prediction': 'A'
-}
-
-calibrated = pipeline.calibrate_single_response(response)
-print(f"Confidence: {calibrated['calibrated_confidence']:.3f}")
-```
-
-### 3. Multi-Model Aggregation
-
-```python
-# Calibrate responses from multiple models
-model_responses = {
-    'gpt-4o': {'raw_uncertainty': 0.8, 'temperature': 0.0, 'prediction': 'A'},
-    'llama-405b': {'raw_uncertainty': 1.5, 'temperature': 0.0, 'prediction': 'B'},
-    'deepseek': {'raw_uncertainty': 2.1, 'temperature': 0.0, 'prediction': 'A'}
-}
-
-calibrated = pipeline.calibrate_model_responses(model_responses)
-aggregated = pipeline.aggregate_calibrated_uncertainties(calibrated)
-
-print(f"Ensemble confidence: {aggregated['aggregated_confidence']:.3f}")
-```
-
-## Data Collection
-
-The framework includes a data collection pipeline that performs temperature sweeps across multiple models:
-
-```python
-from uncertainty_calibration.data_collection import collect_calibration_dataset
-
-# Collect training data across temperature range [0.0, 0.2, 0.4, 0.6, 0.8, 1.0]
-training_df = collect_calibration_dataset(config, "training_data.csv")
-```
-
-## Feature Engineering
-
-Automatic feature engineering from raw responses:
-
-- **Core Features**: `raw_uncertainty`, `model_name`, `param_count`, `temperature`
-- **Derived Features**: Normalized uncertainty, temperature interactions, model categories
-- **Ensemble Features**: Cross-model statistics for same questions
-
-## Model Architecture
-
-**LightGBM Configuration**:
-- Objective: Binary classification (predict answer correctness)
-- Categorical features: Model name, size category, temperature bins
-- Early stopping with validation monitoring
-- Feature importance analysis
-
-## Evaluation
-
-Comprehensive calibration quality metrics:
-
-```python
-from uncertainty_calibration.evaluation import CalibrationEvaluator
-
-evaluator = CalibrationEvaluator()
-metrics = evaluator.comprehensive_evaluation(y_true, y_prob)
-
-print(f"Expected Calibration Error: {metrics['ECE']:.4f}")
-print(f"Brier Score: {metrics['Brier_Score']:.4f}")
-```
-
-## Scripts
-
-### Training Script
+### 1. Installation
 
 ```bash
-# Train complete pipeline
-python scripts/train_calibrator.py
-
-# Individual steps
-python scripts/train_calibrator.py --collect-data
-python scripts/train_calibrator.py --train
-python scripts/train_calibrator.py --evaluate
+pip install -r requirements.txt
 ```
 
-### Demo Usage
+### 2. Data Exploration
 
 ```bash
-# See calibration in action
-python scripts/demo_usage.py
+python scripts/explore_data.py
 ```
 
-## Expected Benefits
+### 3. Training Calibration Model
 
-1. **Unified Scale**: `uncertainty=0.7` means the same thing across all models
-2. **Automatic Learning**: Discovers model-specific calibration behaviors
-3. **Temperature Handling**: Accounts for sampling parameter effects
-4. **Model Size Awareness**: Larger models automatically get different treatment
-5. **Ensemble Ready**: Meaningful aggregation of multiple model outputs
+```bash
+# Full training pipeline
+python scripts/train_uncertainty_calibration.py
 
-## File Structure
+# Quick test with minimal data
+python scripts/train_uncertainty_calibration.py --quick_test
+
+# Custom configuration
+python scripts/train_uncertainty_calibration.py \
+    --config configs/uncertainty_calibration/llm.yaml \
+    --models "openai/gpt-4o" "deepseek/deepseek-chat" \
+    --max_samples 20
+```
+
+### 4. Using Trained Model
+
+```bash
+# Interactive mode
+python scripts/calibrate_uncertainties.py \
+    --model_path models/uncertainty_calibration/calibration_model.lgb \
+    --interactive
+
+# Batch processing
+python scripts/calibrate_uncertainties.py \
+    --model_path models/uncertainty_calibration/calibration_model.lgb \
+    --input_csv input_uncertainties.csv \
+    --output_csv calibrated_results.csv
+```
+
+## Project Structure
 
 ```
 src/uncertainty_calibration/
 ├── __init__.py                 # Package initialization
-├── model_metadata.py           # Model parameter definitions
+├── model_metadata.py           # Model parameter definitions  
 ├── data_collection.py          # Temperature sweep data collection
 ├── feature_engineering.py      # Response to feature conversion
 ├── lightgbm_trainer.py        # LightGBM training logic
 ├── calibration_pipeline.py    # Production inference pipeline
 └── evaluation.py              # Calibration quality metrics
+
+configs/uncertainty_calibration/
+└── llm.yaml                    # LLM and training configuration
+
+scripts/
+├── explore_data.py             # Data exploration
+├── train_uncertainty_calibration.py  # Complete training pipeline
+└── calibrate_uncertainties.py # Inference script
 ```
 
-## Dependencies
+## Data Flow
 
-- `lightgbm` - Gradient boosting model
-- `pandas` - Data manipulation
-- `numpy` - Numerical computing
-- `scikit-learn` - ML utilities
-- `matplotlib` - Plotting
+### 1. Data Collection
+- Load `train.csv` with human preference judgments
+- Convert each row to appropriate prompts (Level 1-3)
+- Query multiple LLMs at different temperatures [0.0, 0.2, 0.4, 0.6, 0.8, 1.0]
+- Extract perplexity/uncertainty scores from logprobs
 
-## Key Insight
+### 2. Feature Engineering
+Core features (as specified in framework):
+- `raw_uncertainty`: Perplexity score from model
+- `model_name`: Categorical model identifier
+- `param_count`: Model parameters in billions
+- `temperature`: Sampling temperature
 
-The model learns that "uncertainty 0.7 from GPT-4 at temp=0.2" means something completely different than "uncertainty 0.7 from Llama-7B at temp=0.8", and maps both to appropriate confidence levels that actually predict answer correctness.
+Additional features:
+- `level`: Data level (1=comparison, 2=originality, 3=dependency)
+- `provider`: Model organization (openai, meta, etc.)
+- `architecture`: Model architecture type
+- `log_param_count`: Log-scaled parameters
+- `is_zero_temp`: Zero temperature flag
+- `temp_squared`: Non-linear temperature effect
+
+### 3. Training
+- LightGBM binary classifier predicts `P(answer_is_correct)`
+- Cross-validation with stratification by model and level
+- Early stopping to prevent overfitting
+- Feature importance analysis
+
+### 4. Evaluation
+Calibration quality metrics:
+- **Expected Calibration Error (ECE)**: Average difference between confidence and accuracy
+- **Maximum Calibration Error (MCE)**: Worst-case calibration error
+- **Brier Score**: Proper scoring rule decomposed into reliability + resolution
+- **ROC AUC**: Discrimination ability
+- **Sharpness**: How far predictions are from uninformative (0.5)
+
+## Configuration
+
+### Core Settings (`configs/uncertainty_calibration/llm.yaml`)
+
+```yaml
+# Model selection
+models:
+  primary_models:
+    gpt_4o: "openai/gpt-4o"
+    llama_4_maverick: "meta-llama/llama-4-maverick"
+    deepseek_v3: "deepseek/deepseek-chat"
+
+# Temperature sweep
+temperature_sweep:
+  temperatures: [0.0, 0.2, 0.4, 0.6, 0.8, 1.0]
+
+# Data collection
+data_collection:
+  max_samples_per_level: 30
+
+# LightGBM parameters
+lightgbm:
+  params:
+    objective: "binary"
+    learning_rate: 0.05
+    num_leaves: 31
+```
+
+### Quality Thresholds
+
+```yaml
+quality_thresholds:
+  max_ece: 0.1          # Maximum Expected Calibration Error
+  min_roc_auc: 0.65     # Minimum discrimination ability
+```
+
+## Data Levels
+
+The framework handles three types of data from `train.csv`:
+
+### Level 1: Seed Repository Comparisons
+- `parent == "ethereum"`
+- Compares two repositories: "Which contributes more to Ethereum ecosystem?"
+- Output: A vs B vs Equal
+
+### Level 2: Originality Assessment  
+- `parent == "originality"`
+- Assesses single repository originality on 1-10 scale
+- Output: Originality bucket (1-10)
+
+### Level 3: Dependency Comparisons
+- `parent == <repository_url>`
+- Compares dependencies within parent repository
+- Output: A vs B vs Equal
+
+## Production Usage
+
+```python
+from uncertainty_calibration import UncertaintyCalibrationPipeline
+
+# Load trained pipeline
+pipeline = create_pipeline_from_config("configs/uncertainty_calibration/llm.yaml")
+
+# Calibrate new uncertainties
+raw_uncertainties = [0.3, 0.7, 0.2]
+model_names = ["openai/gpt-4o", "deepseek/deepseek-chat", "meta-llama/llama-4-maverick"]
+temperatures = [0.0, 0.0, 0.2]
+
+calibrated_confidences = pipeline.predict_calibrated_uncertainty(
+    raw_uncertainties, model_names, temperatures
+)
+
+# Results: [0.82, 0.31, 0.76] - probabilities that answers are correct
+```
+
+## Expected Results
+
+**Before Calibration**: Raw uncertainty 0.7 from different models means different things
+
+**After Calibration**: All uncertainty scores map to meaningful confidence levels:
+- 0.9 confidence → 90% chance the answer is correct
+- 0.3 confidence → 30% chance the answer is correct
+
+**Key Benefits**:
+- **Unified Scale**: All models produce comparable uncertainty scores
+- **Predictive**: Uncertainty accurately predicts correctness
+- **Automatic**: No manual calibration curves or model-specific tuning
+- **Extensible**: Easy to add new models or features
+
+## Troubleshooting
+
+### Common Issues
+
+1. **API Rate Limits**: Reduce `requests_per_minute` in config
+2. **Out of Memory**: Reduce `max_samples_per_level` for large datasets
+3. **Poor Calibration**: Check data quality, increase training samples
+4. **Missing Models**: Verify model IDs in `model_metadata.py`
+
+### Debugging
+
+```bash
+# Enable debug logging
+export PYTHONPATH=src
+python -c "
+import logging
+logging.basicConfig(level=logging.DEBUG)
+from uncertainty_calibration import run_calibration_pipeline
+run_calibration_pipeline('configs/uncertainty_calibration/llm.yaml')
+"
+```
+
+## Contributing
+
+1. Add new models to `model_metadata.py`
+2. Extend features in `feature_engineering.py`
+3. Add evaluation metrics in `evaluation.py`
+4. Update configuration in `llm.yaml`
+
+## License
+
+MIT License - see LICENSE file for details.

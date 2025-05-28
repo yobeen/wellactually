@@ -1,0 +1,209 @@
+# configs/uncertainty_calibration/llm.yaml
+# Configuration for LLM Uncertainty Calibration Pipeline
+
+# Enable/disable uncertainty calibration
+enabled: true
+
+# Output directory for calibration data and models
+output_dir: "data/uncertainty_calibration"
+model_output_dir: "models/uncertainty_calibration"
+
+# API Configuration (reuse from llm_augmentation)
+api:
+  openrouter:
+    base_url: "https://openrouter.ai/api/v1/chat/completions"
+    api_key_env: "OPENROUTER_API_KEY"
+    headers:
+      http_referer: "https://github.com/yobeen/wellactually"
+      x_title: "wellactually-Uncertainty-Calibration"
+  
+  rate_limiting:
+    requests_per_minute: 30  # Reduced for uncertainty calibration
+    max_retries: 3
+    backoff_factor: 2
+    timeout_seconds: 45
+
+# Model Configuration for Uncertainty Calibration
+models:
+  # Primary models for calibration (subset for efficiency)
+  primary_models:
+    gpt_4o: "openai/gpt-4o"
+    llama_4_maverick: "meta-llama/llama-4-maverick"
+    deepseek_v3: "deepseek/deepseek-chat"
+    grok_3_beta: "x-ai/grok-3-beta"
+    llama_3_1_405b: "meta-llama/llama-3.1-405b-instruct"
+    qwq_32b: "qwen/qwq-32b-preview"
+    mixtral_8x22b: "mistralai/mixtral-8x22b-instruct"
+    deepseek_coder_v2: "deepseek/deepseek-coder"
+    gemma_3_27b: "google/gemma-3-27b-it"
+
+  secondary_models:
+    xyz: "xyz/xyz"
+    
+  # Model selection for efficiency
+  max_models_per_experiment: 9
+  use_secondary_models: false
+
+# Temperature Sweep Configuration
+temperature_sweep:
+  enabled: true
+  temperatures: [0.0, 0.2, 0.4, 0.6, 0.8, 1.0]
+  default_temperature: 0.0
+
+# Data Collection Settings
+data_collection:
+  max_samples_per_level: 30  # Limit for efficiency during development
+  
+  # Level-specific settings
+  level_1:
+    enabled: true
+    max_samples: 30
+    
+  level_2:
+    enabled: true
+    max_samples: 30
+    
+  level_3:
+    enabled: true
+    max_samples: 30
+
+# Feature Engineering Configuration
+feature_engineering:
+  core_features:
+    - raw_uncertainty
+    - model_name
+    - param_count
+    - temperature
+  
+  additional_features:
+    - level
+    - provider
+    - architecture
+    - log_param_count
+    - is_zero_temp
+    - temp_squared
+    - model_size_category
+    - uncertainty_bin
+  
+  categorical_encoding:
+    method: "label"  # label, onehot
+    handle_unknown: "ignore"
+
+# LightGBM Training Configuration
+lightgbm:
+  # Model parameters
+  params:
+    objective: "binary"
+    metric: "binary_logloss"
+    boosting_type: "gbdt"
+    num_leaves: 31
+    learning_rate: 0.05
+    feature_fraction: 0.9
+    bagging_fraction: 0.8
+    bagging_freq: 5
+    min_data_in_leaf: 10
+    min_gain_to_split: 0.0
+    lambda_l1: 0.0
+    lambda_l2: 0.0
+    random_state: 42
+    force_row_wise: true
+    verbose: -1
+  
+  # Training parameters
+  training:
+    num_boost_round: 1000
+    early_stopping_rounds: 100
+    validation_fraction: 0.2
+    cross_validation_folds: 5
+    
+  # Hyperparameter search (optional)
+  hyperparameter_search:
+    enabled: false
+    method: "optuna"  # optuna, grid, random
+    n_trials: 50
+    search_space:
+      num_leaves: [15, 31, 63, 127]
+      learning_rate: [0.01, 0.05, 0.1, 0.2]
+      feature_fraction: [0.7, 0.8, 0.9, 1.0]
+      lambda_l1: [0.0, 0.01, 0.1, 1.0]
+
+# Evaluation Configuration
+evaluation:
+  # Calibration metrics
+  metrics:
+    - ECE  # Expected Calibration Error
+    - MCE  # Maximum Calibration Error
+    - Brier_Score
+    - Log_Loss
+    - ROC_AUC
+    - Accuracy
+    - Sharpness
+    - Reliability
+    - Resolution
+  
+  # Calibration curve settings
+  calibration_curve:
+    n_bins: 10
+    strategy: "uniform"  # uniform, quantile
+  
+  # Cross-validation settings
+  cross_validation:
+    enabled: true
+    folds: 5
+    stratify: true
+    
+  # Plots to generate
+  plots:
+    calibration_curve: true
+    model_comparison: true
+    feature_importance: true
+    uncertainty_distribution: true
+
+# Quality Thresholds
+quality_thresholds:
+  # Calibration quality
+  max_ece: 0.1  # Maximum Expected Calibration Error
+  max_mce: 0.15  # Maximum Calibration Error
+  min_roc_auc: 0.65  # Minimum discrimination ability
+  max_brier_score: 0.25  # Maximum Brier Score
+  
+  # Data quality
+  min_samples_per_model: 50  # Minimum samples per model for training
+  min_positive_rate: 0.1  # Minimum positive rate in data
+  max_positive_rate: 0.9  # Maximum positive rate in data
+
+# Cost Management
+cost_management:
+  track_costs: true
+  max_cost_per_experiment: 50.0  # USD
+  cost_per_1k_tokens: 0.01  # Approximate cost
+  warn_threshold: 0.8  # Warn at 80% of budget
+
+# Sampling Strategy
+sampling:
+  # Training data sampling
+  stratify_by:
+    - model_name
+    - level
+    - temperature
+  
+  # Minimum samples per stratum
+  min_samples_per_stratum: 5
+  
+  # Random state for reproducibility
+  random_state: 42
+
+# Output Configuration
+outputs:
+  # Save intermediate results
+  save_collected_data: true
+  save_features: true
+  save_model: true
+  save_evaluation: true
+  
+  # File formats
+  data_format: "csv"  # csv, parquet
+  plot_format: "png"  # png, pdf, svg
+  
+  # Compression
+  compress_data: false

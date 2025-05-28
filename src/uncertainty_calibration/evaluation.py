@@ -1,37 +1,90 @@
 # src/uncertainty_calibration/evaluation.py
+#!/usr/bin/env python3
 """
 Evaluation metrics for uncertainty calibration quality.
-Implements Expected Calibration Error, Brier score, and other calibration metrics.
+Implements comprehensive calibration assessment framework.
 """
 
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-from sklearn.metrics import brier_score_loss, log_loss, roc_auc_score
+from typing import Dict, List, Any, Tuple, Optional
+from sklearn.metrics import (
+    log_loss, brier_score_loss, roc_auc_score, accuracy_score,
+    precision_recall_curve, roc_curve
+)
 from sklearn.calibration import calibration_curve
-from typing import Dict, List, Any, Optional, Tuple
+import logging
+
+logger = logging.getLogger(__name__)
 
 class CalibrationEvaluator:
-    """Evaluates calibration quality of uncertainty estimates."""
+    """
+    Comprehensive evaluation of uncertainty calibration quality.
+    """
     
     def __init__(self):
+        """Initialize evaluator."""
         pass
     
-    def expected_calibration_error(self, 
-                                 y_true: np.ndarray, 
-                                 y_prob: np.ndarray, 
-                                 n_bins: int = 10) -> float:
+    def evaluate_calibration(self, y_true: np.ndarray, y_prob: np.ndarray,
+                           n_bins: int = 10) -> Dict[str, float]:
         """
-        Calculate Expected Calibration Error (ECE).
+        Comprehensive calibration evaluation.
         
         Args:
             y_true: True binary labels
             y_prob: Predicted probabilities
-            n_bins: Number of bins for calibration
+            n_bins: Number of bins for calibration curve
             
         Returns:
-            ECE score (lower is better)
+            Dictionary of calibration metrics
+        """
+        
+        metrics = {}
+        
+        # Expected Calibration Error (ECE)
+        metrics['ECE'] = self.expected_calibration_error(y_true, y_prob, n_bins)
+        
+        # Maximum Calibration Error (MCE)
+        metrics['MCE'] = self.maximum_calibration_error(y_true, y_prob, n_bins)
+        
+        # Brier Score (reliability + resolution - uncertainty)
+        metrics['Brier_Score'] = brier_score_loss(y_true, y_prob)
+        
+        # Decompose Brier Score
+        reliability, resolution, uncertainty = self.brier_decomposition(y_true, y_prob, n_bins)
+        metrics['Reliability'] = reliability  # Lower is better (calibration)
+        metrics['Resolution'] = resolution    # Higher is better (sharpness)
+        metrics['Uncertainty'] = uncertainty  # Inherent uncertainty in data
+        
+        # Log Loss (proper scoring rule)
+        metrics['Log_Loss'] = log_loss(y_true, y_prob)
+        
+        # ROC AUC (discrimination ability)
+        metrics['ROC_AUC'] = roc_auc_score(y_true, y_prob)
+        
+        # Accuracy at 0.5 threshold
+        y_pred = (y_prob > 0.5).astype(int)
+        metrics['Accuracy'] = accuracy_score(y_true, y_pred)
+        
+        # Sharpness (how far predictions are from 0.5)
+        metrics['Sharpness'] = self.sharpness(y_prob)
+        
+        # Overconfidence/Underconfidence
+        overconf, underconf = self.confidence_bias(y_true, y_prob, n_bins)
+        metrics['Overconfidence'] = overconf
+        metrics['Underconfidence'] = underconf
+        
+        return metrics
+    
+    def expected_calibration_error(self, y_true: np.ndarray, y_prob: np.ndarray,
+                                 n_bins: int = 10) -> float:
+        """
+        Calculate Expected Calibration Error (ECE).
+        
+        ECE measures the difference between prediction confidence and accuracy.
         """
         bin_boundaries = np.linspace(0, 1, n_bins + 1)
         bin_lowers = bin_boundaries[:-1]
@@ -39,35 +92,19 @@ class CalibrationEvaluator:
         
         ece = 0
         for bin_lower, bin_upper in zip(bin_lowers, bin_uppers):
-            # Find predictions in this bin
             in_bin = (y_prob > bin_lower) & (y_prob <= bin_upper)
             prop_in_bin = in_bin.mean()
             
             if prop_in_bin > 0:
-                # Accuracy in this bin
                 accuracy_in_bin = y_true[in_bin].mean()
-                # Average confidence in this bin
                 avg_confidence_in_bin = y_prob[in_bin].mean()
-                # ECE contribution
                 ece += np.abs(avg_confidence_in_bin - accuracy_in_bin) * prop_in_bin
         
         return ece
     
-    def maximum_calibration_error(self, 
-                                y_true: np.ndarray, 
-                                y_prob: np.ndarray, 
+    def maximum_calibration_error(self, y_true: np.ndarray, y_prob: np.ndarray,
                                 n_bins: int = 10) -> float:
-        """
-        Calculate Maximum Calibration Error (MCE).
-        
-        Args:
-            y_true: True binary labels
-            y_prob: Predicted probabilities
-            n_bins: Number of bins for calibration
-            
-        Returns:
-            MCE score (lower is better)
-        """
+        """Calculate Maximum Calibration Error (MCE)."""
         bin_boundaries = np.linspace(0, 1, n_bins + 1)
         bin_lowers = bin_boundaries[:-1]
         bin_uppers = bin_boundaries[1:]
@@ -84,159 +121,171 @@ class CalibrationEvaluator:
         
         return max_error
     
-    def reliability_diagram_data(self, 
-                               y_true: np.ndarray, 
-                               y_prob: np.ndarray, 
-                               n_bins: int = 10) -> Dict[str, np.ndarray]:
+    def brier_decomposition(self, y_true: np.ndarray, y_prob: np.ndarray,
+                          n_bins: int = 10) -> Tuple[float, float, float]:
         """
-        Generate data for reliability diagram.
+        Decompose Brier Score into Reliability, Resolution, and Uncertainty.
         
-        Returns:
-            Dict with bin data for plotting
+        Brier Score = Reliability - Resolution + Uncertainty
         """
-        fraction_correct, mean_predicted = calibration_curve(
-            y_true, y_prob, n_bins=n_bins, strategy='uniform'
-        )
-        
-        # Calculate bin counts
         bin_boundaries = np.linspace(0, 1, n_bins + 1)
-        bin_counts = np.zeros(n_bins)
+        bin_lowers = bin_boundaries[:-1]
+        bin_uppers = bin_boundaries[1:]
         
-        for i in range(n_bins):
-            bin_lower = bin_boundaries[i]
-            bin_upper = bin_boundaries[i + 1]
+        overall_accuracy = y_true.mean()
+        n_samples = len(y_true)
+        
+        reliability = 0
+        resolution = 0
+        
+        for bin_lower, bin_upper in zip(bin_lowers, bin_uppers):
             in_bin = (y_prob > bin_lower) & (y_prob <= bin_upper)
-            bin_counts[i] = in_bin.sum()
+            n_in_bin = in_bin.sum()
+            
+            if n_in_bin > 0:
+                accuracy_in_bin = y_true[in_bin].mean()
+                avg_confidence_in_bin = y_prob[in_bin].mean()
+                
+                # Reliability: calibration error weighted by bin size
+                reliability += (n_in_bin / n_samples) * (avg_confidence_in_bin - accuracy_in_bin) ** 2
+                
+                # Resolution: how much bin accuracy differs from overall accuracy
+                resolution += (n_in_bin / n_samples) * (accuracy_in_bin - overall_accuracy) ** 2
         
-        return {
-            'fraction_correct': fraction_correct,
-            'mean_predicted': mean_predicted,
-            'bin_counts': bin_counts,
-            'bin_boundaries': bin_boundaries
-        }
+        # Uncertainty: inherent uncertainty in the data
+        uncertainty = overall_accuracy * (1 - overall_accuracy)
+        
+        return reliability, resolution, uncertainty
     
     def sharpness(self, y_prob: np.ndarray) -> float:
         """
-        Calculate sharpness (how discriminative the predictions are).
-        
-        Higher sharpness means predictions are more concentrated 
-        away from 0.5 (more confident).
+        Calculate sharpness - how far predictions are from uninformative (0.5).
+        Higher sharpness = more confident predictions.
         """
-        return np.var(y_prob)
+        return np.mean(np.abs(y_prob - 0.5))
     
-    def comprehensive_evaluation(self, 
-                               y_true: np.ndarray, 
-                               y_prob: np.ndarray,
-                               n_bins: int = 10) -> Dict[str, float]:
+    def confidence_bias(self, y_true: np.ndarray, y_prob: np.ndarray,
+                       n_bins: int = 10) -> Tuple[float, float]:
         """
-        Calculate comprehensive calibration metrics.
+        Calculate overconfidence and underconfidence.
+        
+        Returns:
+            (overconfidence, underconfidence) where:
+            - overconfidence: average amount predictions exceed accuracy
+            - underconfidence: average amount predictions fall below accuracy
+        """
+        bin_boundaries = np.linspace(0, 1, n_bins + 1)
+        bin_lowers = bin_boundaries[:-1]
+        bin_uppers = bin_boundaries[1:]
+        
+        overconf_sum = 0
+        underconf_sum = 0
+        total_weight = 0
+        
+        for bin_lower, bin_upper in zip(bin_lowers, bin_uppers):
+            in_bin = (y_prob > bin_lower) & (y_prob <= bin_upper)
+            prop_in_bin = in_bin.mean()
+            
+            if prop_in_bin > 0:
+                accuracy_in_bin = y_true[in_bin].mean()
+                avg_confidence_in_bin = y_prob[in_bin].mean()
+                
+                diff = avg_confidence_in_bin - accuracy_in_bin
+                
+                if diff > 0:  # Overconfident
+                    overconf_sum += diff * prop_in_bin
+                else:  # Underconfident
+                    underconf_sum += (-diff) * prop_in_bin
+                
+                total_weight += prop_in_bin
+        
+        return overconf_sum, underconf_sum
+    
+    def evaluate_by_model(self, df: pd.DataFrame, prob_column: str = 'predicted_prob',
+                         true_column: str = 'is_correct',
+                         model_column: str = 'model_name') -> pd.DataFrame:
+        """
+        Evaluate calibration separately for each model.
         
         Args:
-            y_true: True binary labels
-            y_prob: Predicted probabilities
-            n_bins: Number of bins for calibration
+            df: Dataframe with predictions and true labels
+            prob_column: Column with predicted probabilities
+            true_column: Column with true labels
+            model_column: Column with model identifiers
             
         Returns:
-            Dictionary of calibration metrics
+            Dataframe with metrics per model
         """
-        metrics = {}
         
-        # Calibration metrics
-        metrics['ECE'] = self.expected_calibration_error(y_true, y_prob, n_bins)
-        metrics['MCE'] = self.maximum_calibration_error(y_true, y_prob, n_bins)
+        model_metrics = []
         
-        # Performance metrics
-        metrics['Brier_Score'] = brier_score_loss(y_true, y_prob)
-        metrics['Log_Loss'] = log_loss(y_true, y_prob)
-        metrics['AUC'] = roc_auc_score(y_true, y_prob)
-        
-        # Prediction quality
-        metrics['Sharpness'] = self.sharpness(y_prob)
-        metrics['Accuracy'] = (y_true == (y_prob > 0.5)).mean()
-        
-        # Confidence statistics
-        metrics['Mean_Confidence'] = np.mean(y_prob)
-        metrics['Confidence_Std'] = np.std(y_prob)
-        
-        # Overconfidence/underconfidence
-        metrics['Mean_Predicted_Prob'] = np.mean(y_prob)
-        metrics['Base_Rate'] = np.mean(y_true)
-        metrics['Overconfidence'] = metrics['Mean_Predicted_Prob'] - metrics['Base_Rate']
-        
-        return metrics
-    
-    def evaluate_by_groups(self, 
-                         df: pd.DataFrame,
-                         group_col: str,
-                         prob_col: str = 'calibrated_confidence',
-                         true_col: str = 'is_correct') -> Dict[str, Dict]:
-        """
-        Evaluate calibration by groups (e.g., by model, temperature).
-        
-        Args:
-            df: DataFrame with predictions and groups
-            group_col: Column to group by
-            prob_col: Column with predicted probabilities
-            true_col: Column with true labels
+        for model_name in df[model_column].unique():
+            model_df = df[df[model_column] == model_name]
             
-        Returns:
-            Dict mapping group values to metrics
-        """
-        group_metrics = {}
-        
-        for group_value in df[group_col].unique():
-            group_data = df[df[group_col] == group_value]
-            
-            if len(group_data) < 10:  # Need minimum samples
+            if len(model_df) == 0:
                 continue
             
-            y_true = group_data[true_col].values
-            y_prob = group_data[prob_col].values
+            y_true = model_df[true_column].values
+            y_prob = model_df[prob_column].values
             
-            group_metrics[str(group_value)] = self.comprehensive_evaluation(y_true, y_prob)
+            metrics = self.evaluate_calibration(y_true, y_prob)
+            metrics['model_name'] = model_name
+            metrics['n_samples'] = len(model_df)
+            
+            model_metrics.append(metrics)
         
-        return group_metrics
+        return pd.DataFrame(model_metrics)
     
-    def plot_reliability_diagram(self, 
-                               y_true: np.ndarray, 
-                               y_prob: np.ndarray,
-                               title: str = "Reliability Diagram",
-                               n_bins: int = 10,
-                               save_path: Optional[str] = None) -> plt.Figure:
+    def plot_calibration_curve(self, y_true: np.ndarray, y_prob: np.ndarray,
+                             n_bins: int = 10, title: str = "Calibration Curve",
+                             save_path: Optional[str] = None) -> plt.Figure:
         """
-        Plot reliability diagram for calibration visualization.
+        Plot calibration curve (reliability diagram).
         
         Args:
             y_true: True binary labels
             y_prob: Predicted probabilities
-            title: Plot title
             n_bins: Number of bins
+            title: Plot title
             save_path: Optional path to save plot
             
         Returns:
-            matplotlib Figure
+            Matplotlib figure
         """
-        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
         
-        # Reliability diagram
-        diagram_data = self.reliability_diagram_data(y_true, y_prob, n_bins)
+        # Calculate calibration curve
+        fraction_of_positives, mean_predicted_value = calibration_curve(
+            y_true, y_prob, n_bins=n_bins
+        )
         
-        ax1.plot([0, 1], [0, 1], 'k--', label='Perfect calibration')
-        ax1.plot(diagram_data['mean_predicted'], diagram_data['fraction_correct'], 
-                'o-', label='Model calibration')
+        # Create plot
+        fig, ax = plt.subplots(figsize=(8, 8))
         
-        ax1.set_xlabel('Mean Predicted Probability')
-        ax1.set_ylabel('Fraction of Positives')
-        ax1.set_title(f'{title} - Calibration')
-        ax1.legend()
-        ax1.grid(True, alpha=0.3)
+        # Plot calibration curve
+        ax.plot(mean_predicted_value, fraction_of_positives, "s-",
+                label="Model", linewidth=2, markersize=8)
         
-        # Histogram of predictions
-        ax2.hist(y_prob, bins=n_bins, alpha=0.7, density=True)
-        ax2.set_xlabel('Predicted Probability')
-        ax2.set_ylabel('Density')
-        ax2.set_title(f'{title} - Prediction Distribution')
-        ax2.grid(True, alpha=0.3)
+        # Plot perfect calibration line
+        ax.plot([0, 1], [0, 1], "k--", label="Perfect Calibration", alpha=0.8)
+        
+        # Add histogram of prediction confidences
+        ax2 = ax.twinx()
+        ax2.hist(y_prob, bins=n_bins, alpha=0.3, color='gray', label='Prediction Distribution')
+        ax2.set_ylabel('Count', color='gray')
+        
+        # Formatting
+        ax.set_xlabel('Mean Predicted Probability')
+        ax.set_ylabel('Fraction of Positives')
+        ax.set_title(title)
+        ax.legend(loc='upper left')
+        ax.grid(True, alpha=0.3)
+        ax.set_xlim([0, 1])
+        ax.set_ylim([0, 1])
+        
+        # Add ECE to plot
+        ece = self.expected_calibration_error(y_true, y_prob, n_bins)
+        ax.text(0.05, 0.95, f'ECE: {ece:.3f}', transform=ax.transAxes,
+                bbox=dict(boxstyle='round', facecolor='white', alpha=0.8))
         
         plt.tight_layout()
         
@@ -245,127 +294,115 @@ class CalibrationEvaluator:
         
         return fig
     
-    def plot_calibration_by_group(self, 
-                                df: pd.DataFrame,
-                                group_col: str,
-                                prob_col: str = 'calibrated_confidence',
-                                true_col: str = 'is_correct',
-                                title: str = "Calibration by Group",
-                                save_path: Optional[str] = None) -> plt.Figure:
+    def plot_model_comparison(self, model_metrics: pd.DataFrame,
+                            metric: str = 'ECE',
+                            title: Optional[str] = None,
+                            save_path: Optional[str] = None) -> plt.Figure:
         """
-        Plot calibration metrics by group.
+        Plot comparison of calibration metrics across models.
         
         Args:
-            df: DataFrame with predictions and groups
-            group_col: Column to group by
-            prob_col: Column with predicted probabilities
-            true_col: Column with true labels
+            model_metrics: DataFrame with metrics per model
+            metric: Metric to plot
             title: Plot title
             save_path: Optional path to save plot
             
         Returns:
-            matplotlib Figure
+            Matplotlib figure
         """
-        group_metrics = self.evaluate_by_groups(df, group_col, prob_col, true_col)
         
-        # Extract metrics for plotting
-        groups = list(group_metrics.keys())
-        ece_scores = [group_metrics[g]['ECE'] for g in groups]
-        brier_scores = [group_metrics[g]['Brier_Score'] for g in groups]
-        auc_scores = [group_metrics[g]['AUC'] for g in groups]
+        if title is None:
+            title = f"Model Comparison: {metric}"
         
-        fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(15, 5))
+        fig, ax = plt.subplots(figsize=(12, 6))
         
-        # ECE by group
-        ax1.bar(groups, ece_scores)
-        ax1.set_ylabel('Expected Calibration Error')
-        ax1.set_title('ECE by Group')
-        ax1.tick_params(axis='x', rotation=45)
+        # Sort models by metric value
+        sorted_df = model_metrics.sort_values(metric)
         
-        # Brier Score by group
-        ax2.bar(groups, brier_scores)
-        ax2.set_ylabel('Brier Score')
-        ax2.set_title('Brier Score by Group')
-        ax2.tick_params(axis='x', rotation=45)
+        # Create bar plot
+        bars = ax.bar(range(len(sorted_df)), sorted_df[metric])
         
-        # AUC by group
-        ax3.bar(groups, auc_scores)
-        ax3.set_ylabel('AUC')
-        ax3.set_title('AUC by Group')
-        ax3.tick_params(axis='x', rotation=45)
+        # Color bars based on performance
+        for i, bar in enumerate(bars):
+            if metric in ['ECE', 'MCE', 'Brier_Score', 'Log_Loss']:  # Lower is better
+                color_intensity = sorted_df[metric].iloc[i] / sorted_df[metric].max()
+                bar.set_color(plt.cm.Reds(color_intensity))
+            else:  # Higher is better
+                color_intensity = sorted_df[metric].iloc[i] / sorted_df[metric].max()
+                bar.set_color(plt.cm.Greens(color_intensity))
         
-        plt.suptitle(title)
+        # Formatting
+        ax.set_xlabel('Model')
+        ax.set_ylabel(metric)
+        ax.set_title(title)
+        ax.set_xticks(range(len(sorted_df)))
+        ax.set_xticklabels(sorted_df['model_name'], rotation=45, ha='right')
+        ax.grid(True, alpha=0.3)
+        
+        # Add value labels on bars
+        for i, bar in enumerate(bars):
+            height = bar.get_height()
+            ax.text(bar.get_x() + bar.get_width()/2., height + 0.001,
+                   f'{height:.3f}', ha='center', va='bottom', fontsize=9)
+        
         plt.tight_layout()
         
         if save_path:
             plt.savefig(save_path, dpi=300, bbox_inches='tight')
         
         return fig
+    
+    def create_evaluation_report(self, y_true: np.ndarray, y_prob: np.ndarray,
+                               model_name: str = "Model") -> Dict[str, Any]:
+        """
+        Create comprehensive evaluation report.
+        
+        Args:
+            y_true: True binary labels
+            y_prob: Predicted probabilities
+            model_name: Name of the model
+            
+        Returns:
+            Dictionary with evaluation results and plots
+        """
+        
+        # Calculate metrics
+        metrics = self.evaluate_calibration(y_true, y_prob)
+        
+        # Create plots
+        calibration_fig = self.plot_calibration_curve(
+            y_true, y_prob, title=f"Calibration Curve - {model_name}"
+        )
+        
+        # Create summary
+        report = {
+            'model_name': model_name,
+            'metrics': metrics,
+            'plots': {
+                'calibration_curve': calibration_fig
+            },
+            'summary': {
+                'total_samples': len(y_true),
+                'positive_rate': y_true.mean(),
+                'mean_confidence': y_prob.mean(),
+                'confidence_std': y_prob.std()
+            }
+        }
+        
+        return report
 
-
-def compare_calibration_methods(results_dict: Dict[str, Dict]) -> pd.DataFrame:
+def evaluate_calibration_quality(y_true: np.ndarray, y_prob: np.ndarray,
+                               n_bins: int = 10) -> Dict[str, float]:
     """
-    Compare multiple calibration methods.
+    Convenience function to evaluate calibration quality.
     
     Args:
-        results_dict: Dict mapping method names to evaluation results
+        y_true: True binary labels
+        y_prob: Predicted probabilities
+        n_bins: Number of bins for calibration metrics
         
     Returns:
-        DataFrame comparing methods
-    """
-    comparison_data = []
-    
-    for method_name, metrics in results_dict.items():
-        row = {'Method': method_name}
-        row.update(metrics)
-        comparison_data.append(row)
-    
-    df = pd.DataFrame(comparison_data)
-    
-    # Round numeric columns
-    numeric_cols = df.select_dtypes(include=[np.number]).columns
-    df[numeric_cols] = df[numeric_cols].round(4)
-    
-    return df
-
-
-def evaluate_pipeline_calibration(pipeline, test_df: pd.DataFrame) -> Dict[str, Any]:
-    """
-    Evaluate calibration quality of a trained pipeline.
-    
-    Args:
-        pipeline: Trained UncertaintyCalibrationPipeline
-        test_df: Test dataframe with ground truth
-        
-    Returns:
-        Comprehensive evaluation results
+        Dictionary of calibration metrics
     """
     evaluator = CalibrationEvaluator()
-    
-    # Apply calibration
-    calibrated_df = pipeline.batch_calibrate(test_df)
-    
-    # Overall evaluation
-    y_true = calibrated_df['is_correct'].values
-    y_prob = calibrated_df['calibrated_confidence'].values
-    
-    overall_metrics = evaluator.comprehensive_evaluation(y_true, y_prob)
-    
-    # By-model evaluation
-    model_metrics = evaluator.evaluate_by_groups(
-        calibrated_df, 'model_id', 'calibrated_confidence', 'is_correct'
-    )
-    
-    # By-temperature evaluation (if available)
-    temp_metrics = {}
-    if 'temperature' in calibrated_df.columns:
-        temp_metrics = evaluator.evaluate_by_groups(
-            calibrated_df, 'temperature', 'calibrated_confidence', 'is_correct'
-        )
-    
-    return {
-        'overall_metrics': overall_metrics,
-        'by_model_metrics': model_metrics,
-        'by_temperature_metrics': temp_metrics,
-        'calibrated_data': calibrated_df
-    }
+    return evaluator.evaluate_calibration(y_true, y_prob, n_bins)
