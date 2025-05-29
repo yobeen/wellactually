@@ -1,8 +1,8 @@
 # src/uncertainty_calibration/multi_model_engine.py
 """
-Multi-Model Engine for LLM Data Augmentation - REFACTORED VERSION
-Handles querying multiple LLM models through OpenRouter API.
-Response parsing is now handled by the ResponseParser module.
+Multi-Model Engine for LLM Data Augmentation - REFACTORED VERSION with Cache Integration
+Handles querying multiple LLM models through OpenRouter API with file-based caching.
+Response parsing is handled by the ResponseParser module.
 """
 import os
 import time
@@ -10,17 +10,18 @@ import logging
 import requests
 from typing import Dict, List, Any, Optional
 from src.uncertainty_calibration.response_parser import ResponseParser, ModelResponse
+from src.uncertainty_calibration.cache_manager import CacheManager
 
 logger = logging.getLogger(__name__)
 
 class MultiModelEngine:
     """
-    Refactored engine for querying multiple LLM models.
+    Refactored engine for querying multiple LLM models with integrated caching.
     Focuses on API communication while delegating parsing to ResponseParser.
     """
 
     def __init__(self, config):
-        """Initialize the multi-model engine."""
+        """Initialize the multi-model engine with caching support."""
         self.config = config
         self.api_config = config.api
 
@@ -50,19 +51,26 @@ class MultiModelEngine:
         self.backoff_factor = self.api_config.rate_limiting.backoff_factor
         self.timeout = self.api_config.rate_limiting.timeout_seconds
 
+        # Initialize cache manager
+        cache_config = getattr(config, 'cache', {})
+        cache_enabled = getattr(cache_config, 'enabled', True)
+        cache_dir = getattr(cache_config, 'directory', 'cache')
+        self.cache_manager = CacheManager(cache_dir=cache_dir, enabled=cache_enabled)
+
         # Initialize response parser
-        cost_per_1k = getattr(self.config, 'cost_management', {}).get('cost_per_1k_tokens', 0.01)
+        cost_management = getattr(config, 'cost_management', {})
+        cost_per_1k = getattr(cost_management, 'cost_per_1k_tokens', 0.01)
         self.response_parser = ResponseParser(cost_per_1k_tokens=cost_per_1k)
 
         # Cost tracking
         self.total_cost = 0.0
 
-        logger.info("MultiModelEngine initialized with OpenRouter API")
+        logger.info("MultiModelEngine initialized with OpenRouter API and caching")
 
     def query_single_model_with_temperature(self, model_id: str, prompt: List[Dict[str, str]],
                                             temperature: float = 0.0) -> ModelResponse:
         """
-        Query a single model with specific temperature.
+        Query a single model with specific temperature, using cache when available.
 
         Args:
             model_id: OpenRouter model identifier
@@ -73,11 +81,22 @@ class MultiModelEngine:
             ModelResponse with parsed data and uncertainty
         """
         
-        # Make API request
-        api_response = self._make_api_request(model_id, prompt, temperature)
-        
-        # Parse response using ResponseParser
-        parsed_response = self.response_parser.parse_response(model_id, api_response, temperature)
+        # Check cache first
+        cached_response = self.cache_manager.get_cached_response(model_id, prompt, temperature)
+        if cached_response is not None:
+            logger.debug(f"Cache hit for {model_id} at temp={temperature}")
+            # Parse cached response
+            parsed_response = self.response_parser.parse_response(model_id, cached_response, temperature)
+        else:
+            # Make API request
+            api_response = self._make_api_request(model_id, prompt, temperature)
+            
+            # Save to cache if successful
+            if self._is_successful_api_response(api_response):
+                self.cache_manager.save_response_to_cache(model_id, prompt, temperature, api_response)
+            
+            # Parse response using ResponseParser
+            parsed_response = self.response_parser.parse_response(model_id, api_response, temperature)
         
         # Update cost tracking
         self.total_cost += parsed_response.cost_usd
@@ -194,6 +213,15 @@ class MultiModelEngine:
 
         self.last_request_time = time.time()
 
+    def _is_successful_api_response(self, api_response: Dict) -> bool:
+        """Check if API response is successful and should be cached."""
+        return (
+            isinstance(api_response, dict) and
+            'choices' in api_response and
+            len(api_response['choices']) > 0 and
+            'error' not in api_response
+        )
+
     def _create_api_error_response(self, error_message: str) -> Dict:
         """
         Create error response dictionary for API failures.
@@ -236,3 +264,11 @@ class MultiModelEngine:
             "ready_for_next_request": time_since_last >= self.min_interval,
             "seconds_until_ready": max(0, self.min_interval - time_since_last)
         }
+
+    def get_cache_stats(self) -> Dict[str, Any]:
+        """Get cache statistics from cache manager."""
+        return self.cache_manager.get_cache_stats()
+
+    def clear_cache(self, model_id: Optional[str] = None):
+        """Clear cache through cache manager."""
+        self.cache_manager.clear_cache(model_id)

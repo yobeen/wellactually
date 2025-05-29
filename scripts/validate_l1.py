@@ -2,6 +2,7 @@
 # scripts/validate_l1.py
 """
 L1 validation script using existing uncertainty calibration infrastructure.
+Fixed to use OmegaConf for configuration compatibility.
 """
 
 import sys
@@ -9,6 +10,7 @@ import os
 import yaml
 import logging
 from pathlib import Path
+from omegaconf import OmegaConf
 
 from src.uncertainty_calibration.data_collection import UncertaintyDataCollector
 from src.utils.data_loader import load_l1_data
@@ -19,22 +21,14 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 def load_config():
-    """Load configuration from YAML file."""
+    """Load configuration from YAML file using OmegaConf."""
     config_path = "configs/uncertainty_calibration/llm.yaml"
     
-    with open(config_path, 'r') as f:
-        config_dict = yaml.safe_load(f)
+    # Load with OmegaConf for both dict and attribute access
+    config = OmegaConf.load(config_path)
     
-    # Convert to object for attribute access
-    class Config:
-        def __init__(self, data):
-            for key, value in data.items():
-                if isinstance(value, dict):
-                    setattr(self, key, Config(value))
-                else:
-                    setattr(self, key.replace('-', '_'), value)
-    
-    return Config(config_dict)
+    logger.info(f"Loaded configuration from {config_path}")
+    return config
 
 def main():
     """Main validation function."""
@@ -49,14 +43,25 @@ def main():
     
     # Load configuration
     print("Loading configuration...")
-    config = load_config()
+    try:
+        config = load_config()
+    except Exception as e:
+        print(f"Failed to load configuration: {e}")
+        return 1
     
     # Load Level 1 data
     print("\n1. Loading Level 1 data...")
-    l1_data = load_l1_data()
-    
-    if len(l1_data) == 0:
-        print("No Level 1 data found. Exiting.")
+    try:
+        l1_data = load_l1_data()
+        
+        if len(l1_data) == 0:
+            print("No Level 1 data found. Exiting.")
+            return 1
+            
+        print(f"Loaded {len(l1_data)} Level 1 comparisons")
+        
+    except Exception as e:
+        print(f"Failed to load L1 data: {e}")
         return 1
     
     # Initialize data collector with single model
@@ -65,6 +70,8 @@ def main():
     
     try:
         collector = UncertaintyDataCollector(config, models_subset=test_models)
+        print(f"Successfully initialized collector with models: {test_models}")
+        
     except Exception as e:
         print(f"Failed to initialize data collector: {e}")
         return 1
@@ -90,6 +97,8 @@ def main():
         
     except Exception as e:
         print(f"Error during data collection: {e}")
+        import traceback
+        traceback.print_exc()
         return 1
     
     # Run analysis
@@ -98,10 +107,13 @@ def main():
         run_analysis(calibration_data_points)
     except Exception as e:
         print(f"Error during analysis: {e}")
+        import traceback
+        traceback.print_exc()
         return 1
     
     print("\nValidation complete!")
     return 0
 
 if __name__ == "__main__":
-    main()
+    exit_code = main()
+    sys.exit(exit_code)

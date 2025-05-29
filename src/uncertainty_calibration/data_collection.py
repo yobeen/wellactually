@@ -81,32 +81,37 @@ class UncertaintyDataCollector:
 
             logger.info(f"Processing question {idx} (Level {level})")
 
-        # Query all models at all temperatures with caching
-        for model_id in self.models:
-            for temperature in temperatures:
-                try:
-                    response = self.engine.query_single_model_with_temperature(
-                        model_id, prompt, temperature, level  # Pass level for parsing
-                    )
-
-                    if response.success:
-                        data_point = self._create_calibration_datapoint(
-                            row, idx, level, response, correct_answer
+            # Query all models at all temperatures
+            for model_id in self.models:
+                for temperature in temperatures:
+                    try:
+                        # Fixed: Remove the level parameter that doesn't exist in the method signature
+                        response = self.engine.query_single_model_with_temperature(
+                            model_id, prompt, temperature
                         )
-                        data_points.append(data_point)
-                    else:
-                        logger.warning(f"Failed query: {model_id} temp={temperature} error={response.error}")
 
-                except Exception as e:
-                    logger.warning(f"Error querying {model_id} at temp {temperature}: {e}")
+                        if response.success:
+                            data_point = self._create_calibration_datapoint(
+                                row, idx, level, response, correct_answer
+                            )
+                            data_points.append(data_point)
+                        else:
+                            logger.warning(f"Failed query: {model_id} temp={temperature} error={response.error}")
+
+                    except Exception as e:
+                        logger.warning(f"Error querying {model_id} at temp {temperature}: {e}")
 
         logger.info(f"Collected {len(data_points)} total calibration data points")
         
-        # Print cache statistics
-        cache_stats = self.engine.get_cache_stats()
-        if cache_stats.get('enabled'):
-            logger.info(f"Cache statistics: {cache_stats['total_files']} files, "
-                       f"{cache_stats['total_size_mb']:.2f} MB")
+        # Print cache statistics if cache is available
+        if hasattr(self.engine, 'get_cache_stats'):
+            try:
+                cache_stats = self.engine.get_cache_stats()
+                if cache_stats.get('enabled'):
+                    logger.info(f"Cache statistics: {cache_stats['total_files']} files, "
+                               f"{cache_stats['total_size_mb']:.2f} MB")
+            except Exception as e:
+                logger.debug(f"Could not get cache stats: {e}")
         
         return data_points
 
@@ -253,8 +258,11 @@ class UncertaintyDataCollector:
 
     def get_cache_info(self) -> Dict[str, Any]:
         """Get cache information from the engine."""
-        return self.engine.get_cache_info()
+        if hasattr(self.engine, 'get_cache_info'):
+            return self.engine.get_cache_info()
+        return {"cache_available": False}
 
     def clear_cache(self, model_id: Optional[str] = None):
         """Clear cache through the engine."""
-        self.engine.clear_cache(model_id)
+        if hasattr(self.engine, 'clear_cache'):
+            self.engine.clear_cache(model_id)

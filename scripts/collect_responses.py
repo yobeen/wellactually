@@ -3,6 +3,7 @@
 """
 Script to collect LLM responses for uncertainty calibration training.
 This is the critical Phase 1 implementation.
+Fixed to use OmegaConf for configuration compatibility.
 """
 import argparse
 import sys
@@ -11,6 +12,7 @@ import yaml
 from pathlib import Path
 import pandas as pd
 import os
+from omegaconf import OmegaConf
 
 from src.uncertainty_calibration.data_collection import UncertaintyDataCollector
 from src.uncertainty_calibration.feature_engineering import TwoModelFeatureEngineer
@@ -57,31 +59,17 @@ def main():
     output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    # Load configuration
+    # Load configuration with OmegaConf
     logger.info(f"Loading configuration from {args.config}")
     if not Path(args.config).exists():
         logger.error(f"Configuration file not found: {args.config}")
         return 1
     try:
-        with open(args.config, 'r') as f:
-            config = yaml.safe_load(f)
+        config = OmegaConf.load(args.config)
+        logger.info("Configuration loaded successfully with OmegaConf")
     except Exception as e:
         logger.error(f"Failed to load configuration: {e}")
         return 1
-
-    # Convert to object for attribute access
-    class Config:
-        def __init__(self, data):
-            for key, value in data.items():
-                if isinstance(value, dict):
-                    setattr(self, key, Config(value))
-                else:
-                    setattr(self, self._sanitize_key(key), value)
-        def _sanitize_key(self, key):
-            # Replace hyphens with underscores for valid attribute names
-            return key.replace('-', '_')
-
-    config = Config(config)
 
     # Check API key
     api_key = os.getenv("OPENROUTER_API_KEY")
