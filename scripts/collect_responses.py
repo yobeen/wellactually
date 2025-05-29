@@ -12,12 +12,9 @@ from pathlib import Path
 import pandas as pd
 import os
 
-# Add src to Python path
-sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
-
-from uncertainty_calibration.data_collection import UncertaintyDataCollector
-from uncertainty_calibration.feature_engineering import TwoModelFeatureEngineer
-from uncertainty_calibration.two_model_trainer import TwoModelTrainer
+from src.uncertainty_calibration.data_collection import UncertaintyDataCollector
+from src.uncertainty_calibration.feature_engineering import TwoModelFeatureEngineer
+from src.uncertainty_calibration.two_model_trainer import TwoModelTrainer
 
 # Configure logging
 logging.basicConfig(

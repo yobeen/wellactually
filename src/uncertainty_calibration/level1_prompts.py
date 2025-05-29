@@ -216,13 +216,6 @@ Repository A: {url_a}
 Repository B: {url_b}
 ({name_b})
 
-Consider factors such as:
-- Foundational importance to Ethereum infrastructure
-- Community adoption and ecosystem integration
-- Development activity and maintenance
-- Impact on developers and end users
-- Long-term strategic value
-
 Please provide your analysis in this format:
 
 Reasoning: [Explain your analysis comparing the two repositories, considering the factors above]
