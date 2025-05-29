@@ -66,7 +66,16 @@ def main():
     
     # Initialize data collector with single model
     print("\n2. Initializing data collector...")
-    test_models = ["openai/gpt-4o"]  # Single model only
+    test_models = ["openai/gpt-4o",
+            "meta-llama/llama-4-maverick",
+            "deepseek/deepseek-chat",
+            "x-ai/grok-3-beta",
+            "meta-llama/llama-3.1-405b-instruct",
+            "qwen/qwq-32b-preview",
+            "mistralai/mixtral-8x22b-instruct",
+           # "deepseek/deepseek-coder",
+            "google/gemma-3-27b-it"
+        ] 
     
     try:
         collector = UncertaintyDataCollector(config, models_subset=test_models)
