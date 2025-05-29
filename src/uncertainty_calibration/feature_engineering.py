@@ -9,8 +9,8 @@ import numpy as np
 from typing import List, Dict, Any, Tuple
 from sklearn.preprocessing import LabelEncoder
 import logging
-from uncertainty_calibration.data_collection import CalibrationDataPoint
-from uncertainty_calibration.model_metadata import MODEL_PROVIDERS, MODEL_ARCHITECTURES
+from src.uncertainty_calibration.data_collection import CalibrationDataPoint
+from src.uncertainty_calibration.model_metadata import MODEL_PROVIDERS, MODEL_ARCHITECTURES
 
 logger = logging.getLogger(__name__) # Fixed: __name__ instead of name
 

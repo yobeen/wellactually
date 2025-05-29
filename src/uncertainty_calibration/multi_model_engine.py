@@ -9,7 +9,7 @@ import time
 import logging
 import requests
 from typing import Dict, List, Any, Optional
-from uncertainty_calibration.response_parser import ResponseParser, ModelResponse
+from src.uncertainty_calibration.response_parser import ResponseParser, ModelResponse
 
 logger = logging.getLogger(__name__)
 

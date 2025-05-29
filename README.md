@@ -176,7 +176,7 @@ The framework handles three types of data from `train.csv`:
 ## Production Usage
 
 ```python
-from uncertainty_calibration import UncertaintyCalibrationPipeline
+from src.uncertainty_calibration import UncertaintyCalibrationPipeline
 
 # Load trained pipeline
 pipeline = create_pipeline_from_config("configs/uncertainty_calibration/llm.yaml")
@@ -224,7 +224,7 @@ export PYTHONPATH=src
 python -c "
 import logging
 logging.basicConfig(level=logging.DEBUG)
-from uncertainty_calibration import run_calibration_pipeline
+from src.uncertainty_calibration import run_calibration_pipeline
 run_calibration_pipeline('configs/uncertainty_calibration/llm.yaml')
 "
 ```

@@ -13,11 +13,11 @@ import logging
 import joblib
 from dataclasses import dataclass
 
-from uncertainty_calibration.data_collection import UncertaintyDataCollector, CalibrationDataPoint
-from uncertainty_calibration.feature_engineering import CalibrationFeatureEngineer
-from uncertainty_calibration.lightgbm_trainer import LightGBMCalibrationTrainer
-from uncertainty_calibration.evaluation import CalibrationEvaluator
-from uncertainty_calibration.model_metadata import validate_model_id, get_model_metadata
+from src.uncertainty_calibration.data_collection import UncertaintyDataCollector, CalibrationDataPoint
+from src.uncertainty_calibration.feature_engineering import CalibrationFeatureEngineer
+from src.uncertainty_calibration.lightgbm_trainer import LightGBMCalibrationTrainer
+from src.uncertainty_calibration.evaluation import CalibrationEvaluator
+from src.uncertainty_calibration.model_metadata import validate_model_id, get_model_metadata
 
 logger = logging.getLogger(__name__)
 

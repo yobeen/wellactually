@@ -9,11 +9,10 @@ import os
 import yaml
 import logging
 from pathlib import Path
-sys.path.append('src/uncertainty_calibration')
 
 from src.uncertainty_calibration.data_collection import UncertaintyDataCollector
 from src.utils.data_loader import load_l1_data
-from src.uncertainty_calibration.l1_analysis import l1_analysis
+from src.uncertainty_calibration.l1_analysis import run_analysis
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -96,7 +95,7 @@ def main():
     # Run analysis
     print("\n4. Running analysis...")
     try:
-        l1_analysis.run_analysis(calibration_data_points)
+        run_analysis(calibration_data_points)
     except Exception as e:
         print(f"Error during analysis: {e}")
         return 1
@@ -105,5 +104,4 @@ def main():
     return 0
 
 if __name__ == "__main__":
-    exit_code = main()
-    sys.exit(exit_code)
+    main()
