@@ -18,6 +18,13 @@ from .model_metadata import (
     TEMPERATURE_SWEEP
 )
 
+from .response_parser import (
+    ModelResponse,
+    ResponseParser,
+    parse_response,
+    calculate_uncertainty
+)
+
 from .data_collection import (
     UncertaintyDataCollector,
     CalibrationDataPoint
@@ -42,6 +49,10 @@ from .calibration_pipeline import (
     UncertaintyCalibrationPipeline,
     CalibrationPipelineConfig,
     create_pipeline_from_config
+)
+
+from .multi_model_engine import (
+    MultiModelEngine
 )
 
 __version__ = "0.1.0"

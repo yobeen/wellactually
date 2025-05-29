@@ -9,14 +9,14 @@ import numpy as np
 from typing import Dict, List, Any, Optional, Tuple
 import logging
 from dataclasses import dataclass
-from uncertainty_calibration.multi_model_engine import MultiModelEngine, ModelResponse
+from uncertainty_calibration.multi_model_engine import MultiModelEngine
+from uncertainty_calibration.response_parser import ModelResponse
 from uncertainty_calibration.level1_prompts import Level1PromptGenerator
 from uncertainty_calibration.level2_prompts import Level2PromptGenerator
-
 from uncertainty_calibration.level3_prompts import Level3PromptGenerator
 from uncertainty_calibration.model_metadata import get_model_metadata, validate_model_id
 
-logger = logging.getLogger(__name__) # Fixed: __name__ instead of name
+logger = logging.getLogger(__name__)
 
 @dataclass
 class CalibrationDataPoint:
@@ -40,7 +40,6 @@ class UncertaintyDataCollector:
     """
     Collects LLM responses for uncertainty calibration training.
     """
-
 
     def __init__(self, config, models_subset: Optional[List[str]] = None):
         """Initialize data collector."""
@@ -74,7 +73,7 @@ class UncertaintyDataCollector:
         data_points = []
 
         # Process each row in train.csv
-        for idx, row in train_df.head(max_samples_per_level * 3).iterrows(): # Adjusted for potential levels
+        for idx, row in train_df.head(max_samples_per_level * 3).iterrows():
             # Determine level and generate prompt
             level, prompt, correct_answer = self._process_training_row(row, idx)
             if not prompt:

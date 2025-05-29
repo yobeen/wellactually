@@ -13,7 +13,7 @@ import pandas as pd
 import os
 
 # Add src to Python path
-sys.path.insert(0, str(Path(__file__).parent.parent / "src")) # Fixed: __file__ instead of file
+sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from uncertainty_calibration.data_collection import UncertaintyDataCollector
 from uncertainty_calibration.feature_engineering import TwoModelFeatureEngineer
@@ -24,11 +24,10 @@ logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
-logger = logging.getLogger(__name__) # Fixed: __name__ instead of name
+logger = logging.getLogger(__name__)
 
 def main():
     """Main data collection function."""
-
 
     parser = argparse.ArgumentParser(description="Collect LLM responses for uncertainty calibration")
     parser.add_argument(
@@ -80,7 +79,7 @@ def main():
                 if isinstance(value, dict):
                     setattr(self, key, Config(value))
                 else:
-                    setattr(self, self._sanitize_key(key), value) # Sanitize key
+                    setattr(self, self._sanitize_key(key), value)
         def _sanitize_key(self, key):
             # Replace hyphens with underscores for valid attribute names
             return key.replace('-', '_')
@@ -219,6 +218,6 @@ def main():
     logger.info("Data collection and processing completed successfully!")
     return 0
 
-if __name__ == "__main__": # Fixed: __name__ instead of name
+if __name__ == "__main__":
     exit_code = main()
     sys.exit(exit_code)

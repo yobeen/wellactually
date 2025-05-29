@@ -1,37 +1,23 @@
 # src/uncertainty_calibration/multi_model_engine.py
 """
-Multi-Model Engine for LLM Data Augmentation - FIXED VERSIONHandles querying multiple LLM models through OpenRouter API and extracting
-uncertainty from logprobs for calibration training.
+Multi-Model Engine for LLM Data Augmentation - REFACTORED VERSION
+Handles querying multiple LLM models through OpenRouter API.
+Response parsing is now handled by the ResponseParser module.
 """
 import os
 import time
 import logging
 import requests
-import numpy as np
-from typing import Dict, List, Any, Optional, Tuple
-from dataclasses import dataclass
-from datetime import datetime
-import json
-logger = logging.getLogger(__name__) # Fixed: __name__ instead of name
-@dataclass
-class ModelResponse:
-    """Container for model response data."""
-    model_id: str
-    success: bool
-    content: str
-    logprobs: Optional[Dict]
-    uncertainty: float
-    raw_choice: str
-    cost_usd: float
-    tokens_used: int
-    temperature: float
-    error: Optional[str] = None
-    timestamp: str = ""
+from typing import Dict, List, Any, Optional
+from uncertainty_calibration.response_parser import ResponseParser, ModelResponse
+
+logger = logging.getLogger(__name__)
+
 class MultiModelEngine:
     """
-    Fixed engine for querying multiple LLM models and extracting uncertainty.
+    Refactored engine for querying multiple LLM models.
+    Focuses on API communication while delegating parsing to ResponseParser.
     """
-
 
     def __init__(self, config):
         """Initialize the multi-model engine."""
@@ -57,9 +43,16 @@ class MultiModelEngine:
             if hasattr(self.api_config.openrouter.headers, 'x_title'):
                 self.headers["X-Title"] = self.api_config.openrouter.headers.x_title
 
-        # Rate limiting
+        # Rate limiting configuration
         self.min_interval = 60.0 / self.api_config.rate_limiting.requests_per_minute
         self.last_request_time = 0.0
+        self.max_retries = self.api_config.rate_limiting.max_retries
+        self.backoff_factor = self.api_config.rate_limiting.backoff_factor
+        self.timeout = self.api_config.rate_limiting.timeout_seconds
+
+        # Initialize response parser
+        cost_per_1k = getattr(self.config, 'cost_management', {}).get('cost_per_1k_tokens', 0.01)
+        self.response_parser = ResponseParser(cost_per_1k_tokens=cost_per_1k)
 
         # Cost tracking
         self.total_cost = 0.0
@@ -69,7 +62,7 @@ class MultiModelEngine:
     def query_single_model_with_temperature(self, model_id: str, prompt: List[Dict[str, str]],
                                             temperature: float = 0.0) -> ModelResponse:
         """
-        Query a single model with specific temperature and extract uncertainty.
+        Query a single model with specific temperature.
 
         Args:
             model_id: OpenRouter model identifier
@@ -77,66 +70,19 @@ class MultiModelEngine:
             temperature: Sampling temperature
 
         Returns:
-            ModelResponse with uncertainty extracted
+            ModelResponse with parsed data and uncertainty
         """
-
-        payload = {
-            "model": model_id,
-            "messages": prompt,
-            "max_tokens": 10,
-            "temperature": temperature,
-            "logprobs": True,
-            "top_logprobs": 10
-        }
-
-        max_retries = self.api_config.rate_limiting.max_retries
-        backoff_factor = self.api_config.rate_limiting.backoff_factor
-        timeout = self.api_config.rate_limiting.timeout_seconds
-
-        # Rate limiting
-        self._wait_if_needed()
-
-        for attempt in range(max_retries + 1):
-            try:
-                response = requests.post(
-                    self.base_url,
-                    headers=self.headers,
-                    json=payload,
-                    timeout=timeout
-                )
-
-                if response.status_code == 200:
-                    data = response.json()
-                    return self._parse_successful_response(model_id, data, temperature)
-
-                elif response.status_code == 429:  # Rate limited
-                    if attempt < max_retries:
-                        wait_time = (backoff_factor ** attempt) * 60
-                        logger.warning(f"Rate limited for {model_id}, waiting {wait_time:.1f}s")
-                        time.sleep(wait_time)
-                        continue
-                    else:
-                        return self._create_error_response(model_id, temperature,
-                                                          f"Rate limit exceeded after {max_retries} retries")
-
-                else:  # Other HTTP error
-                    error_msg = f"HTTP {response.status_code}: {response.text}"
-                    if attempt < max_retries:
-                        logger.warning(f"HTTP error for {model_id}: {error_msg}, retrying...")
-                        time.sleep(backoff_factor ** attempt)
-                        continue
-                    else:
-                        return self._create_error_response(model_id, temperature, error_msg)
-
-            except Exception as e:
-                error_msg = f"Exception: {str(e)}"
-                if attempt < max_retries:
-                    logger.warning(f"Exception for {model_id}: {error_msg}, retrying...")
-                    time.sleep(backoff_factor ** attempt)
-                    continue
-                else:
-                    return self._create_error_response(model_id, temperature, error_msg)
-        return self._create_error_response(model_id, temperature, "Unexpected error in retry loop")
+        
+        # Make API request
+        api_response = self._make_api_request(model_id, prompt, temperature)
+        
+        # Parse response using ResponseParser
+        parsed_response = self.response_parser.parse_response(model_id, api_response, temperature)
+        
+        # Update cost tracking
+        self.total_cost += parsed_response.cost_usd
+        
+        return parsed_response
 
     def query_multiple_models(self, model_ids: List[str], prompt: List[Dict[str, str]],
                               temperatures: List[float] = None) -> List[ModelResponse]:
@@ -160,108 +106,82 @@ class MultiModelEngine:
                 response = self.query_single_model_with_temperature(model_id, prompt, temperature)
                 responses.append(response)
 
-                # Update cost tracking
-                self.total_cost += response.cost_usd
-
-                # Small delay between requests
+                # Small delay between requests to be respectful
                 time.sleep(0.1)
 
         logger.info(f"Queried {len(model_ids)} models x {len(temperatures)} temperatures = {len(responses)} total responses")
         return responses
 
-    def _parse_successful_response(self, model_id: str, data: Dict, temperature: float) -> ModelResponse:
-        """Parse successful API response into ModelResponse with uncertainty."""
-        try:
-            choice = data.get('choices', [{}])[0]
-            message = choice.get('message', {})
-            content = message.get('content', '').strip()
+    def _make_api_request(self, model_id: str, prompt: List[Dict[str, str]], 
+                         temperature: float) -> Dict:
+        """
+        Make API request with retry logic and rate limiting.
+        
+        Args:
+            model_id: Model identifier
+            prompt: Message list
+            temperature: Temperature
+            
+        Returns:
+            Raw API response dictionary or error dictionary
+        """
+        
+        payload = {
+            "model": model_id,
+            "messages": prompt,
+            "max_tokens": 10,
+            "temperature": temperature,
+            "logprobs": True,
+            "top_logprobs": 10
+        }
 
-            # Extract logprobs
-            logprobs_data = choice.get('logprobs')
-            parsed_logprobs = {}
-            uncertainty = 1.0  # Default high uncertainty
-            raw_choice = content
+        # Rate limiting
+        self._wait_if_needed()
 
-            if logprobs_data and 'content' in logprobs_data:
-                token_logprobs = logprobs_data['content']
-                if token_logprobs:
-                    # Get first token logprobs (usually the answer)
-                    first_token = token_logprobs[0]
-                    top_logprobs = first_token.get('top_logprobs', [])
+        # Retry loop
+        for attempt in range(self.max_retries + 1):
+            try:
+                response = requests.post(
+                    self.base_url,
+                    headers=self.headers,
+                    json=payload,
+                    timeout=self.timeout
+                )
 
-                    # Convert to linear probabilities
-                    for token_data in top_logprobs:
-                        token = token_data.get('token', '').strip()
-                        logprob = token_data.get('logprob', -float('inf'))
-                        if logprob > -float('inf'):
-                            parsed_logprobs[token] = np.exp(logprob)
+                if response.status_code == 200:
+                    return response.json()
 
-                    # Calculate uncertainty as entropy
-                    uncertainty = self._calculate_uncertainty(parsed_logprobs)
+                elif response.status_code == 429:  # Rate limited
+                    if attempt < self.max_retries:
+                        wait_time = (self.backoff_factor ** attempt) * 60
+                        logger.warning(f"Rate limited for {model_id}, waiting {wait_time:.1f}s")
+                        time.sleep(wait_time)
+                        continue
+                    else:
+                        return self._create_api_error_response(
+                            f"Rate limit exceeded after {self.max_retries} retries"
+                        )
 
-                    # Extract raw choice from highest probability token
-                    if parsed_logprobs:
-                        raw_choice = max(parsed_logprobs.keys(), key=lambda k: parsed_logprobs[k])
+                else:  # Other HTTP error
+                    error_msg = f"HTTP {response.status_code}: {response.text}"
+                    if attempt < self.max_retries:
+                        logger.warning(f"HTTP error for {model_id}: {error_msg}, retrying...")
+                        time.sleep(self.backoff_factor ** attempt)
+                        continue
+                    else:
+                        return self._create_api_error_response(error_msg)
 
-            # Calculate cost
-            usage = data.get('usage', {})
-            total_tokens = usage.get('total_tokens', 0)
-            cost_usd = total_tokens * 0.01 / 1000.0  # Approximate cost
+            except Exception as e:
+                error_msg = f"Request exception: {str(e)}"
+                if attempt < self.max_retries:
+                    logger.warning(f"Exception for {model_id}: {error_msg}, retrying...")
+                    time.sleep(self.backoff_factor ** attempt)
+                    continue
+                else:
+                    return self._create_api_error_response(error_msg)
 
-            return ModelResponse(
-                model_id=model_id,
-                success=True,
-                content=content,
-                logprobs=parsed_logprobs,
-                uncertainty=uncertainty,
-                raw_choice=raw_choice,
-                cost_usd=cost_usd,
-                tokens_used=total_tokens,
-                temperature=temperature,
-                timestamp=datetime.now().isoformat()
-            )
-
-        except Exception as e:
-            return self._create_error_response(model_id, temperature, f"Response parsing error: {str(e)}")
-
-    def _calculate_uncertainty(self, probabilities: Dict[str, float]) -> float:
-        """Calculate uncertainty as normalized entropy."""
-        if not probabilities:
-            return 1.0
-
-        # Normalize probabilities
-        total_prob = sum(probabilities.values())
-        if total_prob == 0:
-            return 1.0
-
-        normalized_probs = [p / total_prob for p in probabilities.values()]
-
-        # Calculate entropy
-        entropy = -sum(p * np.log2(p + 1e-10) for p in normalized_probs if p > 0)
-
-        # Normalize by max possible entropy
-        max_entropy = np.log2(len(probabilities))
-        if max_entropy == 0:
-            return 1.0
-
-        normalized_entropy = entropy / max_entropy
-        return min(1.0, max(0.0, normalized_entropy))
-
-    def _create_error_response(self, model_id: str, temperature: float, error_msg: str) -> ModelResponse:
-        """Create error response."""
-        return ModelResponse(
-            model_id=model_id,
-            success=False,
-            content="",
-            logprobs=None,
-            uncertainty=1.0,  # Maximum uncertainty for errors
-            raw_choice="",
-            cost_usd=0.0,
-            tokens_used=0,
-            temperature=temperature,
-            error=error_msg,
-            timestamp=datetime.now().isoformat()
-        )
+        # Should not reach here, but just in case
+        return self._create_api_error_response("Unexpected error in retry loop")
 
     def _wait_if_needed(self):
         """Wait if necessary to respect rate limits."""
@@ -274,6 +194,45 @@ class MultiModelEngine:
 
         self.last_request_time = time.time()
 
+    def _create_api_error_response(self, error_message: str) -> Dict:
+        """
+        Create error response dictionary for API failures.
+        
+        Args:
+            error_message: Error description
+            
+        Returns:
+            Error response dictionary
+        """
+        return {
+            "error": {"message": error_message},
+            "choices": [],
+            "usage": {"total_tokens": 0}
+        }
+
     def get_total_cost(self) -> float:
         """Get total cost incurred so far."""
         return self.total_cost
+
+    def reset_cost_tracking(self):
+        """Reset cost tracking to zero."""
+        self.total_cost = 0.0
+        logger.info("Cost tracking reset to $0.00")
+
+    def get_rate_limit_status(self) -> Dict[str, Any]:
+        """
+        Get current rate limiting status.
+        
+        Returns:
+            Dictionary with rate limiting information
+        """
+        current_time = time.time()
+        time_since_last = current_time - self.last_request_time
+        
+        return {
+            "requests_per_minute": 60.0 / self.min_interval,
+            "min_interval_seconds": self.min_interval,
+            "time_since_last_request": time_since_last,
+            "ready_for_next_request": time_since_last >= self.min_interval,
+            "seconds_until_ready": max(0, self.min_interval - time_since_last)
+        }
