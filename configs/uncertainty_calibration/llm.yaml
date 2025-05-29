@@ -1,5 +1,5 @@
 # configs/uncertainty_calibration/llm.yaml
-# Configuration for LLM Uncertainty Calibration Pipeline
+# Configuration for LLM Uncertainty Calibration Pipeline with Caching
 
 # Enable/disable uncertainty calibration
 enabled: true
@@ -7,6 +7,12 @@ enabled: true
 # Output directory for calibration data and models
 output_dir: "data/uncertainty_calibration"
 model_output_dir: "models/uncertainty_calibration"
+
+# Cache Configuration
+cache:
+  enabled: true
+  directory: "cache"
+  clear_on_startup: false
 
 # API Configuration (reuse from llm_augmentation)
 api:
@@ -66,6 +72,23 @@ data_collection:
   level_3:
     enabled: true
     max_samples: 30
+
+# Response Parsing Configuration
+response_parsing:
+  answer_extraction:
+    primary_method: "structured_text"  # Look for "Answer:" section
+    fallback_method: "pattern_matching"  # Regex patterns
+    require_reasoning_section: false  # Optional validation
+  
+  uncertainty_calculation:
+    method: "answer_specific"  # Use only answer token logprobs
+    valid_answers_only: true  # Filter logprobs to valid answer set
+    fallback_to_uniform: true  # If no valid logprobs found
+  
+  validation:
+    check_answer_format: true
+    check_reasoning_present: false  # Optional
+    log_parsing_failures: true
 
 # Feature Engineering Configuration
 feature_engineering:
