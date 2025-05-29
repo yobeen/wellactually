@@ -3,8 +3,12 @@
 Uncertainty Calibration Package
 
 LightGBM-based uncertainty calibration framework for aggregating
-heterogeneous uncertainty measures from multiple LLMs.
+heterogeneous uncertainty measures from multiple LLMs with caching support.
 """
+
+from .cache_manager import (
+    CacheManager
+)
 
 from .model_metadata import (
     MODEL_PARAMS,

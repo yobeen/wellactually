@@ -1,7 +1,7 @@
 # src/uncertainty_calibration/data_collection.py
 #!/usr/bin/env python3
 """
-Data collection pipeline for uncertainty calibration - FIXED VERSION.
+Data collection pipeline for uncertainty calibration with cache support.
 Collects LLM responses across temperature sweeps for training data.
 """
 import pandas as pd
@@ -38,7 +38,7 @@ class CalibrationDataPoint:
 
 class UncertaintyDataCollector:
     """
-    Collects LLM responses for uncertainty calibration training.
+    Collects LLM responses for uncertainty calibration training with caching support.
     """
 
     def __init__(self, config, models_subset: Optional[List[str]] = None):
@@ -81,26 +81,33 @@ class UncertaintyDataCollector:
 
             logger.info(f"Processing question {idx} (Level {level})")
 
-            # Query all models at all temperatures
-            for model_id in self.models:
-                for temperature in temperatures:
-                    try:
-                        response = self.engine.query_single_model_with_temperature(
-                            model_id, prompt, temperature
+        # Query all models at all temperatures with caching
+        for model_id in self.models:
+            for temperature in temperatures:
+                try:
+                    response = self.engine.query_single_model_with_temperature(
+                        model_id, prompt, temperature, level  # Pass level for parsing
+                    )
+
+                    if response.success:
+                        data_point = self._create_calibration_datapoint(
+                            row, idx, level, response, correct_answer
                         )
+                        data_points.append(data_point)
+                    else:
+                        logger.warning(f"Failed query: {model_id} temp={temperature} error={response.error}")
 
-                        if response.success:
-                            data_point = self._create_calibration_datapoint(
-                                row, idx, level, response, correct_answer
-                            )
-                            data_points.append(data_point)
-                        else:
-                            logger.warning(f"Failed query: {model_id} temp={temperature} error={response.error}")
-
-                    except Exception as e:
-                        logger.warning(f"Error querying {model_id} at temp {temperature}: {e}")
+                except Exception as e:
+                    logger.warning(f"Error querying {model_id} at temp {temperature}: {e}")
 
         logger.info(f"Collected {len(data_points)} total calibration data points")
+        
+        # Print cache statistics
+        cache_stats = self.engine.get_cache_stats()
+        if cache_stats.get('enabled'):
+            logger.info(f"Cache statistics: {cache_stats['total_files']} files, "
+                       f"{cache_stats['total_size_mb']:.2f} MB")
+        
         return data_points
 
     def _process_training_row(self, row: pd.Series, idx: int) -> Tuple[int, List[Dict], str]:
@@ -167,10 +174,10 @@ class UncertaintyDataCollector:
                                       response: ModelResponse, correct_answer: str) -> CalibrationDataPoint:
         """Create calibration data point from model response."""
 
-        # Extract model prediction
-        prediction = response.content.strip()
+        # Extract model prediction from raw_choice (already parsed with structured format)
+        prediction = response.raw_choice.strip()
 
-        # Determine if correct
+        # Determine if correct using the parsed prediction
         is_correct = self._is_prediction_correct(prediction, correct_answer, level)
 
         # Get model metadata
@@ -201,16 +208,15 @@ class UncertaintyDataCollector:
         correct_answer = correct_answer.strip().upper()
 
         if level in [1, 3]:  # A/B/Equal choices
-            # Look for the answer in the prediction text
-            return (correct_answer in prediction or
-                    any(correct_answer in token.upper() for token in prediction.split()))
+            # Direct comparison since prediction should be parsed correctly
+            return prediction == correct_answer
         else:  # Level 2: numeric
             try:
-                # Extract numbers from prediction
-                pred_nums = [int(char) for char in prediction if char.isdigit()]
-                if pred_nums:
-                    pred_num = pred_nums[0]  # Take first number found
-                    correct_num = int(correct_answer)
+                # Both should be numbers for level 2
+                pred_num = int(prediction) if prediction.isdigit() else None
+                correct_num = int(correct_answer) if correct_answer.isdigit() else None
+                
+                if pred_num is not None and correct_num is not None:
                     return pred_num == correct_num
                 return False
             except:
@@ -244,3 +250,11 @@ class UncertaintyDataCollector:
 
         logger.info(f"Saved {len(df)} calibration data points to {output_path}")
         return df
+
+    def get_cache_info(self) -> Dict[str, Any]:
+        """Get cache information from the engine."""
+        return self.engine.get_cache_info()
+
+    def clear_cache(self, model_id: Optional[str] = None):
+        """Clear cache through the engine."""
+        self.engine.clear_cache(model_id)
