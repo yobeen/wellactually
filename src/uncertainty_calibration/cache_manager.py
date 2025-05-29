@@ -38,6 +38,23 @@ class CacheManager:
         else:
             logger.info("Cache manager disabled")
     
+    def _strip_bytes_fields(self, data: Any) -> Any:
+        """
+        Recursively remove 'bytes' fields from dictionary structures.
+        
+        Args:
+            data: Data structure to clean
+            
+        Returns:
+            Cleaned data structure without bytes fields
+        """
+        if isinstance(data, dict):
+            return {k: self._strip_bytes_fields(v) for k, v in data.items() if k != "bytes"}
+        elif isinstance(data, list):
+            return [self._strip_bytes_fields(item) for item in data]
+        else:
+            return data
+    
     def generate_cache_key(self, model_id: str, prompt: List[Dict[str, str]], 
                           temperature: float) -> str:
         """
@@ -142,13 +159,16 @@ class CacheManager:
                 json.dumps(prompt, sort_keys=True).encode('utf-8')
             ).hexdigest()[:16]
             
+            # Strip bytes fields before caching
+            cleaned_response = self._strip_bytes_fields(raw_api_response)
+            
             cache_data = {
                 "cache_key": cache_key,
                 "model_id": model_id,
                 "temperature": temperature,
                 "prompt_hash": prompt_hash,
                 "cached_at": datetime.now().isoformat(),
-                "raw_api_response": raw_api_response
+                "raw_api_response": cleaned_response
             }
             
             # Atomic write using temporary file

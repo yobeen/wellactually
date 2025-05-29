@@ -204,7 +204,7 @@ class Level1PromptGenerator:
         prompt = [
             {
                 "role": "system",
-                "content": "You are an expert evaluating the relative importance of open source repositories to the Ethereum ecosystem. Provide your reasoning and then give a clear answer."
+                "content": "You are an expert evaluating the relative importance of open source repositories to the Ethereum ecosystem. Give a clear answer and then provide your reasoning."
             },
             {
                 "role": "user", 
@@ -218,9 +218,11 @@ Repository B: {url_b}
 
 Please provide your analysis in this format:
 
-Reasoning: [Explain your analysis comparing the two repositories, considering the factors above]
 
-Answer: [A or B or Equal]"""
+Answer: [A or B or Equal]
+Reasoning: [Explain your analysis comparing the two repositories]
+"""
+
             }
         ]
         

@@ -151,7 +151,7 @@ class MultiModelEngine:
             "max_tokens": 10,
             "temperature": temperature,
             "logprobs": True,
-            "top_logprobs": 10
+            "top_logprobs": 5
         }
 
         # Rate limiting

@@ -39,4 +39,4 @@ def load_l1_data(csv_path="data/raw/train.csv"):
     logger.info(f"Loaded {len(l1_df)} Level 1 comparisons")
     logger.info(f"Human label distribution: {l1_df['human_label'].value_counts().to_dict()}")
     
-    return l1_df.head(3)
+    return l1_df.head(30)
