@@ -74,21 +74,26 @@ class ModelAnswerPostprocessor:
             return raw_token
         
         try:
-            if model_family == "llama":
-                # Universal Ġ stripping for Llama family
-                return raw_token.replace("Ġ", "")
+            # Universal space prefix removal for ALL families
+            # Handle both unicode and different encodings of space characters
+            cleaned = raw_token
             
-            elif model_family == "google":
-                # SentencePiece uses ▁ for spaces
-                return raw_token.replace("▁", "")
+            # Try different representations of space prefixes
+            space_prefixes = ["Ġ", "\u0120", "▁", " "]
+            for prefix in space_prefixes:
+                if cleaned.startswith(prefix):
+                    cleaned = cleaned[len(prefix):]
+                    logger.debug(f"{model_family} preprocessing: '{raw_token}' -> '{cleaned}' (removed prefix: '{prefix}')")
+                    break
             
-            elif model_family == "openai":
-                # OpenAI models use regular spaces
-                return raw_token.strip()
+            # Additional family-specific processing if needed
+            if model_family == "google":
+                # SentencePiece might have additional ▁ characters beyond the prefix
+                cleaned = cleaned.replace("▁", "")
+                if cleaned != raw_token:
+                    logger.debug(f"Google additional cleanup: '{raw_token}' -> '{cleaned}'")
             
-            else:
-                # Generic preprocessing - just strip whitespace
-                return raw_token.strip()
+            return cleaned
                 
         except Exception as e:
             logger.warning(f"Preprocessing failed for {model_family}: {e}")

@@ -16,10 +16,8 @@ logger = logging.getLogger(__name__)
 
 # Model-specific provider exceptions
 MODEL_PROVIDER_EXCEPTIONS = {
-    "llama": ["fireworks"],  # Remove fireworks for llama models
-    # Add more exceptions as needed:
-    # "gpt": ["lambda"],
-    # "claude": ["azure"],
+    "llama": ["fireworks"], 
+    "deepseek": ["fireworks"],
 }
 
 class MultiModelEngine:
