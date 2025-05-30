@@ -332,19 +332,25 @@ def create_single_model_plots(results_df: pd.DataFrame, precision_data: pd.DataF
         save_dir: Directory to save plots
         model_name: Model name for plot titles
     """
-    # Set style
+    # Set style with high contrast colors
     plt.style.use('default')
-    sns.set_palette("husl")
+    
+    # Define high-contrast color palette
+    primary_blue = '#1f77b4'
+    vibrant_red = '#d62728'
+    vibrant_green = '#2ca02c'
+    vibrant_orange = '#ff7f0e'
+    deep_purple = '#9467bd'
     
     # 1. Accuracy Analysis Plot
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
     
     # Overall accuracy
-    ax1.bar(['Overall'], [overall_acc], color='skyblue')
-    ax1.set_ylabel('Accuracy')
-    ax1.set_title(f'Overall Accuracy - {model_name}')
+    ax1.bar(['Overall'], [overall_acc], color=primary_blue, edgecolor='black', linewidth=1)
+    ax1.set_ylabel('Accuracy', fontweight='bold')
+    ax1.set_title(f'Overall Accuracy - {model_name}', fontweight='bold')
     ax1.set_ylim(0, 1)
-    ax1.text(0, overall_acc + 0.02, f'{overall_acc:.3f}', ha='center')
+    ax1.text(0, overall_acc + 0.02, f'{overall_acc:.3f}', ha='center', fontweight='bold', fontsize=11)
     
     # Per-class accuracy
     class_acc = {}
@@ -357,9 +363,10 @@ def create_single_model_plots(results_df: pd.DataFrame, precision_data: pd.DataF
     
     classes = list(class_acc.keys())
     accuracies = list(class_acc.values())
-    bars = ax2.bar(classes, accuracies, color=['lightcoral', 'lightgreen', 'lightsalmon'])
-    ax2.set_ylabel('Accuracy')
-    ax2.set_title(f'Per-Class Accuracy - {model_name}')
+    class_colors = [vibrant_red, vibrant_green, vibrant_orange]
+    bars = ax2.bar(classes, accuracies, color=class_colors, edgecolor='black', linewidth=1)
+    ax2.set_ylabel('Accuracy', fontweight='bold')
+    ax2.set_title(f'Per-Class Accuracy - {model_name}', fontweight='bold')
     ax2.set_ylim(0, 1)
     
     # Add count labels
@@ -367,7 +374,7 @@ def create_single_model_plots(results_df: pd.DataFrame, precision_data: pd.DataF
         count = len(results_df[results_df['human_label'] == class_name])
         height = bar.get_height()
         ax2.text(bar.get_x() + bar.get_width()/2, height + 0.02, 
-                f'{height:.3f}\n(n={count})', ha='center', va='bottom')
+                f'{height:.3f}\n(n={count})', ha='center', va='bottom', fontweight='bold', fontsize=10)
     
     plt.tight_layout()
     plt.savefig(save_dir / "l1_accuracy_analysis.png", dpi=300, bbox_inches='tight')
@@ -376,14 +383,16 @@ def create_single_model_plots(results_df: pd.DataFrame, precision_data: pd.DataF
     # 2. Precision-Rejection Curve
     plt.figure(figsize=(10, 6))
     plt.plot(precision_data['rejection_rate'], precision_data['accuracy'], 
-             marker='o', linewidth=2, markersize=6)
-    plt.axhline(y=overall_acc, color='red', linestyle='--', alpha=0.7, 
+             marker='o', linewidth=3, markersize=8, color=primary_blue, markerfacecolor='white',
+             markeredgecolor=primary_blue, markeredgewidth=2)
+    plt.axhline(y=overall_acc, color=vibrant_red, linestyle='--', linewidth=2, alpha=0.8, 
                 label=f'Baseline (no rejection): {overall_acc:.3f}')
-    plt.xlabel('Rejection Rate (%)')
-    plt.ylabel('Accuracy on Remaining Samples')
-    plt.title(f'Precision-Rejection Curve - {model_name}\n(Higher uncertainty samples rejected first)')
+    plt.xlabel('Rejection Rate (%)', fontweight='bold')
+    plt.ylabel('Accuracy on Remaining Samples', fontweight='bold')
+    plt.title(f'Precision-Rejection Curve - {model_name}\n(Higher uncertainty samples rejected first)', 
+              fontweight='bold')
     plt.grid(True, alpha=0.3)
-    plt.legend()
+    plt.legend(fontsize=11, frameon=True, fancybox=True, shadow=True)
     plt.xlim(0, 90)
     plt.ylim(0, 1)
     
@@ -392,7 +401,8 @@ def create_single_model_plots(results_df: pd.DataFrame, precision_data: pd.DataF
         final_acc = precision_data.iloc[-1]['accuracy']
         improvement = final_acc - overall_acc
         plt.text(45, 0.1, f'Max improvement: +{improvement:.3f}', 
-                bbox=dict(boxstyle="round,pad=0.3", facecolor="yellow", alpha=0.7))
+                bbox=dict(boxstyle="round,pad=0.3", facecolor='gold', alpha=0.9, edgecolor='black'),
+                fontweight='bold', fontsize=11)
     
     plt.tight_layout()
     plt.savefig(save_dir / "l1_precision_rejection.png", dpi=300, bbox_inches='tight')
@@ -403,15 +413,15 @@ def create_single_model_plots(results_df: pd.DataFrame, precision_data: pd.DataF
     correct_uncertainty = results_df[results_df['is_correct']]['raw_uncertainty']
     incorrect_uncertainty = results_df[~results_df['is_correct']]['raw_uncertainty']
     
-    plt.hist(correct_uncertainty, bins=20, alpha=0.7, label='Correct Predictions', 
-             color='green', density=True)
-    plt.hist(incorrect_uncertainty, bins=20, alpha=0.7, label='Incorrect Predictions', 
-             color='red', density=True)
+    plt.hist(correct_uncertainty, bins=20, alpha=0.75, label='Correct Predictions', 
+             color=vibrant_green, density=True, edgecolor='black', linewidth=0.5)
+    plt.hist(incorrect_uncertainty, bins=20, alpha=0.75, label='Incorrect Predictions', 
+             color=vibrant_red, density=True, edgecolor='black', linewidth=0.5)
     
-    plt.xlabel('Raw Uncertainty')
-    plt.ylabel('Density')
-    plt.title(f'Uncertainty Distribution by Prediction Correctness - {model_name}')
-    plt.legend()
+    plt.xlabel('Raw Uncertainty', fontweight='bold')
+    plt.ylabel('Density', fontweight='bold')
+    plt.title(f'Uncertainty Distribution by Prediction Correctness - {model_name}', fontweight='bold')
+    plt.legend(fontsize=11, frameon=True, fancybox=True, shadow=True)
     plt.grid(True, alpha=0.3)
     
     plt.tight_layout()
@@ -466,14 +476,19 @@ def create_model_accuracy_comparison(individual_results: Dict, save_dir: Path):
     model_names = list(individual_results.keys())
     overall_accs = [individual_results[model]['overall_accuracy'] for model in model_names]
     
+    # High-contrast color palette for multiple models
+    colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', 
+              '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf']
+    
     # Overall accuracy comparison
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 6))
     
     # Overall accuracy bar plot
-    bars = ax1.bar(range(len(model_names)), overall_accs, color='skyblue')
-    ax1.set_xlabel('Model')
-    ax1.set_ylabel('Overall Accuracy')
-    ax1.set_title('Overall Accuracy Comparison')
+    bars = ax1.bar(range(len(model_names)), overall_accs, 
+                   color=colors[:len(model_names)], edgecolor='black', linewidth=1)
+    ax1.set_xlabel('Model', fontweight='bold')
+    ax1.set_ylabel('Overall Accuracy', fontweight='bold')
+    ax1.set_title('Overall Accuracy Comparison', fontweight='bold')
     ax1.set_xticks(range(len(model_names)))
     ax1.set_xticklabels([name.replace('/', '\n') for name in model_names], rotation=45, ha='right')
     ax1.set_ylim(0, 1)
@@ -481,24 +496,32 @@ def create_model_accuracy_comparison(individual_results: Dict, save_dir: Path):
     # Add value labels
     for i, (bar, acc) in enumerate(zip(bars, overall_accs)):
         ax1.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.01,
-                f'{acc:.3f}', ha='center', va='bottom')
+                f'{acc:.3f}', ha='center', va='bottom', fontweight='bold')
     
     # Per-class accuracy comparison
     class_names = ['A', 'B', 'Equal']
     x = np.arange(len(class_names))
-    width = 0.25
+    width = 0.8 / len(model_names)  # Adjust width based on number of models
     
     for i, model in enumerate(model_names):
         class_acc = individual_results[model]['class_accuracy']
         accuracies = [class_acc[cls] for cls in class_names]
-        ax2.bar(x + i * width, accuracies, width, label=model.replace('/', '-'))
+        bars = ax2.bar(x + i * width, accuracies, width, 
+                      label=model.replace('/', '-'), color=colors[i], 
+                      edgecolor='black', linewidth=0.5)
+        
+        # Add value labels on bars
+        for bar, acc in zip(bars, accuracies):
+            if acc > 0.05:  # Only show label if bar is tall enough
+                ax2.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.01,
+                        f'{acc:.2f}', ha='center', va='bottom', fontsize=8, fontweight='bold')
     
-    ax2.set_xlabel('Class')
-    ax2.set_ylabel('Accuracy')
-    ax2.set_title('Per-Class Accuracy Comparison')
+    ax2.set_xlabel('Class', fontweight='bold')
+    ax2.set_ylabel('Accuracy', fontweight='bold')
+    ax2.set_title('Per-Class Accuracy Comparison', fontweight='bold')
     ax2.set_xticks(x + width * (len(model_names) - 1) / 2)
     ax2.set_xticklabels(class_names)
-    ax2.legend()
+    ax2.legend(frameon=True, fancybox=True, shadow=True)
     ax2.set_ylim(0, 1)
     
     plt.tight_layout()
@@ -509,32 +532,34 @@ def create_uncertainty_distribution_comparison(individual_results: Dict, save_di
     """Create uncertainty distribution comparison plots."""
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 6))
     
-    colors = plt.cm.Set3(np.linspace(0, 1, len(individual_results)))
+    # High-contrast colors
+    colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', 
+              '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf']
     
     # Correct predictions uncertainty distribution
     for i, (model, results) in enumerate(individual_results.items()):
         df = results['results_df']
         correct_uncertainty = df[df['is_correct']]['raw_uncertainty']
-        ax1.hist(correct_uncertainty, bins=15, alpha=0.6, label=model.replace('/', '-'),
-                color=colors[i], density=True)
+        ax1.hist(correct_uncertainty, bins=15, alpha=0.7, label=model.replace('/', '-'),
+                color=colors[i % len(colors)], density=True, edgecolor='black', linewidth=0.5)
     
-    ax1.set_xlabel('Raw Uncertainty')
-    ax1.set_ylabel('Density')
-    ax1.set_title('Uncertainty Distribution - Correct Predictions')
-    ax1.legend()
+    ax1.set_xlabel('Raw Uncertainty', fontweight='bold')
+    ax1.set_ylabel('Density', fontweight='bold')
+    ax1.set_title('Uncertainty Distribution - Correct Predictions', fontweight='bold')
+    ax1.legend(frameon=True, fancybox=True, shadow=True)
     ax1.grid(True, alpha=0.3)
     
     # Incorrect predictions uncertainty distribution
     for i, (model, results) in enumerate(individual_results.items()):
         df = results['results_df']
         incorrect_uncertainty = df[~df['is_correct']]['raw_uncertainty']
-        ax2.hist(incorrect_uncertainty, bins=15, alpha=0.6, label=model.replace('/', '-'),
-                color=colors[i], density=True)
+        ax2.hist(incorrect_uncertainty, bins=15, alpha=0.7, label=model.replace('/', '-'),
+                color=colors[i % len(colors)], density=True, edgecolor='black', linewidth=0.5)
     
-    ax2.set_xlabel('Raw Uncertainty')
-    ax2.set_ylabel('Density')
-    ax2.set_title('Uncertainty Distribution - Incorrect Predictions')
-    ax2.legend()
+    ax2.set_xlabel('Raw Uncertainty', fontweight='bold')
+    ax2.set_ylabel('Density', fontweight='bold')
+    ax2.set_title('Uncertainty Distribution - Incorrect Predictions', fontweight='bold')
+    ax2.legend(frameon=True, fancybox=True, shadow=True)
     ax2.grid(True, alpha=0.3)
     
     plt.tight_layout()
@@ -545,21 +570,30 @@ def create_precision_rejection_comparison(individual_results: Dict, save_dir: Pa
     """Create precision-rejection curve comparison."""
     plt.figure(figsize=(12, 8))
     
-    colors = plt.cm.Set3(np.linspace(0, 1, len(individual_results)))
+    # High-contrast colors and line styles
+    colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', 
+              '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf']
+    line_styles = ['-', '--', '-.', ':', '-', '--', '-.', ':', '-', '--']
+    markers = ['o', 's', '^', 'D', 'v', '<', '>', 'p', '*', 'h']
     
     for i, (model, results) in enumerate(individual_results.items()):
         precision_data = results['precision_data']
         plt.plot(precision_data['rejection_rate'], precision_data['accuracy'],
-                marker='o', linewidth=2, label=model.replace('/', '-'), color=colors[i])
+                marker=markers[i % len(markers)], linewidth=3, markersize=8,
+                label=model.replace('/', '-'), color=colors[i % len(colors)],
+                linestyle=line_styles[i % len(line_styles)], markerfacecolor='white',
+                markeredgecolor=colors[i % len(colors)], markeredgewidth=2)
         
         # Add baseline for this model
         baseline = results['overall_accuracy']
-        plt.axhline(y=baseline, color=colors[i], linestyle='--', alpha=0.5)
+        plt.axhline(y=baseline, color=colors[i % len(colors)], 
+                   linestyle=':', alpha=0.6, linewidth=1)
     
-    plt.xlabel('Rejection Rate (%)')
-    plt.ylabel('Accuracy on Remaining Samples')
-    plt.title('Precision-Rejection Curves Comparison\n(Higher uncertainty samples rejected first)')
-    plt.legend()
+    plt.xlabel('Rejection Rate (%)', fontweight='bold')
+    plt.ylabel('Accuracy on Remaining Samples', fontweight='bold')
+    plt.title('Precision-Rejection Curves Comparison\n(Higher uncertainty samples rejected first)', 
+              fontweight='bold')
+    plt.legend(frameon=True, fancybox=True, shadow=True, loc='best')
     plt.grid(True, alpha=0.3)
     plt.xlim(0, 90)
     plt.ylim(0, 1)
