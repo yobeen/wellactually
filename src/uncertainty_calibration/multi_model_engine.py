@@ -14,6 +14,14 @@ from src.uncertainty_calibration.cache_manager import CacheManager
 
 logger = logging.getLogger(__name__)
 
+# Model-specific provider exceptions
+MODEL_PROVIDER_EXCEPTIONS = {
+    "llama": ["fireworks"],  # Remove fireworks for llama models
+    # Add more exceptions as needed:
+    # "gpt": ["lambda"],
+    # "claude": ["azure"],
+}
+
 class MultiModelEngine:
     """
     Refactored engine for querying multiple LLM models with integrated caching.
@@ -66,6 +74,34 @@ class MultiModelEngine:
         self.total_cost = 0.0
 
         logger.info("MultiModelEngine initialized with OpenRouter API and caching")
+
+    def _filter_providers_for_model(self, model_id: str, providers: List[str]) -> List[str]:
+        """
+        Filter providers based on model-specific exceptions.
+        
+        Args:
+            model_id: Model identifier
+            providers: Original list of providers
+            
+        Returns:
+            Filtered list of providers
+        """
+        if not providers:
+            return providers
+        
+        filtered_providers = providers.copy()
+        model_lower = model_id.lower()
+        
+        for model_pattern, excluded_providers in MODEL_PROVIDER_EXCEPTIONS.items():
+            if model_pattern in model_lower:
+                for excluded in excluded_providers:
+                    # Case insensitive comparison
+                    for provider in filtered_providers[:]:  # Copy list to avoid modification during iteration
+                        if excluded.lower() == provider.lower():
+                            filtered_providers.remove(provider)
+                            logger.debug(f"Removed provider '{provider}' for model '{model_id}' due to exception rule")
+        
+        return filtered_providers
 
     def query_single_model_with_temperature(self, model_id: str, prompt: List[Dict[str, str]],
                                             temperature: float = 0.0) -> ModelResponse:
@@ -153,6 +189,15 @@ class MultiModelEngine:
             "logprobs": True,
             "top_logprobs": 5
         }
+
+        # Add provider filtering if configured
+        if hasattr(self.api_config.openrouter, 'providers') and self.api_config.openrouter.providers:
+            providers = list(self.api_config.openrouter.providers)
+            filtered_providers = self._filter_providers_for_model(model_id, providers)
+            if filtered_providers:
+                payload["provider"] = {
+                    "only": filtered_providers
+                }
 
         # Rate limiting
         self._wait_if_needed()

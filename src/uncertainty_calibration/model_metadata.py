@@ -9,19 +9,30 @@ from typing import Dict, Optional
 
 # Model parameter counts (in billions)
 MODEL_PARAMS = {
-    # Primary models from config
-    "openai/gpt-4o": 200.0,  # Estimated GPT-4o parameters
+    # OpenAI models
+    "openai/gpt-4o": 200.0,  # GPT-4o
+    
+    # Meta LLaMA models
     "meta-llama/llama-4-maverick": 405.0,  # Llama 4 Maverick
+    "meta-llama/llama-3.1-405b-instruct": 405.0,  # Llama 3.1 405B
+    
+    # DeepSeek models
     "deepseek/deepseek-chat": 236.0,  # DeepSeek V3
+    "deepseek/deepseek-chat-v3-0324": 236.0,  # DeepSeek Chat V3
+    "deepseek/deepseek-coder": 33.0,  # DeepSeek Coder V2
+    "deepseek/deepseek-r1-0528": 671.0,  # DeepSeek R1
+    
+    # Qwen models
+    "qwen/qwq-32b-preview": 32.0,  # QwQ 32B
+    "qwen/qwen3-235b-a22b": 235.0,  # Qwen 3 235B
+    
+    # xAI models
     "x-ai/grok-3-beta": 314.0,  # Grok 3 Beta
     
-    # Secondary models
-    "meta-llama/llama-3.1-405b-instruct": 405.0,  # Llama 3.1 405B
-    "qwen/qwq-32b-preview": 32.0,  # QwQ 32B
+    # Mistral models
     "mistralai/mixtral-8x22b-instruct": 176.0,  # Mixtral 8x22B (8*22B)
     
-    # Specialist models
-    "deepseek/deepseek-coder": 33.0,  # DeepSeek Coder V2
+    # Google models
     "google/gemma-3-27b-it": 27.0,  # Gemma 3 27B
 }
 
@@ -31,9 +42,12 @@ MODEL_PROVIDERS = {
     "meta-llama/llama-4-maverick": "meta",
     "meta-llama/llama-3.1-405b-instruct": "meta", 
     "deepseek/deepseek-chat": "deepseek",
+    "deepseek/deepseek-chat-v3-0324": "deepseek",
     "deepseek/deepseek-coder": "deepseek",
+    "deepseek/deepseek-r1-0528": "deepseek",
     "x-ai/grok-3-beta": "xai",
     "qwen/qwq-32b-preview": "alibaba",
+    "qwen/qwen3-235b-a22b": "alibaba",
     "mistralai/mixtral-8x22b-instruct": "mistral",
     "google/gemma-3-27b-it": "google",
 }
@@ -44,9 +58,12 @@ MODEL_ARCHITECTURES = {
     "meta-llama/llama-4-maverick": "transformer",
     "meta-llama/llama-3.1-405b-instruct": "transformer",
     "deepseek/deepseek-chat": "transformer", 
+    "deepseek/deepseek-chat-v3-0324": "transformer",
     "deepseek/deepseek-coder": "transformer",
+    "deepseek/deepseek-r1-0528": "transformer",
     "x-ai/grok-3-beta": "transformer",
     "qwen/qwq-32b-preview": "transformer",
+    "qwen/qwen3-235b-a22b": "transformer",
     "mistralai/mixtral-8x22b-instruct": "mixture_of_experts",
     "google/gemma-3-27b-it": "transformer",
 }

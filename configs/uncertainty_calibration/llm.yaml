@@ -1,5 +1,5 @@
 # configs/uncertainty_calibration/llm.yaml
-# Configuration for LLM Uncertainty Calibration Pipeline with Caching
+# Configuration for LLM Uncertainty Calibration Pipeline with Caching and Provider Filtering
 
 # Enable/disable uncertainty calibration
 enabled: true
@@ -14,7 +14,7 @@ cache:
   directory: "cache"
   clear_on_startup: false
 
-# API Configuration (reuse from llm_augmentation)
+# API Configuration with Provider Filtering Support
 api:
   openrouter:
     base_url: "https://openrouter.ai/api/v1/chat/completions"
@@ -22,7 +22,9 @@ api:
     headers:
       http_referer: "https://github.com/yobeen/wellactually"
       x_title: "wellactually-Uncertainty-Calibration"
-  
+    
+    providers: ["Azure", "Fireworks", "Kluster", "Lambda", "Nebius", "OpenAI", "xAI"]
+
   rate_limiting:
     requests_per_minute: 30  # Reduced for uncertainty calibration
     max_retries: 3
@@ -35,13 +37,17 @@ models:
   primary_models:
     gpt_4o: "openai/gpt-4o"
     llama_4_maverick: "meta-llama/llama-4-maverick"
-    deepseek_v3: "deepseek/deepseek-chat"
     grok_3_beta: "x-ai/grok-3-beta"
     llama_3_1_405b: "meta-llama/llama-3.1-405b-instruct"
-    qwq_32b: "qwen/qwq-32b-preview"
+    QwQ_32b: "qwen/qwq-32b-preview"
+    Qwen3_235b: "qwen/qwen3-235b-a22b"
     mixtral_8x22b: "mistralai/mixtral-8x22b-instruct"
-    deepseek_coder_v2: "deepseek/deepseek-coder"
+    deepseek_chat: "deepseek/deepseek-chat"
+    deepseek_coder: "deepseek/deepseek-coder"
+    deepseek_R1: "deepseek/deepseek-r1-0528"
+    deepseek_chat_V3: "deepseek/deepseek-chat-v3-0324"
     gemma_3_27b: "google/gemma-3-27b-it"
+
 
   secondary_models:
     xyz: "xyz/xyz"
