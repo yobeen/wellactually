@@ -1,7 +1,7 @@
 # src/uncertainty_calibration/response_parser.py
 """
-Enhanced response parser with smart answer token extraction and cache cleaning.
-Fixes critical bug where uncertainty was extracted from wrong token.
+Enhanced response parser with model-specific answer postprocessing integration.
+Fixes tokenization artifacts across different model families.
 """
 import numpy as np
 import re
@@ -10,6 +10,9 @@ from datetime import datetime
 import logging
 from dataclasses import dataclass
 import copy
+
+# Import the new postprocessor
+from src.uncertainty_calibration.model_answer_postprocessor import ModelAnswerPostprocessor
 
 logger = logging.getLogger(__name__)
 
@@ -27,16 +30,16 @@ class ModelResponse:
     temperature: float
     error: Optional[str] = None
     timestamp: str = ""
-    answer_token_info: Optional[Dict] = None  # New: extraction metadata
+    answer_token_info: Optional[Dict] = None
+    normalized_answer: Optional[str] = None  # NEW: Store normalized answer
 
 class AnswerTokenExtractor:
     """
-    Extracts the actual answer token from logprobs instead of using first token.
-    Handles multiple answer formats and provides robust fallback mechanisms.
+    Enhanced answer token extractor with model-specific postprocessing.
     """
     
     def __init__(self):
-        # Answer patterns by level
+        # Answer patterns by level (before normalization)
         self.choice_answers = ["A", "B", "EQUAL", "1", "2"]  # Level 1 & 3
         self.numeric_answers = [str(i) for i in range(1, 11)]  # Level 2: 1-10 scale
         
@@ -51,14 +54,18 @@ class AnswerTokenExtractor:
             "Response:",
             "Choice:"
         ]
+        
+        # Initialize postprocessor
+        self.postprocessor = ModelAnswerPostprocessor()
     
-    def extract_answer_token(self, logprobs_content: List[Dict], 
+    def extract_answer_token(self, logprobs_content: List[Dict], model_id: str,
                            expected_format: str = "choice") -> Tuple[Optional[Dict], Dict]:
         """
-        Extract the actual answer token from logprobs content.
+        Extract answer token from PREPROCESSED logprobs content.
         
         Args:
-            logprobs_content: List of token logprob objects from API
+            logprobs_content: List of ALREADY CLEANED token logprob objects
+            model_id: Model identifier for family-specific processing
             expected_format: "choice" (A/B/Equal), "numeric" (1-10), or "auto"
             
         Returns:
@@ -69,7 +76,9 @@ class AnswerTokenExtractor:
             "pattern_found": None,
             "token_index": None,
             "fallback_used": False,
-            "extraction_confidence": 0.0
+            "extraction_confidence": 0.0,
+            "original_token": None,
+            "normalized_token": None
         }
         
         if not logprobs_content:
@@ -81,29 +90,56 @@ class AnswerTokenExtractor:
         if answer_token:
             extraction_info.update(info)
             extraction_info["method"] = "answer_indicator"
-            return answer_token, extraction_info
+        else:
+            # Strategy 2: Look for bracketed answers [A], [B], etc.
+            answer_token, info = self._find_bracketed_answer(logprobs_content, expected_format)
+            if answer_token:
+                extraction_info.update(info)
+                extraction_info["method"] = "bracketed_answer"
+            else:
+                # Strategy 3: Find direct answer tokens with meaningful alternatives
+                answer_token, info = self._find_direct_answer_token(logprobs_content, expected_format)
+                if answer_token:
+                    extraction_info.update(info)
+                    extraction_info["method"] = "direct_answer"
+                else:
+                    # Strategy 4: Fallback - last resort heuristics
+                    answer_token, info = self._fallback_extraction(logprobs_content, expected_format)
+                    extraction_info.update(info)
+                    extraction_info["method"] = "fallback"
+                    extraction_info["fallback_used"] = True
         
-        # Strategy 2: Look for bracketed answers [A], [B], etc.
-        answer_token, info = self._find_bracketed_answer(logprobs_content, expected_format)
+        # Apply final answer normalization rules if token found
         if answer_token:
-            extraction_info.update(info)
-            extraction_info["method"] = "bracketed_answer"
-            return answer_token, extraction_info
+            raw_token = answer_token.get('token', '')
+            extraction_info["original_token"] = answer_token.get('original_token', raw_token)
+            
+            # Apply final normalization rules (equ → Equal, etc.)
+            try:
+                model_family = self.postprocessor.detect_model_family(model_id)
+                normalized_answer = self.postprocessor.apply_family_rules(
+                    raw_token, model_family, expected_format
+                )
+                
+                # Create normalized token object
+                normalized_token = answer_token.copy()
+                normalized_token['token'] = normalized_answer
+                extraction_info["normalized_token"] = normalized_answer
+                
+                # Validate that normalized answer is valid
+                if self.postprocessor.is_valid_answer(normalized_answer, expected_format):
+                    extraction_info["extraction_confidence"] = max(extraction_info.get("extraction_confidence", 0), 0.8)
+                    return normalized_token, extraction_info
+                else:
+                    # Fallback to original if normalization produces invalid answer
+                    logger.warning(f"Normalization produced invalid answer: {normalized_answer} for {model_id}")
+                    return answer_token, extraction_info
+                    
+            except Exception as e:
+                logger.warning(f"Final normalization failed for {model_id}: {e}")
+                return answer_token, extraction_info
         
-        # Strategy 3: Find direct answer tokens with meaningful alternatives
-        answer_token, info = self._find_direct_answer_token(logprobs_content, expected_format)
-        if answer_token:
-            extraction_info.update(info)
-            extraction_info["method"] = "direct_answer"
-            return answer_token, extraction_info
-        
-        # Strategy 4: Fallback - last resort heuristics
-        answer_token, info = self._fallback_extraction(logprobs_content, expected_format)
-        extraction_info.update(info)
-        extraction_info["method"] = "fallback"
-        extraction_info["fallback_used"] = True
-        
-        return answer_token, extraction_info
+        return None, extraction_info
     
     def _find_answer_after_indicator(self, logprobs_content: List[Dict], 
                                    expected_format: str) -> Tuple[Optional[Dict], Dict]:
@@ -121,7 +157,7 @@ class AnswerTokenExtractor:
                     # Look for answer in next few tokens
                     for j in range(i + 1, min(i + 4, len(logprobs_content))):
                         next_token = logprobs_content[j]
-                        if self._is_valid_answer_token(next_token, expected_format):
+                        if self._is_potential_answer_token(next_token, expected_format):
                             info["token_index"] = j
                             info["extraction_confidence"] = self._calculate_confidence(next_token)
                             return next_token, info
@@ -142,7 +178,7 @@ class AnswerTokenExtractor:
                 match = re.match(pattern, token_text)
                 if match:
                     answer = match.group(1)
-                    if self._is_valid_answer(answer, expected_format):
+                    if self._is_potential_answer(answer, expected_format):
                         info["pattern_found"] = f"bracketed_{pattern}"
                         info["token_index"] = i
                         info["extraction_confidence"] = self._calculate_confidence(token_obj)
@@ -152,14 +188,13 @@ class AnswerTokenExtractor:
     
     def _find_direct_answer_token(self, logprobs_content: List[Dict], 
                                 expected_format: str) -> Tuple[Optional[Dict], Dict]:
-        """Find answer tokens directly (A, B, Equal) with meaningful alternatives."""
+        """Find answer tokens directly with meaningful alternatives."""
         info = {"pattern_found": "direct", "token_index": None}
         
         candidates = []
         
         for i, token_obj in enumerate(logprobs_content):
-            if self._is_valid_answer_token(token_obj, expected_format):
-                # Check if this token has meaningful alternatives in top_logprobs
+            if self._is_potential_answer_token(token_obj, expected_format):
                 confidence = self._calculate_confidence(token_obj)
                 alternatives_quality = self._assess_alternatives_quality(token_obj, expected_format)
                 
@@ -167,7 +202,6 @@ class AnswerTokenExtractor:
                 candidates.append((token_obj, i, score))
         
         if candidates:
-            # Take the candidate with the best score
             best_token, best_index, best_score = max(candidates, key=lambda x: x[2])
             info["token_index"] = best_index
             info["extraction_confidence"] = best_score
@@ -183,7 +217,7 @@ class AnswerTokenExtractor:
         # Take the last token that looks like an answer
         for i in reversed(range(len(logprobs_content))):
             token_obj = logprobs_content[i]
-            if self._is_valid_answer_token(token_obj, expected_format):
+            if self._is_potential_answer_token(token_obj, expected_format):
                 info["token_index"] = i
                 return token_obj, info
         
@@ -201,28 +235,29 @@ class AnswerTokenExtractor:
         indicator_clean = indicator.strip().upper().rstrip(':')
         return token_clean == indicator_clean
     
-    def _is_valid_answer_token(self, token_obj: Dict, expected_format: str) -> bool:
-        """Check if token object represents a valid answer."""
-        token_text = token_obj.get('token', '').strip().upper()
-        return self._is_valid_answer(token_text, expected_format)
+    def _is_potential_answer_token(self, token_obj: Dict, expected_format: str) -> bool:
+        """Check if token object represents a potential answer (works on CLEANED tokens)."""
+        token_text = token_obj.get('token', '').strip()
+        return self._is_potential_answer(token_text, expected_format)
     
-    def _is_valid_answer(self, token_text: str, expected_format: str) -> bool:
-        """Check if token text is a valid answer for the expected format."""
+    def _is_potential_answer(self, token_text: str, expected_format: str) -> bool:
+        """Check if token text could be an answer (works on CLEANED tokens)."""
         token_clean = token_text.strip().upper().rstrip('.,!?:')
         
         if expected_format == "choice":
-            return token_clean in ["A", "B", "EQUAL", "1", "2"]
+            # Now works on cleaned tokens - should find "A", "B", "Equal" directly
+            # Also include "EQU" for the equ → Equal rule
+            return token_clean in ["A", "B", "EQUAL", "1", "2", "EQU", "EQ"]
         elif expected_format == "numeric":
-            return token_clean in self.numeric_answers
+            return token_clean in [str(i) for i in range(1, 11)]
         else:  # auto
-            return (token_clean in self.choice_answers or 
-                   token_clean in self.numeric_answers)
+            return token_clean in (["A", "B", "EQUAL", "1", "2", "EQU", "EQ"] + 
+                                 [str(i) for i in range(1, 11)])
     
     def _calculate_confidence(self, token_obj: Dict) -> float:
         """Calculate confidence score for a token based on its logprob."""
         logprob = token_obj.get('logprob', -10.0)
-        # Convert logprob to confidence (higher logprob = higher confidence)
-        confidence = min(1.0, max(0.0, (logprob + 5.0) / 5.0))  # Normalize roughly
+        confidence = min(1.0, max(0.0, (logprob + 5.0) / 5.0))
         return confidence
     
     def _assess_alternatives_quality(self, token_obj: Dict, expected_format: str) -> float:
@@ -230,52 +265,33 @@ class AnswerTokenExtractor:
         top_logprobs = token_obj.get('top_logprobs', [])
         
         if not top_logprobs:
-            return 0.1  # Low quality if no alternatives
+            return 0.1
         
-        # Count how many alternatives are valid answers
         valid_alternatives = 0
         for alt in top_logprobs:
             alt_token = alt.get('token', '').strip().upper()
-            if self._is_valid_answer(alt_token, expected_format):
+            if self._is_potential_answer(alt_token, expected_format):
                 valid_alternatives += 1
         
-        # Quality score based on number of valid alternatives
         if len(top_logprobs) == 0:
             return 0.1
         
         quality = valid_alternatives / len(top_logprobs)
-        return max(0.2, quality)  # Minimum quality threshold
+        return max(0.2, quality)
 
 
 class ResponseParser:
     """
-    Enhanced response parser with smart answer token extraction and cache cleaning.
+    Enhanced response parser with model-specific answer postprocessing.
     """
     
     def __init__(self, cost_per_1k_tokens: float = 0.01):
-        """
-        Initialize response parser.
-        
-        Args:
-            cost_per_1k_tokens: Approximate cost per 1000 tokens
-        """
         self.cost_per_1k_tokens = cost_per_1k_tokens
         self.answer_extractor = AnswerTokenExtractor()
     
     def parse_response(self, model_id: str, api_response: Dict, 
                       temperature: float, expected_answer_format: str = "choice") -> ModelResponse:
-        """
-        Parse API response into ModelResponse object with enhanced answer extraction.
-        
-        Args:
-            model_id: Model identifier
-            api_response: Raw API response dictionary
-            temperature: Temperature used for request
-            expected_answer_format: "choice", "numeric", or "auto"
-            
-        Returns:
-            ModelResponse object with parsed data
-        """
+        """Parse API response with enhanced answer extraction and normalization."""
         try:
             if self._is_successful_response(api_response):
                 return self._parse_successful_response(
@@ -314,7 +330,7 @@ class ResponseParser:
     
     def _parse_successful_response(self, model_id: str, data: Dict, 
                                  temperature: float, expected_answer_format: str) -> ModelResponse:
-        """Parse successful API response into ModelResponse."""
+        """Parse successful API response with enhanced extraction."""
         
         # Extract basic response data
         choice = data.get('choices', [{}])[0]
@@ -324,10 +340,13 @@ class ResponseParser:
         # Extract and process logprobs with enhanced answer extraction
         logprobs_data = choice.get('logprobs')
         parsed_logprobs, answer_token_info = self._extract_logprobs_enhanced(
-            logprobs_data, expected_answer_format
+            logprobs_data, model_id, expected_answer_format  # Pass model_id
         )
         uncertainty = self._calculate_uncertainty(parsed_logprobs)
         raw_choice = self._extract_raw_choice(parsed_logprobs, content, answer_token_info)
+        
+        # Extract normalized answer if available
+        normalized_answer = answer_token_info.get("normalized_token")
         
         # Extract usage and calculate cost
         usage_info = self._extract_usage_info(data)
@@ -344,39 +363,38 @@ class ResponseParser:
             tokens_used=usage_info['total_tokens'],
             temperature=temperature,
             timestamp=datetime.now().isoformat(),
-            answer_token_info=answer_token_info
+            answer_token_info=answer_token_info,
+            normalized_answer=normalized_answer  # NEW
         )
     
-    def _extract_logprobs_enhanced(self, logprobs_data: Optional[Dict], 
+    def _extract_logprobs_enhanced(self, logprobs_data: Optional[Dict], model_id: str,
                                  expected_answer_format: str) -> Tuple[Dict[str, float], Dict]:
-        """
-        Enhanced logprobs extraction that finds the actual answer token.
-        
-        Args:
-            logprobs_data: Logprobs section from API response
-            expected_answer_format: Expected format of the answer
-            
-        Returns:
-            (parsed_logprobs, answer_token_info)
-        """
+        """Enhanced logprobs extraction with model-specific postprocessing."""
         parsed_logprobs = {}
         answer_token_info = {
             "extraction_success": False,
             "method": None,
             "token_found": None,
-            "alternatives_count": 0
+            "alternatives_count": 0,
+            "model_family": None,
+            "preprocessing_applied": False
         }
         
         if not logprobs_data or 'content' not in logprobs_data:
             return parsed_logprobs, answer_token_info
         
-        token_logprobs = logprobs_data['content']
-        if not token_logprobs:
+        raw_token_logprobs = logprobs_data['content']
+        if not raw_token_logprobs:
             return parsed_logprobs, answer_token_info
         
-        # Use enhanced answer token extraction
+        # CRITICAL FIX: Apply preprocessing to ALL tokens BEFORE extraction
+        preprocessed_token_logprobs = self._preprocess_all_tokens(raw_token_logprobs, model_id)
+        answer_token_info["preprocessing_applied"] = True
+        answer_token_info["model_family"] = self.answer_extractor.postprocessor.detect_model_family(model_id)
+        
+        # Use enhanced answer token extraction on CLEANED tokens
         answer_token, extraction_info = self.answer_extractor.extract_answer_token(
-            token_logprobs, expected_answer_format
+            preprocessed_token_logprobs, model_id, expected_answer_format
         )
         
         answer_token_info.update(extraction_info)
@@ -405,48 +423,84 @@ class ResponseParser:
         
         else:
             # Fallback to old behavior if extraction completely fails
-            logger.warning(f"Answer token extraction failed, falling back to first token")
+            logger.warning(f"Answer token extraction failed for {model_id}, falling back to first token")
             answer_token_info["method"] = "fallback_first_token"
             
-            first_token = token_logprobs[0]
-            top_logprobs = first_token.get('top_logprobs', [])
-            
-            for token_data in top_logprobs:
-                token = token_data.get('token', '').strip()
-                logprob = token_data.get('logprob', -float('inf'))
+            if preprocessed_token_logprobs:
+                first_token = preprocessed_token_logprobs[0]
+                top_logprobs = first_token.get('top_logprobs', [])
                 
-                if logprob > -float('inf') and token:
-                    parsed_logprobs[token] = np.exp(logprob)
+                for token_data in top_logprobs:
+                    token = token_data.get('token', '').strip()
+                    logprob = token_data.get('logprob', -float('inf'))
+                    
+                    if logprob > -float('inf') and token:
+                        parsed_logprobs[token] = np.exp(logprob)
         
         return parsed_logprobs, answer_token_info
     
-    def _calculate_uncertainty(self, probabilities: Dict[str, float]) -> float:
+    def _preprocess_all_tokens(self, token_logprobs: List[Dict], model_id: str) -> List[Dict]:
         """
-        Calculate uncertainty as normalized entropy.
+        Apply model-family preprocessing to ALL tokens before extraction.
+        This is the critical fix - clean tokens BEFORE trying to find answers.
+        """
+        model_family = self.answer_extractor.postprocessor.detect_model_family(model_id)
+        preprocessed_tokens = []
         
-        Args:
-            probabilities: Dictionary mapping tokens to probabilities
+        for token_obj in token_logprobs:
+            if not isinstance(token_obj, dict):
+                preprocessed_tokens.append(token_obj)
+                continue
             
-        Returns:
-            Uncertainty score between 0.0 and 1.0
-        """
-        if not probabilities:
-            return 1.0  # Maximum uncertainty for empty probabilities
+            # Create copy to avoid modifying original
+            cleaned_token_obj = token_obj.copy()
+            raw_token = token_obj.get('token', '')
+            
+            # Apply family-specific preprocessing
+            cleaned_token = self.answer_extractor.postprocessor.preprocess_token_by_family(
+                raw_token, model_family
+            )
+            
+            # Update token while preserving all other fields (logprob, top_logprobs, etc.)
+            cleaned_token_obj['token'] = cleaned_token
+            cleaned_token_obj['original_token'] = raw_token  # Keep for debugging
+            
+            # Also clean tokens in top_logprobs
+            if 'top_logprobs' in cleaned_token_obj:
+                cleaned_top_logprobs = []
+                for top_token_data in cleaned_token_obj['top_logprobs']:
+                    if isinstance(top_token_data, dict):
+                        cleaned_top_token = top_token_data.copy()
+                        raw_top_token = top_token_data.get('token', '')
+                        cleaned_top_token['token'] = self.answer_extractor.postprocessor.preprocess_token_by_family(
+                            raw_top_token, model_family
+                        )
+                        cleaned_top_token['original_token'] = raw_top_token
+                        cleaned_top_logprobs.append(cleaned_top_token)
+                    else:
+                        cleaned_top_logprobs.append(top_token_data)
+                cleaned_token_obj['top_logprobs'] = cleaned_top_logprobs
+            
+            preprocessed_tokens.append(cleaned_token_obj)
         
-        # Normalize probabilities to sum to 1
+        return preprocessed_tokens
+    
+    def _calculate_uncertainty(self, probabilities: Dict[str, float]) -> float:
+        """Calculate uncertainty as normalized entropy."""
+        if not probabilities:
+            return 1.0
+        
         total_prob = sum(probabilities.values())
         if total_prob == 0:
             return 1.0
         
         normalized_probs = [p / total_prob for p in probabilities.values()]
         
-        # Calculate entropy
         entropy = 0.0
         for p in normalized_probs:
             if p > 0:
-                entropy -= p * np.log2(p + 1e-10)  # Add small epsilon to avoid log(0)
+                entropy -= p * np.log2(p + 1e-10)
         
-        # Normalize by maximum possible entropy
         max_entropy = np.log2(len(probabilities))
         if max_entropy == 0:
             return 1.0
@@ -456,17 +510,12 @@ class ResponseParser:
     
     def _extract_raw_choice(self, probabilities: Dict[str, float], 
                           content: str, answer_token_info: Dict) -> str:
-        """
-        Extract the raw choice from probabilities or content.
+        """Extract the raw choice with preference for normalized answer."""
         
-        Args:
-            probabilities: Token probabilities
-            content: Response content as fallback
-            answer_token_info: Information about answer token extraction
-            
-        Returns:
-            Raw choice string
-        """
+        # Use normalized answer if available and valid
+        if answer_token_info.get("normalized_token"):
+            return answer_token_info["normalized_token"]
+        
         # Use extracted answer token if available
         if answer_token_info.get("extraction_success") and answer_token_info.get("token_found"):
             return answer_token_info["token_found"]
@@ -482,7 +531,6 @@ class ResponseParser:
         """Parse choice from response content as final fallback."""
         content_upper = content.upper()
         
-        # Look for common answer patterns
         patterns = [
             r"ANSWER:\s*([AB]|EQUAL|[1-9]|10)",
             r"ANSWER\s*([AB]|EQUAL|[1-9]|10)",
@@ -496,22 +544,13 @@ class ResponseParser:
             if match:
                 return match.group(1)
         
-        # Last resort: look for standalone A, B, Equal at end of response
         if content_upper.strip().endswith((' A', ' B', ' EQUAL')):
             return content_upper.strip()[-1] if content_upper.strip().endswith((' A', ' B')) else 'EQUAL'
         
-        return content  # Return full content if nothing else works
+        return content
     
     def _extract_usage_info(self, data: Dict) -> Dict[str, int]:
-        """
-        Extract token usage information from API response.
-        
-        Args:
-            data: API response data
-            
-        Returns:
-            Dictionary with usage information
-        """
+        """Extract token usage information from API response."""
         usage = data.get('usage', {})
         return {
             'total_tokens': usage.get('total_tokens', 0),
@@ -520,36 +559,18 @@ class ResponseParser:
         }
     
     def _calculate_cost(self, total_tokens: int) -> float:
-        """
-        Calculate cost based on token usage.
-        
-        Args:
-            total_tokens: Total tokens used
-            
-        Returns:
-            Cost in USD
-        """
+        """Calculate cost based on token usage."""
         return total_tokens * self.cost_per_1k_tokens / 1000.0
     
     def _create_error_response(self, model_id: str, temperature: float, 
                              error_msg: str) -> ModelResponse:
-        """
-        Create error response for failed requests.
-        
-        Args:
-            model_id: Model identifier
-            temperature: Temperature used
-            error_msg: Error message
-            
-        Returns:
-            ModelResponse with error information
-        """
+        """Create error response for failed requests."""
         return ModelResponse(
             model_id=model_id,
             success=False,
             content="",
             logprobs=None,
-            uncertainty=1.0,  # Maximum uncertainty for errors
+            uncertainty=1.0,
             raw_choice="",
             cost_usd=0.0,
             tokens_used=0,
@@ -558,35 +579,3 @@ class ResponseParser:
             timestamp=datetime.now().isoformat(),
             answer_token_info={"extraction_success": False, "method": "error"}
         )
-
-
-# Convenience functions for backward compatibility
-def parse_response(model_id: str, api_response: Dict, temperature: float, 
-                  expected_answer_format: str = "choice") -> ModelResponse:
-    """
-    Convenience function to parse a single response.
-    
-    Args:
-        model_id: Model identifier
-        api_response: Raw API response
-        temperature: Temperature used
-        expected_answer_format: Expected format of the answer
-        
-    Returns:
-        Parsed ModelResponse
-    """
-    parser = ResponseParser()
-    return parser.parse_response(model_id, api_response, temperature, expected_answer_format)
-
-def calculate_uncertainty(probabilities: Dict[str, float]) -> float:
-    """
-    Convenience function to calculate uncertainty from probabilities.
-    
-    Args:
-        probabilities: Token probabilities
-        
-    Returns:
-        Uncertainty score
-    """
-    parser = ResponseParser()
-    return parser._calculate_uncertainty(probabilities)

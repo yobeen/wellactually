@@ -1,6 +1,6 @@
 # src/uncertainty_calibration/__init__.py
 """
-Uncertainty Calibration Package - Simplified imports for validation
+Uncertainty Calibration Package - Enhanced with Model-Specific Postprocessing
 """
 
 # Core components needed for L1 validation
@@ -25,4 +25,9 @@ from src.uncertainty_calibration.model_metadata import (
 from src.uncertainty_calibration.response_parser import (
     ModelResponse,
     ResponseParser
+)
+
+from src.uncertainty_calibration.model_answer_postprocessor import (
+    ModelAnswerPostprocessor,
+    normalize_answer_token
 )
