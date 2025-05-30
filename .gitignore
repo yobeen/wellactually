@@ -87,6 +87,9 @@ data/external/*
 !data/raw/.gitkeep
 !data/processed/.gitkeep
 !data/augmented/.gitkeep
+cache/
+plots/
+results/
 
 # Model files
 models/*.pkl

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # scripts/validate_l1.py
 """
-L1 validation script using existing uncertainty calibration infrastructure.
+Enhanced L1 validation script with voting analysis support.
 Fixed to use OmegaConf for configuration compatibility.
 """
 
@@ -14,7 +14,8 @@ from omegaconf import OmegaConf
 
 from src.uncertainty_calibration.data_collection import UncertaintyDataCollector
 from src.utils.data_loader import load_l1_data
-from src.uncertainty_calibration.l1_analysis import run_analysis
+from src.uncertainty_calibration.l1_core_analysis import run_analysis
+from src.uncertainty_calibration.l1_voting_analysis import run_voting_analysis
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -31,9 +32,9 @@ def load_config():
     return config
 
 def main():
-    """Main validation function."""
-    print("L1 Prediction Validation Analysis")
-    print("=" * 40)
+    """Main validation function with voting analysis support."""
+    print("L1 Prediction Validation Analysis with Voting")
+    print("=" * 50)
     
     # Check API key
     if not os.getenv("OPENROUTER_API_KEY"):
@@ -64,18 +65,20 @@ def main():
         print(f"Failed to load L1 data: {e}")
         return 1
     
-    # Initialize data collector with single model
+    # Initialize data collector with multiple models for voting
     print("\n2. Initializing data collector...")
     test_models = ["openai/gpt-4o",
             "meta-llama/llama-4-maverick",
             "deepseek/deepseek-chat",
             "x-ai/grok-3-beta",
-            "meta-llama/llama-3.1-405b-instruct",
-            "qwen/qwq-32b-preview",
             "mistralai/mixtral-8x22b-instruct",
-           # "deepseek/deepseek-coder",
-            "google/gemma-3-27b-it"
+            "google/gemma-3-27b-it",
+            "deepseek/deepseek-chat-v3-0324"
         ] 
+    # test_models = [
+    #         #"deepseek/deepseek-r1-0528",
+    #         #"qwen/qwen3-235b-a22b",
+    #     ] 
     
     try:
         collector = UncertaintyDataCollector(config, models_subset=test_models)
@@ -85,9 +88,9 @@ def main():
         print(f"Failed to initialize data collector: {e}")
         return 1
     
-    # Collect predictions with temperature 0.7
-    print("\n3. Querying LLM predictions...")
-    print(f"Model: {test_models[0]}")
+    # Collect predictions
+    print(f"\n4. Querying LLM predictions...")
+    print(f"Models: {test_models}")
     print(f"Temperature: 0.7")
     print(f"Processing {len(l1_data)} comparisons...")
     
@@ -110,10 +113,29 @@ def main():
         traceback.print_exc()
         return 1
     
-    # Run analysis
-    print("\n4. Running analysis...")
+    # Run analysis based on choice
     try:
-        run_analysis(calibration_data_points)
+        shared_results_dir = None
+        
+        print("\n5a. Running individual model analysis...")
+        individual_results_dir = run_analysis(calibration_data_points)
+        shared_results_dir = individual_results_dir
+        print(f"Individual analysis results saved to: {individual_results_dir}")
+        
+        print("\n5b. Running voting analysis...")
+        # Ask for rejection rates
+        print("2. Custom range")
+        
+        rejection_rates = None  # Use default
+        
+        voting_results_dir = run_voting_analysis(
+            calibration_data_points, 
+            rejection_rates=rejection_rates
+        )
+        print(f"Voting analysis results saved to: {voting_results_dir}")
+        if shared_results_dir is None:
+            shared_results_dir = voting_results_dir
+        
     except Exception as e:
         print(f"Error during analysis: {e}")
         import traceback
@@ -121,6 +143,26 @@ def main():
         return 1
     
     print("\nValidation complete!")
+    
+    # Summary of what was done
+    print("\nSummary:")
+    print("✓ Individual model analysis completed")
+    print("✓ Voting analysis with per-model rejection completed")
+    
+    if shared_results_dir:
+        print(f"\n📁 All results saved to: {shared_results_dir}")
+        print("   ├── {model_dirs}/     # Individual model results")
+        print("   ├── comparison/      # Cross-model comparisons") 
+        print("   └── voting/          # Voting analysis results")
+    
+    print("\nGenerated outputs:")
+    print("- Accuracy analysis plots")
+    print("- Precision-rejection curves")
+    print("- Uncertainty distribution analysis")
+    print("- Voting accuracy curves (dual-mode evaluation)")
+    print("- Voting efficiency analysis")
+    print("- Model contribution statistics")
+    
     return 0
 
 if __name__ == "__main__":
