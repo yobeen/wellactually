@@ -1,7 +1,7 @@
 # src/uncertainty_calibration/level1_prompts.py
 """
 Level 1 Prompt Generator with structured Reasoning/Answer format.
-Generates prompts for seed repository comparisons (Level 1).
+Generates prompts for seed repository comparisons (Level 1) with variation support.
 """
 
 import logging
@@ -19,7 +19,7 @@ class Level1PromptGenerator:
     Generates prompts for Level 1 comparisons between seed repositories.
     
     Level 1 focuses on comparing seed repositories for their relative importance
-    to the Ethereum ecosystem using structured reasoning format.
+    to the Ethereum ecosystem using structured reasoning format with prompt variations.
     """
     
     def __init__(self, config):
@@ -179,6 +179,31 @@ class Level1PromptGenerator:
                                repo_b: Dict[str, Any]) -> List[Dict[str, str]]:
         """
         Create a comparison prompt for two repositories with structured format.
+        Dispatches to the appropriate prompt variation based on configuration.
+        
+        Args:
+            repo_a: First repository dictionary
+            repo_b: Second repository dictionary
+            
+        Returns:
+            List of message dictionaries in OpenAI format
+        """
+        # Get prompt variation from config
+        l1_prompts_config = getattr(self.config, 'l1_prompts', {})
+        variation = l1_prompts_config.get('variation', 'default')
+        
+        # Dispatch to appropriate prompt function
+        if variation == 'v1':
+            return self.create_comparison_prompt_v1(repo_a, repo_b)
+        elif variation == 'v2':
+            return self.create_comparison_prompt_v2(repo_a, repo_b)
+        else:
+            return self.create_comparison_prompt_default(repo_a, repo_b)
+    
+    def create_comparison_prompt_default(self, repo_a: Dict[str, Any], 
+                                       repo_b: Dict[str, Any]) -> List[Dict[str, str]]:
+        """
+        Create the default comparison prompt for two repositories.
         
         Args:
             repo_a: First repository dictionary
@@ -227,6 +252,143 @@ Reasoning: [Explain your analysis comparing the two repositories]
         ]
         
         return prompt
+    
+    def create_comparison_prompt_v1(self, repo_a: Dict[str, Any], 
+                                  repo_b: Dict[str, Any]) -> List[Dict[str, str]]:
+        """
+        Create comparison prompt variation 1 (placeholder).
+        
+        Args:
+            repo_a: First repository dictionary
+            repo_b: Second repository dictionary
+            
+        Returns:
+            List of message dictionaries in OpenAI format
+        """
+        # Validate repository data
+        for repo, name in [(repo_a, 'repo_a'), (repo_b, 'repo_b')]:
+            if not isinstance(repo, dict):
+                raise ValueError(f"{name} must be a dictionary")
+            if 'url' not in repo:
+                raise ValueError(f"{name} missing required 'url' field")
+        
+        # Extract repository information
+        url_a = repo_a['url']
+        url_b = repo_b['url']
+        name_a = repo_a.get('name', self._extract_repo_name(url_a))
+        name_b = repo_b.get('name', self._extract_repo_name(url_b))
+        
+        # Create structured comparison prompt
+        prompt = [
+            {
+                "role": "system",
+                "content": """
+                You are an expert evaluating the relative importance and contribution of open source repositories to the Ethereum ecosystem.
+                Give a clear answer and then provide your reasoning.
+                
+                IMPORTANCE CRITERIA FOR ETHEREUM REPOSITORIES:
+
+Core Protocol Implementation
+
+Description: Measures how critical the repository is to Ethereum's core functioning and protocol implementation
+
+Market Adoption & Network Effects
+
+Description: Evaluates real-world usage, developer adoption, and network share
+Indicators:
+Number of active users/developers
+Market share for clients (% of validators/nodes)
+Download statistics and GitHub stars
+Integration in major projects
+
+Scoring guidance: Dominant market position, significant adoption, emerging adoption
+
+
+Developer Ecosystem Impact
+
+Description: Measures how much the tool enables and accelerates Ethereum development
+Indicators:
+
+Scoring guidance: Essential developer tools, widely-used libraries, specialized tools
+
+
+Security & Infrastructure Criticality
+
+Description: Assesses the security implications and infrastructure dependencies
+Indicators:
+
+Smart contract security tools and audited libraries
+Account abstraction and wallet infrastructure
+Critical infrastructure components
+Security track record
+
+
+Scoring guidance: Security-critical infrastructure, important security tools, auxiliary security projects
+
+
+Innovation & Technical Excellence
+
+Description: Recognizes technical innovation and performance improvements
+Indicators:
+
+Novel technical approaches
+Performance benchmarks
+Research contributions
+Architecture quality
+
+
+Scoring guidance: Breakthrough innovations, significant improvements, incremental advances
+
+
+Community Trust & Project Maturity
+
+Description: Evaluates project stability, maintenance, and community confidence
+Indicators:
+
+Years in production
+Corporate/foundation backing
+Maintenance activity and responsiveness
+Community size and engagement
+
+                """
+            },
+            {
+                "role": "user", 
+                "content": f"""Which repository is more important and contributes more to the Ethereum ecosystem?
+
+Repository A: {url_a}
+({name_a})
+
+Repository B: {url_b}
+({name_b})
+
+Please provide your analysis in this format:
+
+
+Answer: [A or B or Equal]
+Reasoning: [Explain your analysis comparing the two repositories]
+"""
+
+            }
+        ]
+        
+        return prompt
+    
+    def create_comparison_prompt_v2(self, repo_a: Dict[str, Any], 
+                                  repo_b: Dict[str, Any]) -> List[Dict[str, str]]:
+        """
+        Create comparison prompt variation 2 (placeholder).
+        
+        Args:
+            repo_a: First repository dictionary
+            repo_b: Second repository dictionary
+            
+        Returns:
+            List of message dictionaries in OpenAI format
+        """
+        # TODO: Implement prompt variation 2
+        # For now, return default prompt
+        return self.create_comparison_prompt_default(repo_a, repo_b)
             
     def _extract_repo_name(self, url: str) -> str:
         """Extract repository name from GitHub URL."""
