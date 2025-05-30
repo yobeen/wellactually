@@ -10,6 +10,7 @@ import os
 import argparse
 import logging
 from pathlib import Path
+from datetime import datetime
 
 # Add src to path to import modules
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -59,7 +60,7 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  # Basic assessment with default settings
+  # Basic assessment with default settings (timestamped output)
   python scripts/run_criteria_assessment.py
   
   # Use different model and temperature
@@ -99,8 +100,8 @@ Examples:
     parser.add_argument(
         "--output-dir",
         type=str,
-        default="results/criteria_assessment",
-        help="Output directory for results (default: results/criteria_assessment)"
+        default=None,
+        help="Output directory for results (default: results/YYYY-MM-DD_HH-MM-SS/criteria_assessment)"
     )
     
     # Configuration
@@ -143,6 +144,15 @@ Examples:
         print(f"Error: Training CSV file not found: {args.train_csv}")
         sys.exit(1)
     
+    # Initialize pipeline to get timestamp for display
+    pipeline = CriteriaAssessmentPipeline(config)
+    
+    # Determine output directory
+    if args.output_dir:
+        output_dir = args.output_dir
+    else:
+        output_dir = f"results/{pipeline.timestamp}/criteria_assessment"
+    
     # Print configuration
     print("="*60)
     print("CRITERIA ASSESSMENT CONFIGURATION")
@@ -150,9 +160,10 @@ Examples:
     print(f"Model: {args.model}")
     print(f"Temperature: {args.temperature}")
     print(f"Training CSV: {args.train_csv}")
-    print(f"Output directory: {args.output_dir}")
+    print(f"Output directory: {output_dir}")
     print(f"Configuration: {args.config}")
     print(f"Verbose logging: {args.verbose}")
+    print(f"Pipeline timestamp: {pipeline.timestamp}")
     print("="*60)
     
     if args.dry_run:
@@ -160,17 +171,13 @@ Examples:
         return 0
     
     try:
-        # Initialize pipeline
-        logger.info("Initializing criteria assessment pipeline...")
-        pipeline = CriteriaAssessmentPipeline(config)
-        
         # Run assessment
         logger.info("Starting criteria assessment...")
         results = pipeline.run_full_assessment(
             model_id=args.model,
             temperature=args.temperature,
             train_csv_path=args.train_csv,
-            output_dir=args.output_dir
+            output_dir=args.output_dir  # Will use pipeline's timestamped default if None
         )
         
         # Print results summary
@@ -182,7 +189,8 @@ Examples:
         metadata = results['pipeline_metadata']
         print(f"Model used: {metadata['model_used']}")
         print(f"Temperature: {metadata['temperature']}")
-        print(f"Timestamp: {metadata['timestamp']}")
+        print(f"Pipeline timestamp: {metadata['timestamp']}")
+        print(f"Run completed: {metadata['run_datetime']}")
         print(f"Output directory: {metadata['output_directory']}")
         print()
         
@@ -208,7 +216,7 @@ Examples:
         print()
         
         # File outputs
-        output_path = Path(args.output_dir)
+        output_path = Path(metadata['output_directory'])
         print("Generated files:")
         print(f"  - {output_path / 'detailed_assessments.json'}")
         print(f"  - {output_path / 'target_scores.json'}")

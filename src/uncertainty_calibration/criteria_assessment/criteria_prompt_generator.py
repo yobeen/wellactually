@@ -1,7 +1,7 @@
 # src/uncertainty_calibration/criteria_assessment/criteria_prompt_generator.py
 """
 Criteria-based prompt generator for repository assessment.
-Generates comprehensive prompts with all 11 importance criteria.
+Generates comprehensive prompts with all 11 importance criteria matching the detailed template.
 """
 
 import logging
@@ -15,8 +15,8 @@ class CriteriaPromptGenerator:
     """
     
     def __init__(self):
-        """Initialize the criteria prompt generator."""
-        # Define the 11 criteria with their weights and descriptions
+        """Initialize the criteria prompt generator with detailed template."""
+        # Define the 11 criteria with their weights, descriptions, and scoring guidance
         self.criteria_template = {
             "core_protocol": {
                 "name": "Core Protocol Implementation",
@@ -28,7 +28,8 @@ class CriteriaPromptGenerator:
                     "Consensus clients",
                     "Core language implementations",
                     "Layer 2 protocol implementations"
-                ]
+                ],
+                "scoring_guidance": "Official implementations score highest (10x multiplier), major client implementations (3-5x), alternative implementations (1-2x)"
             },
             "market_adoption": {
                 "name": "Market Adoption & Network Effects", 
@@ -40,7 +41,8 @@ class CriteriaPromptGenerator:
                     "Total Value Locked (TVL) for DeFi protocols",
                     "Transaction volume and fee generation",
                     "Integration in major projects"
-                ]
+                ],
+                "scoring_guidance": "Dominant market position (5-10x multiplier), significant adoption (2-5x), emerging adoption (1-2x)"
             },
             "developer_ecosystem": {
                 "name": "Developer Ecosystem Impact",
@@ -52,7 +54,8 @@ class CriteriaPromptGenerator:
                     "Smart contract libraries", 
                     "Testing, debugging, and deployment tools",
                     "Documentation and educational resources"
-                ]
+                ],
+                "scoring_guidance": "Essential developer tools (3-5x multiplier), widely-used libraries (2-3x), specialized tools (1-2x)"
             },
             "general_purpose_tools": {
                 "name": "General Purpose Tool Dependency",
@@ -64,7 +67,8 @@ class CriteriaPromptGenerator:
                     "Database systems",
                     "Web frameworks and libraries",
                     "DevOps tools"
-                ]
+                ],
+                "scoring_guidance": "Universal dependencies (5-10x multiplier), widely-used tools (2-5x), specialized tools (1-2x)"
             },
             "security_infrastructure": {
                 "name": "Security & Infrastructure Criticality",
@@ -76,7 +80,8 @@ class CriteriaPromptGenerator:
                     "Key management and cryptographic libraries",
                     "Audit firms' tools and frameworks",
                     "Bug bounty platforms"
-                ]
+                ],
+                "scoring_guidance": "Security-critical infrastructure (5-10x multiplier), important security tools (2-5x), auxiliary security projects (1-2x)"
             },
             "defi_infrastructure": {
                 "name": "DeFi & Financial Infrastructure",
@@ -88,7 +93,8 @@ class CriteriaPromptGenerator:
                     "Stablecoin infrastructure",
                     "Liquidity and market-making tools",
                     "Cross-chain bridges"
-                ]
+                ],
+                "scoring_guidance": "Systemic DeFi infrastructure (3-5x multiplier), major protocols (2-3x), niche protocols (1-2x)"
             },
             "data_analytics": {
                 "name": "Data & Analytics Infrastructure",
@@ -100,7 +106,8 @@ class CriteriaPromptGenerator:
                     "Analytics platforms",
                     "MEV infrastructure",
                     "Data availability solutions"
-                ]
+                ],
+                "scoring_guidance": "Essential data infrastructure (3-5x multiplier), major analytics tools (2-3x), specialized tools (1-2x)"
             },
             "innovation_research": {
                 "name": "Innovation & Research Impact",
@@ -111,7 +118,8 @@ class CriteriaPromptGenerator:
                     "Zero-knowledge proof systems",
                     "Academic research tools and implementations",
                     "Experimental protocols and proof-of-concepts"
-                ]
+                ],
+                "scoring_guidance": "Breakthrough innovations (2-3x multiplier), significant improvements (1.5-2x), incremental advances (1-1.5x)"
             },
             "ecosystem_coordination": {
                 "name": "Ecosystem Coordination & Standards",
@@ -123,7 +131,8 @@ class CriteriaPromptGenerator:
                     "Chain and token lists",
                     "Governance tools and frameworks",
                     "DAO infrastructure"
-                ]
+                ],
+                "scoring_guidance": "Core standards (2-3x multiplier), widely-adopted standards (1.5-2x), niche standards (1x)"
             },
             "community_trust": {
                 "name": "Community Trust & Project Maturity",
@@ -134,7 +143,8 @@ class CriteriaPromptGenerator:
                     "Corporate/foundation backing",
                     "Maintenance activity and responsiveness",
                     "Community size and engagement"
-                ]
+                ],
+                "scoring_guidance": "Battle-tested projects (2x multiplier), established projects (1.5x), newer projects (1x)"
             },
             "user_applications": {
                 "name": "User-Facing Applications",
@@ -145,7 +155,8 @@ class CriteriaPromptGenerator:
                     "NFT platforms and marketplaces",
                     "Gaming infrastructure",
                     "Social protocols and identity systems"
-                ]
+                ],
+                "scoring_guidance": "Dominant user applications (2-3x multiplier), popular applications (1.5-2x), niche applications (1x)"
             }
         }
     
@@ -175,15 +186,15 @@ class CriteriaPromptGenerator:
         prompt = [
             {
                 "role": "system",
-                "content": f"""You are an expert evaluating the importance and contribution of open source repositories to the Ethereum ecosystem. 
+                "content": f"""You are an expert evaluating the importance and contribution of open source repositories to the Ethereum ecosystem. You will assess repositories across 11 specific criteria with predefined weights.
 
-You will assess repositories across 11 specific criteria with predefined weights. You may adjust the weights slightly if justified, but they should sum to approximately 1.0.
+IMPORTANCE CRITERIA FOR ETHEREUM ECOSYSTEM REPOSITORIES:
 
 {criteria_section}
 
 For each criterion, provide:
 1. A score from 1-10 (where 1 = minimal contribution, 10 = maximum contribution)
-2. A weight (you may adjust from defaults if justified)
+2. A weight (you may adjust from defaults if justified, but they should sum to approximately 1.0)
 3. Brief reasoning for your assessment
 
 Provide your response in the exact JSON format specified."""
@@ -209,9 +220,10 @@ Assess each criterion carefully and provide scores, weights, and reasoning. Ensu
         
         for criterion_id, criterion in self.criteria_template.items():
             section = f"""
-**{criterion['name']} (Default Weight: {criterion['weight']:.2f})**
-- {criterion['description']}
-- Key indicators: {', '.join(criterion['indicators'])}"""
+**{criterion['name']} (Weight: {criterion['weight']:.0%})**
+- **Description**: {criterion['description']}
+- **Indicators**: {', '.join(criterion['indicators'])}
+- **Scoring guidance**: {criterion['scoring_guidance']}"""
             sections.append(section)
         
         return "\n".join(sections)
