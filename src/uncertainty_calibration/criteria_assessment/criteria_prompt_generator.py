@@ -240,14 +240,17 @@ Assess each criterion carefully and provide scores, weights, and reasoning. Ensu
       "reasoning": "[Brief explanation for the score]"
     }}''')
         
+        # Fix: Move the join operation outside the f-string
+        criteria_json = ',\n'.join(example_criteria)
+        
         response_format = f"""
 Please respond in this exact JSON format:
 
 {{
-  "repository_url": "{'{repo_url}'}",
-  "repository_name": "{'{repo_name}'}",
+  "repository_url": "{{repo_url}}",
+  "repository_name": "{{repo_name}}",
   "criteria_assessments": {{
-{',\n'.join(example_criteria)}
+{criteria_json}
   }},
   "assessment_summary": {{
     "total_weight": "[sum of all weights - should be ~1.0]",

@@ -1,7 +1,7 @@
 # src/uncertainty_calibration/response_parser.py
 """
 Enhanced response parser with model-specific answer postprocessing integration.
-Fixes tokenization artifacts across different model families.
+Updated to provide access to full content logprobs for criteria assessment.
 """
 import numpy as np
 import re
@@ -31,7 +31,9 @@ class ModelResponse:
     error: Optional[str] = None
     timestamp: str = ""
     answer_token_info: Optional[Dict] = None
-    normalized_answer: Optional[str] = None  # NEW: Store normalized answer
+    normalized_answer: Optional[str] = None
+    # NEW: Full content logprobs for criteria assessment
+    full_content_logprobs: Optional[List[Dict]] = None
 
 class AnswerTokenExtractor:
     """
@@ -282,7 +284,7 @@ class AnswerTokenExtractor:
 
 class ResponseParser:
     """
-    Enhanced response parser with model-specific answer postprocessing.
+    Enhanced response parser with model-specific answer postprocessing and full logprobs access.
     """
     
     def __init__(self, cost_per_1k_tokens: float = 0.01):
@@ -339,8 +341,8 @@ class ResponseParser:
         
         # Extract and process logprobs with enhanced answer extraction
         logprobs_data = choice.get('logprobs')
-        parsed_logprobs, answer_token_info = self._extract_logprobs_enhanced(
-            logprobs_data, model_id, expected_answer_format  # Pass model_id
+        parsed_logprobs, answer_token_info, full_content_logprobs = self._extract_logprobs_enhanced(
+            logprobs_data, model_id, expected_answer_format
         )
         uncertainty = self._calculate_uncertainty(parsed_logprobs)
         raw_choice = self._extract_raw_choice(parsed_logprobs, content, answer_token_info)
@@ -364,12 +366,13 @@ class ResponseParser:
             temperature=temperature,
             timestamp=datetime.now().isoformat(),
             answer_token_info=answer_token_info,
-            normalized_answer=normalized_answer  # NEW
+            normalized_answer=normalized_answer,
+            full_content_logprobs=full_content_logprobs  # NEW
         )
     
     def _extract_logprobs_enhanced(self, logprobs_data: Optional[Dict], model_id: str,
-                                 expected_answer_format: str) -> Tuple[Dict[str, float], Dict]:
-        """Enhanced logprobs extraction with model-specific postprocessing."""
+                                 expected_answer_format: str) -> Tuple[Dict[str, float], Dict, Optional[List[Dict]]]:
+        """Enhanced logprobs extraction with model-specific postprocessing and full content access."""
         parsed_logprobs = {}
         answer_token_info = {
             "extraction_success": False,
@@ -379,18 +382,22 @@ class ResponseParser:
             "model_family": None,
             "preprocessing_applied": False
         }
+        full_content_logprobs = None
         
         if not logprobs_data or 'content' not in logprobs_data:
-            return parsed_logprobs, answer_token_info
+            return parsed_logprobs, answer_token_info, full_content_logprobs
         
         raw_token_logprobs = logprobs_data['content']
         if not raw_token_logprobs:
-            return parsed_logprobs, answer_token_info
+            return parsed_logprobs, answer_token_info, full_content_logprobs
         
-        # CRITICAL FIX: Apply preprocessing to ALL tokens BEFORE extraction
+        # CRITICAL: Apply preprocessing to ALL tokens BEFORE extraction
         preprocessed_token_logprobs = self._preprocess_all_tokens(raw_token_logprobs, model_id)
         answer_token_info["preprocessing_applied"] = True
         answer_token_info["model_family"] = self.answer_extractor.postprocessor.detect_model_family(model_id)
+        
+        # NEW: Store full content logprobs for criteria assessment
+        full_content_logprobs = preprocessed_token_logprobs
         
         # Use enhanced answer token extraction on CLEANED tokens
         answer_token, extraction_info = self.answer_extractor.extract_answer_token(
@@ -437,7 +444,7 @@ class ResponseParser:
                     if logprob > -float('inf') and token:
                         parsed_logprobs[token] = np.exp(logprob)
         
-        return parsed_logprobs, answer_token_info
+        return parsed_logprobs, answer_token_info, full_content_logprobs
     
     def _preprocess_all_tokens(self, token_logprobs: List[Dict], model_id: str) -> List[Dict]:
         """
@@ -577,5 +584,6 @@ class ResponseParser:
             temperature=temperature,
             error=error_msg,
             timestamp=datetime.now().isoformat(),
-            answer_token_info={"extraction_success": False, "method": "error"}
+            answer_token_info={"extraction_success": False, "method": "error"},
+            full_content_logprobs=None
         )

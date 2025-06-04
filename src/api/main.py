@@ -1,7 +1,7 @@
 # src/api/main.py
 """
 FastAPI server for LLM repository comparison and originality assessment API.
-Integrates with existing uncertainty calibration components.
+Enhanced with criteria assessment endpoint.
 """
 
 import logging
@@ -15,9 +15,11 @@ import uvicorn
 
 from wellactually.src.api.requests import ComparisonRequest, OriginalityRequest
 from wellactually.src.api.responses import ComparisonResponse, OriginalityResponse, ErrorResponse
+from wellactually.src.api.criteria_models import CriteriaRequest, CriteriaResponse
 from wellactually.src.api.llm_orchestrator import LLMOrchestrator
 from wellactually.src.api.comparison_handler import ComparisonHandler
 from wellactually.src.api.originality_handler import OriginalityHandler
+from wellactually.src.api.criteria_handler import CriteriaHandler
 from wellactually.src.api.settings import APISettings
 
 # Configure logging
@@ -28,12 +30,13 @@ logger = logging.getLogger(__name__)
 llm_orchestrator = None
 comparison_handler = None
 originality_handler = None
+criteria_handler = None
 settings = None
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Manage application lifecycle - startup and shutdown."""
-    global llm_orchestrator, comparison_handler, originality_handler, settings
+    global llm_orchestrator, comparison_handler, originality_handler, criteria_handler, settings
     
     # Startup
     try:
@@ -48,6 +51,7 @@ async def lifespan(app: FastAPI):
         # Initialize handlers
         comparison_handler = ComparisonHandler(llm_orchestrator)
         originality_handler = OriginalityHandler(llm_orchestrator)
+        criteria_handler = CriteriaHandler(llm_orchestrator)
         
         logger.info("LLM API server startup complete")
         
@@ -63,7 +67,7 @@ async def lifespan(app: FastAPI):
 # Create FastAPI app
 app = FastAPI(
     title="LLM Repository Assessment API",
-    description="API for repository comparison and originality assessment using LLMs",
+    description="API for repository comparison, originality assessment, and criteria evaluation using LLMs",
     version="1.0.0",
     lifespan=lifespan
 )
@@ -77,7 +81,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Dependency to get handlers
+# Dependencies to get handlers
 def get_comparison_handler() -> ComparisonHandler:
     """Dependency to get comparison handler."""
     if comparison_handler is None:
@@ -89,6 +93,12 @@ def get_originality_handler() -> OriginalityHandler:
     if originality_handler is None:
         raise HTTPException(status_code=503, detail="Service not initialized")
     return originality_handler
+
+def get_criteria_handler() -> CriteriaHandler:
+    """Dependency to get criteria handler."""
+    if criteria_handler is None:
+        raise HTTPException(status_code=503, detail="Service not initialized")
+    return criteria_handler
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request, exc):
@@ -116,7 +126,8 @@ async def root():
         "endpoints": {
             "health": "/health",
             "comparison": "/compare",
-            "originality": "/assess"
+            "originality": "/assess",
+            "criteria": "/criteria"
         }
     }
 
@@ -181,6 +192,35 @@ async def assess_originality(
     except Exception as e:
         logger.error(f"Error processing originality assessment: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="Failed to process originality assessment")
+
+@app.post("/criteria", response_model=CriteriaResponse)
+async def assess_criteria(
+    request: CriteriaRequest,
+    handler: CriteriaHandler = Depends(get_criteria_handler)
+) -> CriteriaResponse:
+    """
+    Assess repository against 11 importance criteria for Ethereum ecosystem.
+    
+    Args:
+        request: Criteria request with repo and optional parameters
+        
+    Returns:
+        CriteriaResponse with detailed criteria scores, weights, reasoning, and uncertainties
+    """
+    try:
+        logger.info(f"Processing criteria assessment: {request.repo}")
+        
+        response = await handler.handle_criteria_assessment(request)
+        
+        logger.info(f"Criteria assessment complete: target_score={response.target_score:.2f}")
+        return response
+        
+    except ValueError as e:
+        logger.warning(f"Validation error in criteria assessment: {e}")
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.error(f"Error processing criteria assessment: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Failed to process criteria assessment")
 
 @app.get("/cache/stats")
 async def get_cache_stats():

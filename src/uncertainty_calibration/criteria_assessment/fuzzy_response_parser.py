@@ -1,12 +1,13 @@
 # src/uncertainty_calibration/criteria_assessment/fuzzy_response_parser.py
 """
-Fuzzy response parser for criteria assessment.
-Robust parsing of LLM responses that may not be perfect JSON.
+Enhanced fuzzy response parser for criteria assessment.
+Robust parsing of LLM responses with perplexity-based uncertainty calculation.
 """
 
 import json
 import re
 import logging
+import math
 from typing import Dict, Any, Optional, List, Tuple
 from dataclasses import dataclass
 
@@ -14,11 +15,12 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class ParsedCriteriaResponse:
-    """Container for parsed criteria assessment response."""
+    """Container for parsed criteria assessment response with enhanced fields."""
     repository_url: str
     repository_name: str
-    criteria_scores: Dict[str, Dict[str, Any]]  # criterion_id -> {score, weight, reasoning}
+    criteria_scores: Dict[str, Dict[str, Any]]  # criterion_id -> {score, weight, reasoning, raw_uncertainty}
     target_score: Optional[float]
+    raw_target_score: Optional[float]  # NEW: from assessment_summary
     total_weight: Optional[float]
     overall_reasoning: Optional[str]
     parsing_method: str
@@ -27,8 +29,8 @@ class ParsedCriteriaResponse:
 
 class FuzzyCriteriaResponseParser:
     """
-    Robust parser for criteria assessment responses from LLMs.
-    Handles imperfect JSON and various response formats.
+    Enhanced parser for criteria assessment responses from LLMs.
+    Handles imperfect JSON and calculates perplexity-based uncertainties.
     """
     
     def __init__(self):
@@ -56,17 +58,19 @@ class FuzzyCriteriaResponseParser:
             "user_applications": 0.02
         }
     
-    def parse_response(self, raw_response: str, repo_url: str, repo_name: str) -> ParsedCriteriaResponse:
+    def parse_response(self, raw_response: str, repo_url: str, repo_name: str, 
+                      logprobs_data: Optional[List[Dict]] = None) -> ParsedCriteriaResponse:
         """
-        Parse LLM response using multiple strategies.
+        Parse LLM response using multiple strategies with enhanced uncertainty calculation.
         
         Args:
             raw_response: Raw text response from LLM
             repo_url: Repository URL for context
             repo_name: Repository name for context
+            logprobs_data: Token logprobs data from MultiModelEngine
             
         Returns:
-            ParsedCriteriaResponse object
+            ParsedCriteriaResponse object with enhanced fields
         """
         warnings = []
         
@@ -74,33 +78,167 @@ class FuzzyCriteriaResponseParser:
         parsed_data, method = self._try_json_parsing(raw_response)
         if parsed_data:
             logger.debug(f"Successfully parsed response using {method}")
-            return self._create_response_from_json(parsed_data, repo_url, repo_name, method, warnings)
+            return self._create_response_from_json(
+                parsed_data, repo_url, repo_name, method, warnings, logprobs_data
+            )
         
         # Strategy 2: Try cleaned JSON parsing
         parsed_data, method = self._try_cleaned_json_parsing(raw_response)
         if parsed_data:
             logger.debug(f"Successfully parsed response using {method}")
             warnings.append("Required JSON cleaning for parsing")
-            return self._create_response_from_json(parsed_data, repo_url, repo_name, method, warnings)
+            return self._create_response_from_json(
+                parsed_data, repo_url, repo_name, method, warnings, logprobs_data
+            )
         
         # Strategy 3: Try regex extraction
         parsed_data, method = self._try_regex_extraction(raw_response)
         if parsed_data:
             logger.debug(f"Successfully parsed response using {method}")
             warnings.append("Used regex extraction instead of JSON parsing")
-            return self._create_response_from_extracted_data(parsed_data, repo_url, repo_name, method, warnings)
+            return self._create_response_from_extracted_data(
+                parsed_data, repo_url, repo_name, method, warnings, logprobs_data
+            )
         
         # Strategy 4: Try line-by-line parsing
         parsed_data, method = self._try_line_parsing(raw_response)
         if parsed_data:
             logger.debug(f"Successfully parsed response using {method}")
             warnings.append("Used line-by-line parsing as fallback")
-            return self._create_response_from_extracted_data(parsed_data, repo_url, repo_name, method, warnings)
+            return self._create_response_from_extracted_data(
+                parsed_data, repo_url, repo_name, method, warnings, logprobs_data
+            )
         
-        # Strategy 5: Fallback with defaults
-        logger.warning(f"All parsing strategies failed for {repo_url}, using defaults")
-        warnings.append("All parsing strategies failed, using default values")
-        return self._create_fallback_response(repo_url, repo_name, warnings)
+        # All parsing failed - raise error instead of fallback
+        error_msg = f"All parsing strategies failed for {repo_url}"
+        logger.error(error_msg)
+        raise ValueError(f"Failed to parse criteria response: {error_msg}")
+    
+    def _calculate_reasoning_perplexity(self, reasoning_text: str, 
+                                      logprobs_data: Optional[List[Dict]]) -> float:
+        """
+        Calculate perplexity-based uncertainty for reasoning text.
+        
+        Args:
+            reasoning_text: The reasoning text for a criterion
+            logprobs_data: Token logprobs from the LLM response
+            
+        Returns:
+            Uncertainty score [0,1] where higher means more uncertain
+        """
+        if not logprobs_data or not reasoning_text:
+            return 0.5  # Default uncertainty when no logprobs available
+        
+        try:
+            # Find tokens that correspond to this reasoning text
+            relevant_tokens = self._extract_tokens_for_reasoning(reasoning_text, logprobs_data)
+            
+            if not relevant_tokens:
+                return 0.5  # Default when no matching tokens found
+            
+            # Calculate average log probability
+            total_log_prob = 0.0
+            token_count = 0
+            
+            for token_data in relevant_tokens:
+                logprob = token_data.get('logprob')
+                if logprob is not None and not math.isinf(logprob):
+                    total_log_prob += logprob
+                    token_count += 1
+            
+            if token_count == 0:
+                return 0.5
+            
+            # Calculate perplexity and normalize to uncertainty
+            avg_log_prob = total_log_prob / token_count
+            perplexity = math.exp(-avg_log_prob)
+            
+            # Normalize perplexity to [0,1] uncertainty range
+            # Lower perplexity = higher confidence = lower uncertainty
+            uncertainty = self._normalize_perplexity_to_uncertainty(perplexity)
+            
+            return max(0.0, min(1.0, uncertainty))
+            
+        except Exception as e:
+            logger.warning(f"Error calculating perplexity for reasoning: {e}")
+            return 0.5
+    
+    def _extract_tokens_for_reasoning(self, reasoning_text: str, 
+                                    logprobs_data: List[Dict]) -> List[Dict]:
+        """
+        Extract logprob tokens that correspond to the reasoning text.
+        
+        Args:
+            reasoning_text: The reasoning text to match
+            logprobs_data: List of token logprob dictionaries
+            
+        Returns:
+            List of relevant token dictionaries
+        """
+        if not reasoning_text or not logprobs_data:
+            return []
+        
+        # Clean reasoning text for matching
+        reasoning_clean = reasoning_text.lower().strip()
+        reasoning_words = set(reasoning_clean.split())
+        
+        relevant_tokens = []
+        
+        # Simple approach: find tokens whose text overlaps with reasoning words
+        for token_data in logprobs_data:
+            token_text = token_data.get('token', '').lower().strip()
+            
+            # Skip empty or whitespace-only tokens
+            if not token_text or token_text.isspace():
+                continue
+            
+            # Check if token text appears in reasoning or shares words
+            if (token_text in reasoning_clean or 
+                any(word in token_text for word in reasoning_words if len(word) > 2)):
+                relevant_tokens.append(token_data)
+        
+        return relevant_tokens
+    
+    def _normalize_perplexity_to_uncertainty(self, perplexity: float) -> float:
+        """
+        Normalize perplexity value to uncertainty in [0,1] range.
+        
+        Args:
+            perplexity: Raw perplexity value (1 to infinity)
+            
+        Returns:
+            Uncertainty score [0,1]
+        """
+        # Use sigmoid normalization with reasonable parameters
+        # perplexity of 1 (perfect prediction) -> low uncertainty
+        # perplexity of 10+ (poor prediction) -> high uncertainty
+        
+        if perplexity <= 1.0:
+            return 0.1  # Minimum uncertainty
+        
+        # Sigmoid transformation: 1 / (1 + exp(-k * (log(perplexity) - offset)))
+        k = 2.0  # Steepness parameter
+        offset = 1.0  # Midpoint (perplexity ~2.7 gives 0.5 uncertainty)
+        
+        log_perplexity = math.log(perplexity)
+        uncertainty = 1.0 / (1.0 + math.exp(-k * (log_perplexity - offset)))
+        
+        return uncertainty
+    
+    def _extract_target_score_from_parsed_data(self, parsed_data: Dict) -> Optional[float]:
+        """Extract target score from assessment_summary section."""
+        try:
+            summary = parsed_data.get("assessment_summary", {})
+            target_score = summary.get("target_score")
+            
+            if target_score is not None:
+                return float(target_score)
+            
+            return None
+            
+        except (ValueError, TypeError) as e:
+            logger.warning(f"Error extracting target score: {e}")
+            return None
     
     def _try_json_parsing(self, response: str) -> Tuple[Optional[Dict], str]:
         """Try to parse response as perfect JSON."""
@@ -261,8 +399,9 @@ class FuzzyCriteriaResponseParser:
         return None, ""
     
     def _create_response_from_json(self, parsed_data: Dict, repo_url: str, repo_name: str, 
-                                  method: str, warnings: List[str]) -> ParsedCriteriaResponse:
-        """Create response object from successfully parsed JSON."""
+                                  method: str, warnings: List[str],
+                                  logprobs_data: Optional[List[Dict]]) -> ParsedCriteriaResponse:
+        """Create response object from successfully parsed JSON with enhanced fields."""
         
         # Extract criteria assessments
         criteria_assessments = parsed_data.get("criteria_assessments", {})
@@ -270,17 +409,21 @@ class FuzzyCriteriaResponseParser:
         # Extract summary info
         summary = parsed_data.get("assessment_summary", {})
         target_score = summary.get("target_score")
+        raw_target_score = target_score  # Store raw target score
         total_weight = summary.get("total_weight")
         overall_reasoning = summary.get("overall_reasoning")
         
-        # Validate and fill missing criteria
-        criteria_scores = self._validate_and_fill_criteria(criteria_assessments, warnings)
+        # Validate and fill missing criteria with enhanced uncertainty calculation
+        criteria_scores = self._validate_and_fill_criteria_enhanced(
+            criteria_assessments, warnings, logprobs_data
+        )
         
         return ParsedCriteriaResponse(
             repository_url=repo_url,
             repository_name=repo_name,
             criteria_scores=criteria_scores,
             target_score=target_score,
+            raw_target_score=raw_target_score,  # NEW
             total_weight=total_weight,
             overall_reasoning=overall_reasoning,
             parsing_method=method,
@@ -289,17 +432,21 @@ class FuzzyCriteriaResponseParser:
         )
     
     def _create_response_from_extracted_data(self, extracted_data: Dict, repo_url: str, repo_name: str,
-                                           method: str, warnings: List[str]) -> ParsedCriteriaResponse:
-        """Create response object from extracted data."""
+                                           method: str, warnings: List[str],
+                                           logprobs_data: Optional[List[Dict]]) -> ParsedCriteriaResponse:
+        """Create response object from extracted data with enhanced fields."""
         
         criteria_assessments = extracted_data.get("criteria_assessments", {})
         summary = extracted_data.get("assessment_summary", {})
         
-        # Validate and fill missing criteria
-        criteria_scores = self._validate_and_fill_criteria(criteria_assessments, warnings)
+        # Validate and fill missing criteria with enhanced uncertainty
+        criteria_scores = self._validate_and_fill_criteria_enhanced(
+            criteria_assessments, warnings, logprobs_data
+        )
         
         # Calculate target score if not provided
         target_score = summary.get("target_score")
+        raw_target_score = target_score
         if target_score is None:
             target_score = self._calculate_target_score(criteria_scores)
             warnings.append("Calculated target score from individual criteria")
@@ -309,6 +456,7 @@ class FuzzyCriteriaResponseParser:
             repository_name=repo_name,
             criteria_scores=criteria_scores,
             target_score=target_score,
+            raw_target_score=raw_target_score,  # NEW
             total_weight=sum(c.get("weight", 0) for c in criteria_scores.values()),
             overall_reasoning="Extracted from partial parsing",
             parsing_method=method,
@@ -316,35 +464,9 @@ class FuzzyCriteriaResponseParser:
             parsing_warnings=warnings
         )
     
-    def _create_fallback_response(self, repo_url: str, repo_name: str, 
-                                warnings: List[str]) -> ParsedCriteriaResponse:
-        """Create fallback response with default values."""
-        
-        # Use default scores (middle value of 5)
-        criteria_scores = {}
-        for criterion in self.default_criteria:
-            criteria_scores[criterion] = {
-                "score": 5,  # Middle value
-                "weight": self.default_weights[criterion],
-                "reasoning": "Default value due to parsing failure"
-            }
-        
-        target_score = self._calculate_target_score(criteria_scores)
-        
-        return ParsedCriteriaResponse(
-            repository_url=repo_url,
-            repository_name=repo_name,
-            criteria_scores=criteria_scores,
-            target_score=target_score,
-            total_weight=1.0,
-            overall_reasoning="Default assessment due to parsing failure",
-            parsing_method="fallback",
-            parsing_success=False,
-            parsing_warnings=warnings
-        )
-    
-    def _validate_and_fill_criteria(self, criteria_assessments: Dict, warnings: List[str]) -> Dict[str, Dict]:
-        """Validate criteria assessments and fill missing ones with defaults."""
+    def _validate_and_fill_criteria_enhanced(self, criteria_assessments: Dict, warnings: List[str],
+                                           logprobs_data: Optional[List[Dict]]) -> Dict[str, Dict]:
+        """Validate criteria assessments and fill with enhanced uncertainty calculation."""
         
         validated_criteria = {}
         
@@ -364,19 +486,21 @@ class FuzzyCriteriaResponseParser:
                     weight = self.default_weights[criterion]
                     warnings.append(f"Invalid weight for {criterion}, using default")
                 
+                # Get reasoning
+                reasoning = assessment.get("reasoning", "No reasoning provided")
+                
+                # NEW: Calculate raw_uncertainty from perplexity
+                raw_uncertainty = self._calculate_reasoning_perplexity(reasoning, logprobs_data)
+                
                 validated_criteria[criterion] = {
                     "score": int(score),
                     "weight": float(weight),
-                    "reasoning": assessment.get("reasoning", "No reasoning provided")
+                    "reasoning": reasoning,
+                    "raw_uncertainty": raw_uncertainty  # NEW
                 }
             else:
-                # Missing criterion, use defaults
-                validated_criteria[criterion] = {
-                    "score": 5,
-                    "weight": self.default_weights[criterion],
-                    "reasoning": "Default value for missing criterion"
-                }
-                warnings.append(f"Missing assessment for {criterion}, using defaults")
+                # Missing criterion - raise error instead of using defaults
+                raise ValueError(f"Missing assessment for required criterion: {criterion}")
         
         return validated_criteria
     
