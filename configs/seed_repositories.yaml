@@ -1,0 +1,360 @@
+# Seed repositories for Level 1 comparisons
+# configs/llm_augmentation/seed_repositories.yaml
+
+seed_repositories:
+  # Ethereum 2.0 Consensus Clients
+  - url: "https://github.com/prysmaticlabs/prysm"
+    name: "Prysm"
+    category: "consensus_client"
+    description: "Ethereum 2.0 client implementation built by Prysmatic Labs"
+    primary_language: "Go"
+    domain: "Ethereum Client"
+    architecture_type: "Client-Server"
+    key_functions: ["Beacon chain validation", "Block proposal", "Attestation processing", "P2P networking", "Validator management"]
+    
+  - url: "https://github.com/sigp/lighthouse"
+    name: "Lighthouse"
+    category: "consensus_client"
+    description: "Ethereum 2.0 client implementation written in Rust"
+    primary_language: "Rust"
+    domain: "Ethereum Client"
+    architecture_type: "Client-Server"
+    key_functions: ["Consensus validation", "High-performance block processing", "Built-in validator", "Slashing protection", "Remote signing"]
+    
+  - url: "https://github.com/consensys/teku"
+    name: "Teku"
+    category: "consensus_client"
+    description: "Java implementation of the Ethereum 2.0 Beacon Chain"
+    primary_language: "Java"
+    domain: "Ethereum Client"
+    architecture_type: "Client-Server"
+    key_functions: ["Beacon chain operations", "Enterprise-grade reliability", "RESTful API", "Validator client", "Web3Signer integration"]
+    
+  - url: "https://github.com/status-im/nimbus-eth2"
+    name: "Nimbus"
+    category: "consensus_client"
+    description: "Ethereum 2.0 client focused on resource efficiency"
+    primary_language: "Nim"
+    domain: "Ethereum Client"
+    architecture_type: "Client-Server"
+    key_functions: ["Low resource usage", "Mobile and IoT optimization", "Validator operations", "Light client support", "Research implementations"]
+    
+  - url: "https://github.com/chainsafe/lodestar"
+    name: "Lodestar"
+    category: "consensus_client"
+    description: "TypeScript implementation of Ethereum 2.0"
+    primary_language: "TypeScript"
+    domain: "Ethereum Client"
+    architecture_type: "Client-Server"
+    key_functions: ["Full consensus client", "Light client implementation", "Browser compatibility", "Developer-friendly APIs", "Modular architecture"]
+    
+  - url: "https://github.com/grandinetech/grandine"
+    name: "Grandine"
+    category: "consensus_client"
+    description: "High-performance Ethereum consensus client"
+    primary_language: "Rust"
+    domain: "Ethereum Client"
+    architecture_type: "Client-Server"
+    key_functions: ["High-performance validation", "Optimized block processing", "Low latency operations", "Efficient resource usage", "Scalable architecture"]
+
+  # Ethereum Execution Clients
+  - url: "https://github.com/ethereum/go-ethereum"
+    name: "Geth"
+    category: "execution_client"
+    description: "Official Go implementation of the Ethereum protocol"
+    primary_language: "Go"
+    domain: "Ethereum Client"
+    architecture_type: "Client-Server"
+    key_functions: ["Transaction execution", "State management", "Mining/validation", "JSON-RPC API", "P2P networking"]
+    
+  - url: "https://github.com/nethermindeth/nethermind"
+    name: "Nethermind"
+    category: "execution_client"
+    description: ".NET Core Ethereum client for Linux, Windows, MacOS"
+    primary_language: "C#"
+    domain: "Ethereum Client"
+    architecture_type: "Client-Server"
+    key_functions: ["Fast sync", "Enterprise features", "JSON-RPC API", "Mining support", "Cross-platform execution"]
+    
+  - url: "https://github.com/hyperledger/besu"
+    name: "Besu"
+    category: "execution_client"
+    description: "Enterprise-focused Ethereum client by Hyperledger"
+    primary_language: "Java"
+    domain: "Ethereum Client"
+    architecture_type: "Client-Server"
+    key_functions: ["Enterprise integration", "Permissioned networks", "Privacy features", "Consensus algorithms", "Monitoring and metrics"]
+    
+  - url: "https://github.com/erigontech/erigon"
+    name: "Erigon"
+    category: "execution_client"
+    description: "Ethereum implementation focused on efficiency and modularity"
+    primary_language: "Go"
+    domain: "Ethereum Client"
+    architecture_type: "Modular"
+    key_functions: ["Efficient storage", "Fast sync", "Archive node optimization", "Modular design", "RPC services"]
+    
+  - url: "https://github.com/paradigmxyz/reth"
+    name: "Reth"
+    category: "execution_client"
+    description: "New Ethereum execution layer implementation in Rust"
+    primary_language: "Rust"
+    domain: "Ethereum Client"
+    architecture_type: "Modular"
+    key_functions: ["High performance", "Modular architecture", "Database optimization", "Node operation", "Developer tools"]
+
+  # Light Clients and Bridges
+  - url: "https://github.com/a16z/helios"
+    name: "Helios"
+    category: "light_client"
+    description: "Fast Ethereum light client written in Rust"
+    primary_language: "Rust"
+    domain: "Light Client"
+    architecture_type: "Client"
+    key_functions: ["Light verification", "Fast sync", "Low resource usage", "Trustless operation", "RPC compatibility"]
+
+  # Development Frameworks
+  - url: "https://github.com/alloy-rs/alloy"
+    name: "Alloy"
+    category: "development_framework"
+    description: "Modern Ethereum development framework for Rust"
+    primary_language: "Rust"
+    domain: "Development Framework"
+    architecture_type: "Library"
+    key_functions: ["Type-safe Ethereum interactions", "Provider abstraction", "Contract bindings", "Transaction building", "RPC client"]
+    
+  - url: "https://github.com/apeworx/ape"
+    name: "Ape"
+    category: "development_framework"
+    description: "Smart contract development framework for Ethereum"
+    primary_language: "Python"
+    domain: "Development Framework"
+    architecture_type: "Framework"
+    key_functions: ["Contract development", "Testing framework", "Plugin system", "Network management", "CLI tools"]
+    
+  - url: "https://github.com/foundry-rs/foundry"
+    name: "Foundry"
+    category: "development_framework"
+    description: "Blazingly fast toolkit for Ethereum application development"
+    primary_language: "Rust"
+    domain: "Development Framework"
+    architecture_type: "Toolkit"
+    key_functions: ["Smart contract compilation", "Testing", "Deployment", "Interaction scripts", "Gas optimization"]
+    
+  - url: "https://github.com/nomicfoundation/hardhat"
+    name: "Hardhat"
+    category: "development_framework"
+    description: "Ethereum development environment for professionals"
+    primary_language: "TypeScript"
+    domain: "Development Framework"
+    architecture_type: "Framework"
+    key_functions: ["Contract compilation", "Local blockchain", "Testing suite", "Task automation", "Plugin ecosystem"]
+
+  # Smart Contract Standards and Infrastructure
+  - url: "https://github.com/eth-infinitism/account-abstraction"
+    name: "Account Abstraction"
+    category: "infrastructure"
+    description: "Reference implementation for ERC-4337 account abstraction"
+    primary_language: "Solidity"
+    domain: "Smart Contract Platform"
+    architecture_type: "Protocol"
+    key_functions: ["Account abstraction", "Bundler operations", "Paymaster contracts", "Entry point logic", "Wallet infrastructure"]
+    
+  - url: "https://github.com/openzeppelin/openzeppelin-contracts"
+    name: "OpenZeppelin Contracts"
+    category: "smart_contract_library"
+    description: "Library for secure smart contract development"
+    primary_language: "Solidity"
+    domain: "Smart Contract Library"
+    architecture_type: "Library"
+    key_functions: ["Security primitives", "Token standards", "Access control", "Upgradeable contracts", "Utilities"]
+    
+  - url: "https://github.com/safe-global/safe-smart-account"
+    name: "Safe Smart Account"
+    category: "infrastructure"
+    description: "Most trusted decentralized custody protocol on Ethereum"
+    primary_language: "Solidity"
+    domain: "Smart Contract Platform"
+    architecture_type: "Protocol"
+    key_functions: ["Multi-signature wallet", "Modular security", "Transaction batching", "Social recovery", "DeFi integrations"]
+
+  # Programming Languages and Compilers
+  - url: "https://github.com/ethereum/solidity"
+    name: "Solidity"
+    category: "programming_language"
+    description: "Contract-oriented programming language for Ethereum"
+    primary_language: "C++"
+    domain: "Programming Language"
+    architecture_type: "Compiler"
+    key_functions: ["Smart contract compilation", "EVM bytecode generation", "ABI generation", "Optimization", "Static analysis"]
+    
+  - url: "https://github.com/ethereum/fe"
+    name: "Fe"
+    category: "programming_language"
+    description: "Emerging smart contract language with Rust-inspired syntax"
+    primary_language: "Rust"
+    domain: "Programming Language"
+    architecture_type: "Compiler"
+    key_functions: ["Safe smart contracts", "Memory safety", "Type safety", "EVM compilation", "Rust-like syntax"]
+    
+  - url: "https://github.com/vyperlang/vyper"
+    name: "Vyper"
+    category: "programming_language"
+    description: "Pythonic smart contract language focusing on security"
+    primary_language: "Python"
+    domain: "Programming Language"
+    architecture_type: "Compiler"
+    key_functions: ["Secure compilation", "Auditability", "Simplicity", "EVM targeting", "Python-like syntax"]
+
+  # Development and Testing Tools
+  - url: "https://github.com/vyperlang/titanoboa"
+    name: "Titanoboa"
+    category: "development_tool"
+    description: "Vyper interpreter with fast JIT-compilation and advanced testing tools"
+    primary_language: "Python"
+    domain: "Development Tool"
+    architecture_type: "Interpreter"
+    key_functions: ["Vyper execution", "JIT compilation", "Testing framework", "Contract interaction", "Debugging tools"]
+    
+  - url: "https://github.com/ethereum/remix-project"
+    name: "Remix"
+    category: "development_tool"
+    description: "Web-based IDE for Ethereum smart contract development"
+    primary_language: "TypeScript"
+    domain: "Development IDE"
+    architecture_type: "Web Application"
+    key_functions: ["Smart contract development", "Compilation", "Debugging", "Deployment", "Plugin ecosystem"]
+    
+  - url: "https://github.com/ethereum/sourcify"
+    name: "Sourcify"
+    category: "development_tool"
+    description: "Source code verification service for Ethereum smart contracts"
+    primary_language: "TypeScript"
+    domain: "Verification Service"
+    architecture_type: "Web Service"
+    key_functions: ["Source verification", "Metadata validation", "Contract transparency", "IPFS integration", "API services"]
+
+  # Infrastructure and Data
+  - url: "https://github.com/ethereum-lists/chains"
+    name: "Ethereum Chains"
+    category: "infrastructure"
+    description: "Comprehensive list of Ethereum chain configurations and metadata"
+    primary_language: "JSON"
+    domain: "Chain Registry"
+    architecture_type: "Data Repository"
+    key_functions: ["Chain configurations", "Network metadata", "RPC endpoints", "Explorer links", "Community maintenance"]
+
+  # Virtual Machines and Runtime Implementations
+  - url: "https://github.com/ethereum/py-evm"
+    name: "Py-EVM"
+    category: "virtual_machine"
+    description: "Python implementation of the Ethereum Virtual Machine"
+    primary_language: "Python"
+    domain: "Virtual Machine"
+    architecture_type: "Runtime"
+    key_functions: ["EVM implementation", "State execution", "Protocol testing", "Research platform", "Educational tool"]
+    
+  - url: "https://github.com/ethereumjs/ethereumjs-monorepo"
+    name: "EthereumJS"
+    category: "virtual_machine"
+    description: "JavaScript/TypeScript Ethereum ecosystem libraries and tools"
+    primary_language: "TypeScript"
+    domain: "JavaScript Ecosystem"
+    architecture_type: "Library Collection"
+    key_functions: ["EVM implementation", "Ethereum utilities", "Protocol libraries", "Client components", "Developer tools"]
+
+  # Web3 Libraries and SDKs
+  - url: "https://github.com/ethereum/web3.py"
+    name: "Web3.py"
+    category: "web3_library"
+    description: "Python library for interacting with Ethereum"
+    primary_language: "Python"
+    domain: "Web3 Library"
+    architecture_type: "Library"
+    key_functions: ["Ethereum interaction", "Contract calls", "Transaction management", "Provider abstraction", "ENS resolution"]
+    
+  - url: "https://github.com/web3/web3.js"
+    name: "Web3.js"
+    category: "web3_library"
+    description: "Ethereum JavaScript API collection"
+    primary_language: "JavaScript"
+    domain: "Web3 Library"
+    architecture_type: "Library"
+    key_functions: ["Ethereum RPC calls", "Contract interaction", "Wallet management", "Event filtering", "Utility functions"]
+    
+  - url: "https://github.com/ethers-io/ethers.js"
+    name: "Ethers.js"
+    category: "web3_library"
+    description: "Complete Ethereum library and wallet implementation"
+    primary_language: "JavaScript"
+    domain: "Web3 Library"
+    architecture_type: "Library"
+    key_functions: ["Provider management", "Signer abstraction", "Contract factories", "Utilities", "TypeScript support"]
+    
+  - url: "https://github.com/wevm/viem"
+    name: "Viem"
+    category: "web3_library"
+    description: "TypeScript interface for Ethereum that provides low-level stateless primitives"
+    primary_language: "TypeScript"
+    domain: "Web3 Library"
+    architecture_type: "Library"
+    key_functions: ["Type-safe Ethereum API", "Modern JavaScript features", "Tree-shakeable", "Modular design", "Performance optimization"]
+    
+  - url: "https://github.com/hyperledger-web3j/web3j"
+    name: "Web3j"
+    category: "web3_library"
+    description: "Lightweight, reactive Java and Android library for integration with Ethereum"
+    primary_language: "Java"
+    domain: "Web3 Library"
+    architecture_type: "Library"
+    key_functions: ["Java Ethereum integration", "Android support", "Reactive programming", "Smart contract wrappers", "Enterprise features"]
+    
+  - url: "https://github.com/nethereum/nethereum"
+    name: "Nethereum"
+    category: "web3_library"
+    description: ".NET integration library for Ethereum"
+    primary_language: "C#"
+    domain: "Web3 Library"
+    architecture_type: "Library"
+    key_functions: [".NET Ethereum integration", "Smart contract interaction", "Wallet management", "Unity support", "Cross-platform compatibility"]
+
+  # Scaffolding and Templates
+  - url: "https://github.com/scaffold-eth/scaffold-eth-2"
+    name: "Scaffold-ETH 2"
+    category: "scaffolding"
+    description: "Open-source toolkit for building decentralized applications"
+    primary_language: "TypeScript"
+    domain: "Development Template"
+    architecture_type: "Scaffolding"
+    key_functions: ["DApp boilerplate", "Smart contract templates", "Frontend integration", "Development workflow", "Educational tools"]
+
+# Category definitions for strategic pairing
+categories:
+  infrastructure:
+    - "consensus_client"
+    - "execution_client" 
+    - "infrastructure"
+    - "virtual_machine"
+  
+  development_tools:
+    - "development_framework"
+    - "development_tool"
+    - "programming_language"
+    - "scaffolding"
+  
+  libraries:
+    - "web3_library"
+    - "smart_contract_library"
+  
+  specialized:
+    - "light_client"
+
+# Similarity matrix for strategic pairing (higher = more similar)
+similarity_groups:
+  consensus_clients: ["prysm", "lighthouse", "teku", "nimbus", "lodestar", "grandine"]
+  execution_clients: ["geth", "nethermind", "besu", "erigon", "reth"]
+  web3_libraries: ["web3.py", "web3.js", "ethers.js", "viem", "web3j", "nethereum"]
+  development_frameworks: ["alloy", "ape", "foundry", "hardhat"]
+  development_tools: ["titanoboa", "remix", "sourcify"]
+  programming_languages: ["solidity", "fe", "vyper"]
+  virtual_machines: ["py-evm", "ethereumjs"]
