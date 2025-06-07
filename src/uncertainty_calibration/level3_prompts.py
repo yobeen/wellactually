@@ -1,247 +1,264 @@
 # src/uncertainty_calibration/level3_prompts.py
 """
-Level 3 Prompt Generator with structured Reasoning/Answer format.
-Generates prompts for dependency comparisons (Level 3).
+Level 3 prompt generator for dependency comparisons.
+Generates prompts using 4-dimension framework for assessing dependency importance.
 """
 
 import logging
-import random
-import networkx as nx
-from typing import Dict, List, Any, Optional, Tuple
-from collections import defaultdict
+from typing import Dict, List, Any
 
 logger = logging.getLogger(__name__)
 
 class Level3PromptGenerator:
     """
-    Generates prompts for Level 3 dependency comparisons with structured format.
-    
-    Level 3 focuses on comparing relative importance of dependencies
-    within each seed repository's ecosystem.
+    Generates Level 3 dependency comparison prompts using 4-dimension framework.
     """
     
-    def __init__(self, config):
+    def __init__(self):
+        """Initialize the Level 3 prompt generator."""
+        
+        # Define the 4-dimension framework for dependency assessment
+        self.dimension_framework = {
+            "functional_necessity": {
+                "name": "Functional Necessity",
+                "weight": 0.4,
+                "description": "How essential is this dependency for core parent functionality?",
+                "indicators": [
+                    "Core features that break without it",
+                    "API surface area used by parent",
+                    "Critical path involvement in main workflows",
+                    "Frequency of usage in codebase",
+                    "Impact on primary use cases"
+                ],
+                "scoring_guidance": "1=Optional enhancement, 3=Nice-to-have feature, 5=Important functionality, 8=Core feature dependency, 10=Parent breaks without it"
+            },
+            "performance_impact": {
+                "name": "Performance Impact",
+                "weight": 0.3,
+                "description": "How much does this dependency affect parent performance and resource usage?",
+                "indicators": [
+                    "CPU and memory overhead",
+                    "I/O operations and latency",
+                    "Startup time contribution",
+                    "Runtime performance bottlenecks",
+                    "Resource consumption patterns"
+                ],
+                "scoring_guidance": "1=Negligible performance impact, 3=Minor overhead, 5=Moderate performance consideration, 8=Significant performance factor, 10=Performance critical component"
+            },
+            "replaceability": {
+                "name": "Replaceability",
+                "weight": 0.2,
+                "description": "How easily could this dependency be replaced, removed, or substituted?",
+                "indicators": [
+                    "Availability of alternative libraries",
+                    "API complexity and coupling",
+                    "Migration effort required",
+                    "Vendor lock-in considerations",
+                    "Community and ecosystem support"
+                ],
+                "scoring_guidance": "1=Easily replaceable with many alternatives, 3=Moderate replacement effort, 5=Limited alternatives available, 8=Difficult to replace, 10=Deeply integrated/irreplaceable"
+            },
+            "integration_depth": {
+                "name": "Integration Depth",
+                "weight": 0.1,
+                "description": "How deeply integrated is this dependency into parent architecture and design?",
+                "indicators": [
+                    "Number of import/usage points",
+                    "Architectural coupling level",
+                    "Configuration and setup complexity",
+                    "Data format dependencies",
+                    "Build and deployment integration"
+                ],
+                "scoring_guidance": "1=Surface-level usage, 3=Moderate integration, 5=Well-integrated component, 8=Architectural dependency, 10=Foundational architectural component"
+            }
+        }
+    
+    def create_dependency_comparison_prompt(self, parent_context: Dict[str, Any], 
+                                          dep_a_context: Dict[str, Any], 
+                                          dep_b_context: Dict[str, Any]) -> List[Dict[str, str]]:
         """
-        Initialize the Level 3 prompt generator.
+        Create a dependency comparison prompt using the 4-dimension framework.
         
         Args:
-            config: LLM augmentation configuration
-        """
-        self.config = config
-        
-    def generate_dependency_pairs(self, graph: nx.DiGraph, repo_profiles: Dict[str, Any],
-                                num_pairs: int, iteration: int) -> List[Tuple[str, str, str]]:
-        """Generate dependency pairs for comparison using strategic sampling."""
-        if not isinstance(graph, nx.DiGraph):
-            raise ValueError("Graph must be a NetworkX DiGraph")
-        
-        if num_pairs <= 0:
-            raise ValueError(f"Number of pairs must be positive, got: {num_pairs}")
-        
-        if iteration not in [1, 2, 3, 4]:
-            raise ValueError(f"Invalid iteration number: {iteration}. Must be 1, 2, 3, or 4")
-        
-        # Get parent repositories (those that have dependencies)
-        parent_repos = self._get_parent_repositories(graph)
-        
-        if not parent_repos:
-            # Fallback to basic examples if no graph data
-            return self._generate_fallback_pairs(num_pairs)
-        
-        # Apply iteration-specific sampling strategy
-        if iteration == 1:
-            pairs = self._generate_tier1_pairs(graph, parent_repos, num_pairs)
-        elif iteration == 2:
-            pairs = self._generate_tier1_and_tier2_pairs(graph, parent_repos, num_pairs)
-        elif iteration == 3:
-            pairs = self._generate_all_tiers_pairs(graph, parent_repos, num_pairs)
-        else:
-            pairs = self._generate_complete_strategic_coverage(graph, parent_repos, num_pairs)
-        
-        if not pairs:
-            return self._generate_fallback_pairs(num_pairs)
-        
-        logger.info(f"Generated {len(pairs)} Level 3 dependency pairs for iteration {iteration}")
-        return pairs
-    
-    def _get_parent_repositories(self, graph: nx.DiGraph) -> List[str]:
-        """Get list of repositories that have dependencies."""
-        parent_repos = set()
-        
-        for source, target in graph.edges():
-            # Skip special nodes
-            if target not in ['ethereum', 'originality'] and target.strip():
-                parent_repos.add(target)
-        
-        return list(parent_repos)
-    
-    def _get_dependencies_for_parent(self, graph: nx.DiGraph, parent: str) -> List[str]:
-        """Get list of dependencies for a parent repository."""
-        dependencies = []
-        
-        for source, target in graph.edges():
-            if target == parent and source.strip():
-                dependencies.append(source)
-        
-        return dependencies
-    
-    def _generate_fallback_pairs(self, num_pairs: int) -> List[Tuple[str, str, str]]:
-        """Generate fallback pairs when no graph data is available."""
-        fallback_examples = [
-            ("https://github.com/psf/requests", "https://github.com/pydantic/pydantic", "https://github.com/ethereum/web3.py"),
-            ("https://github.com/readthedocs/sphinx_rtd_theme", "https://github.com/psf/requests", "https://github.com/vyperlang/titanoboa"),
-            ("https://github.com/numpy/numpy", "https://github.com/pandas-dev/pandas", "https://github.com/ethereum/py-evm"),
-        ]
-        
-        # Repeat examples to reach desired count
-        pairs = []
-        while len(pairs) < num_pairs and fallback_examples:
-            pairs.extend(fallback_examples)
-        
-        return pairs[:num_pairs]
-    
-    def _generate_tier1_pairs(self, graph: nx.DiGraph, parent_repos: List[str], 
-                            num_pairs: int) -> List[Tuple[str, str, str]]:
-        """Generate Tier 1 pairs (obvious contrasts within each parent)."""
-        pairs = []
-        
-        # For each parent, find dependencies and create high-contrast pairs
-        for parent in parent_repos:
-            dependencies = self._get_dependencies_for_parent(graph, parent)
-            
-            if len(dependencies) < 2:
-                continue
-            
-            # Create pairs between dependencies (simple approach)
-            for i, dep1 in enumerate(dependencies):
-                for dep2 in dependencies[i+1:min(i+3, len(dependencies))]:
-                    pairs.append((dep1, dep2, parent))
-                    if len(pairs) >= num_pairs:
-                        return pairs[:num_pairs]
-        
-        return pairs
-    
-    def _generate_tier1_and_tier2_pairs(self, graph: nx.DiGraph, parent_repos: List[str],
-                                      num_pairs: int) -> List[Tuple[str, str, str]]:
-        """Generate Tier 1 and Tier 2 pairs (clear + moderate contrasts)."""
-        # 60% Tier 1, 40% Tier 2
-        tier1_count = int(num_pairs * 0.6)
-        tier2_count = num_pairs - tier1_count
-        
-        pairs = []
-        
-        # Generate Tier 1 pairs
-        tier1_pairs = self._generate_tier1_pairs(graph, parent_repos, tier1_count)
-        pairs.extend(tier1_pairs)
-        
-        # Generate additional pairs for Tier 2
-        for parent in parent_repos:
-            dependencies = self._get_dependencies_for_parent(graph, parent)
-            
-            if len(dependencies) >= 2:
-                # Add more pairs from this parent
-                for i, dep1 in enumerate(dependencies):
-                    for dep2 in dependencies[i+1:]:
-                        if (dep1, dep2, parent) not in pairs and (dep2, dep1, parent) not in pairs:
-                            pairs.append((dep1, dep2, parent))
-                            if len(pairs) >= num_pairs:
-                                return pairs[:num_pairs]
-        
-        return pairs
-    
-    def _generate_all_tiers_pairs(self, graph: nx.DiGraph, parent_repos: List[str],
-                                num_pairs: int) -> List[Tuple[str, str, str]]:
-        """Generate all tiers of pairs (high, moderate, low contrast)."""
-        return self._generate_tier1_and_tier2_pairs(graph, parent_repos, num_pairs)
-    
-    def _generate_complete_strategic_coverage(self, graph: nx.DiGraph, parent_repos: List[str],
-                                            num_pairs: int) -> List[Tuple[str, str, str]]:
-        """Generate complete strategic coverage of dependency space."""
-        pairs = []
-        
-        # Generate all possible pairs for each parent
-        for parent in parent_repos:
-            dependencies = self._get_dependencies_for_parent(graph, parent)
-            
-            if len(dependencies) >= 2:
-                for i, dep1 in enumerate(dependencies):
-                    for dep2 in dependencies[i+1:]:
-                        pairs.append((dep1, dep2, parent))
-        
-        # Shuffle and limit
-        random.shuffle(pairs)
-        return pairs[:num_pairs]
-    
-    def create_dependency_comparison_prompt(self, dep_a: str, dep_b: str, parent: str,
-                                          repo_profiles: Dict[str, Any] = None) -> List[Dict[str, str]]:
-        """
-        Create a dependency comparison prompt with structured format.
-        
-        Args:
-            dep_a: First dependency URL
-            dep_b: Second dependency URL  
-            parent: Parent repository URL
-            repo_profiles: Repository profiles (not used in simplified version)
+            parent_context: Context about the parent repository
+            dep_a_context: Context about first dependency
+            dep_b_context: Context about second dependency
             
         Returns:
             List of message dictionaries in OpenAI format
         """
-        # Validate inputs
-        for param, name in [(dep_a, 'dep_a'), (dep_b, 'dep_b'), (parent, 'parent')]:
-            if not param or not isinstance(param, str):
-                raise ValueError(f"{name} must be a non-empty string")
-        
-        # Extract names for readability
-        name_a = self._extract_repo_name(dep_a)
-        name_b = self._extract_repo_name(dep_b)
-        parent_name = self._extract_repo_name(parent)
-        
-        # Create structured dependency comparison prompt
-        prompt = [
-            {
-                "role": "system",
-                "content": "You are an expert evaluating the relative importance of dependencies to their parent repositories in the context of the Ethereum ecosystem. Consider functional criticality, replaceability, maintenance burden, and ecosystem impact. Provide your reasoning and then give a clear answer."
-            },
-            {
-                "role": "user",
-                "content": f"""Which dependency is more critical for the parent repository?
-
-Dependency A: {dep_a}
-({name_a})
-
-Dependency B: {dep_b}
-({name_b})
-
-Parent Repository: {parent}
-({parent_name})
-
-Consider factors such as:
-- Functional criticality: How essential is this dependency to core functionality?
-- Replaceability: How difficult would it be to replace this dependency?
-- Maintenance burden: What are the ongoing costs and risks?
-- Ecosystem impact: How does this dependency affect the broader Ethereum ecosystem?
-- Development workflow: How much does this dependency affect the development process?
-
-Please provide your analysis in this format:
-
-Reasoning: [Explain your analysis comparing the criticality of both dependencies for the parent repository, considering the factors above]
-
-Answer: [A or B or Equal]"""
-            }
-        ]
-        
-        return prompt
-            
-    def _extract_repo_name(self, url: str) -> str:
-        """Extract repository name from GitHub URL."""
-        if not url or not isinstance(url, str):
-            raise ValueError("Repository URL must be a non-empty string")
-        
         try:
-            if 'github.com' in url:
-                parts = url.rstrip('/').split('/')
-                if len(parts) >= 2:
-                    return parts[-1]  # Repository name
-            return url.split('/')[-1] if '/' in url else url
+            # Build framework section
+            framework_section = self._build_framework_section()
+            
+            # Build context sections
+            parent_section = self._build_parent_context_section(parent_context)
+            dependencies_section = self._build_dependencies_section(dep_a_context, dep_b_context)
+            
+            # Build response format
+            response_format = self._build_response_format(dep_a_context, dep_b_context)
+            
+            prompt = [
+                {
+                    "role": "system",
+                    "content": f"""You are an expert software architect evaluating dependency relationships within software projects. You will assess which of two dependencies is more important for a specific parent repository using a structured 4-dimension framework.
+
+DEPENDENCY IMPORTANCE ASSESSMENT FRAMEWORK:
+
+{framework_section}
+
+For each dimension, provide:
+1. A score from 1-10 for BOTH dependencies (where 1 = minimal importance, 10 = maximum importance)
+2. A weight (you may adjust from defaults if justified, but they should sum to approximately 1.0)
+3. Brief reasoning comparing both dependencies on this dimension
+
+Your goal is to determine which dependency is more critical for the parent repository's success and functionality.
+
+Provide your response in the exact JSON format specified."""
+                },
+                {
+                    "role": "user", 
+                    "content": f"""Please assess which dependency is more important for the parent repository using the 4-dimension framework:
+
+{parent_section}
+
+{dependencies_section}
+
+{response_format}
+
+Analyze each dimension carefully, score both dependencies, provide reasoning, and determine which dependency is more critical overall."""
+                }
+            ]
+            
+            return prompt
+            
         except Exception as e:
-            raise ValueError(f"Failed to extract repository name from URL '{url}': {e}")
+            logger.error(f"Error creating dependency comparison prompt: {e}")
+            raise
+    
+    def _build_framework_section(self) -> str:
+        """Build the 4-dimension framework description."""
+        sections = []
+        
+        for dimension_id, dimension in self.dimension_framework.items():
+            section = f"""
+**{dimension['name']} (Weight: {dimension['weight']:.0%})**
+- **Description**: {dimension['description']}
+- **Key Indicators**: {', '.join(dimension['indicators'])}
+- **Scoring Guidance**: {dimension['scoring_guidance']}"""
+            sections.append(section)
+        
+        return "\n".join(sections)
+    
+    def _build_parent_context_section(self, parent_context: Dict[str, Any]) -> str:
+        """Build the parent repository context section."""
+        return f"""
+PARENT REPOSITORY CONTEXT:
+Repository: {parent_context.get('url', 'unknown')}
+Name: {parent_context.get('name', 'unknown')}
+Description: {parent_context.get('description', 'No description available')}
+Primary Language: {parent_context.get('primary_language', 'unknown')}
+Domain: {parent_context.get('domain', 'unknown')}
+Architecture Type: {parent_context.get('architecture_type', 'unknown')}
+Key Functions: {parent_context.get('key_functions', 'unknown')}
+Dependency Management: {parent_context.get('dependency_management', 'unknown')}"""
+    
+    def _build_dependencies_section(self, dep_a_context: Dict[str, Any], 
+                                  dep_b_context: Dict[str, Any]) -> str:
+        """Build the dependencies context section."""
+        
+        dep_a_section = f"""
+DEPENDENCY A:
+Repository: {dep_a_context.get('url', 'unknown')}
+Name: {dep_a_context.get('name', 'unknown')}
+Description: {dep_a_context.get('description', 'No description available')}
+Category: {dep_a_context.get('category', 'unknown')}
+Primary Function: {dep_a_context.get('primary_function', 'unknown')}
+Integration Patterns: {dep_a_context.get('integration_patterns', 'unknown')}
+Performance Characteristics: {dep_a_context.get('performance_characteristics', 'unknown')}"""
+
+        dep_b_section = f"""
+DEPENDENCY B:
+Repository: {dep_b_context.get('url', 'unknown')}
+Name: {dep_b_context.get('name', 'unknown')}
+Description: {dep_b_context.get('description', 'No description available')}
+Category: {dep_b_context.get('category', 'unknown')}
+Primary Function: {dep_b_context.get('primary_function', 'unknown')}
+Integration Patterns: {dep_b_context.get('integration_patterns', 'unknown')}
+Performance Characteristics: {dep_b_context.get('performance_characteristics', 'unknown')}"""
+        
+        return dep_a_section + "\n" + dep_b_section
+    
+    def _build_response_format(self, dep_a_context: Dict[str, Any], 
+                             dep_b_context: Dict[str, Any]) -> str:
+        """Build the expected response format section."""
+        
+        dep_a_name = dep_a_context.get('name', 'dependency_a')
+        dep_b_name = dep_b_context.get('name', 'dependency_b')
+        
+        example_dimensions = []
+        for dimension_id, dimension in self.dimension_framework.items():
+            example_dimensions.append(f'''    "{dimension_id}": {{
+      "name": "{dimension['name']}",
+      "score_a": [1-10],
+      "score_b": [1-10],
+      "weight": {dimension['weight']:.3f},
+      "reasoning": "[Compare both dependencies on this dimension]"
+    }}''')
+        
+        dimensions_json = ',\n'.join(example_dimensions)
+        
+        response_format = f"""
+Please respond in this exact JSON format:
+
+{{
+  "parent_url": "{dep_a_context.get('url', 'parent_url')}",
+  "parent_name": "parent_repository_name",
+  "dependency_a_url": "{dep_a_context.get('url', 'dep_a_url')}",
+  "dependency_a_name": "{dep_a_name}",
+  "dependency_b_url": "{dep_b_context.get('url', 'dep_b_url')}",
+  "dependency_b_name": "{dep_b_name}",
+  "dimension_assessments": {{
+{dimensions_json}
+  }},
+  "overall_assessment": {{
+    "choice": "[A|B|Equal]",
+    "confidence": "[0.0-1.0]",
+    "weighted_score_a": "[calculated weighted sum for dependency A]",
+    "weighted_score_b": "[calculated weighted sum for dependency B]", 
+    "reasoning": "[Overall comparison explaining which dependency is more important and why]"
+  }}
+}}"""
+        
+        return response_format
+    
+    def get_default_weights(self) -> Dict[str, float]:
+        """Get the default weights for all dimensions."""
+        return {dimension_id: dimension['weight'] 
+                for dimension_id, dimension in self.dimension_framework.items()}
+    
+    def get_dimension_names(self) -> Dict[str, str]:
+        """Get mapping of dimension IDs to human-readable names."""
+        return {dimension_id: dimension['name'] 
+                for dimension_id, dimension in self.dimension_framework.items()}
+    
+    def validate_weights_sum(self, weights: Dict[str, float]) -> Dict[str, Any]:
+        """
+        Validate that weights sum to approximately 1.0.
+        
+        Args:
+            weights: Dictionary of dimension weights
+            
+        Returns:
+            Validation result dictionary
+        """
+        total_weight = sum(weights.values())
+        deviation = abs(total_weight - 1.0)
+        
+        return {
+            'total_weight': total_weight,
+            'deviation': deviation,
+            'is_valid': deviation <= 0.1,  # Allow 10% deviation
+            'needs_normalization': deviation > 0.05,  # Normalize if >5% deviation
+            'warning': deviation > 0.1
+        }
