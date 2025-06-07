@@ -1,0 +1,152 @@
+# Level 3 Dependency Comparison Configuration
+level3_dependency_comparison:
+  enabled: true
+  
+  # Data sources
+  data_sources:
+    parent_repos_csv: "data/external/parent_repos.csv"
+    dependencies_csv: "data/external/dependencies.csv"
+    
+  # CSV schema validation
+  csv_validation:
+    required_parent_columns:
+      - "parent_url"
+      - "name" 
+      - "description"
+      - "primary_language"
+      - "domain"
+      - "architecture_type"
+      - "key_functions"
+    
+    required_dependency_columns:
+      - "dependency_url"
+      - "name"
+      - "description"
+      - "category"
+      - "primary_function"
+      - "integration_patterns"
+    
+    validate_on_startup: true
+    
+  # 4-Dimension Framework Configuration
+  dimension_framework:
+    functional_necessity:
+      weight: 0.4
+      description: "How essential is this dependency for core parent functionality?"
+      score_range: [1, 10]
+      
+    performance_impact:
+      weight: 0.3
+      description: "How much does this dependency affect parent performance and resource usage?"
+      score_range: [1, 10]
+      
+    replaceability:
+      weight: 0.2
+      description: "How easily could this dependency be replaced, removed, or substituted?"
+      score_range: [1, 10]
+      
+    integration_depth:
+      weight: 0.1
+      description: "How deeply integrated is this dependency into parent architecture?"
+      score_range: [1, 10]
+  
+  # Response parsing configuration
+  response_parsing:
+    parsing_strategies:
+      - "perfect_json"
+      - "cleaned_json"
+      - "regex_extraction"
+      - "line_parsing"
+    
+    required_dimensions: 4
+    validate_dimension_completeness: true
+    calculate_perplexity_uncertainty: true
+    
+    # Fallback behavior
+    use_defaults_for_missing_dimensions: false  # Raise error instead
+    default_uncertainty: 0.5
+  
+  # Batch processing configuration
+  batch_processing:
+    enabled: true
+    max_pairs_per_parent: 10
+    checkpoint_interval: 25  # Save checkpoint every N tasks
+    resume_from_checkpoint: true
+    
+    # Rate limiting for batch jobs
+    delay_between_requests: 0.1  # seconds
+    batch_size: 100
+    
+    # Output configuration
+    save_intermediate_results: true
+    output_formats: ["json", "csv"]
+    include_detailed_analysis: true
+  
+  # Integration with existing uncertainty calibration
+  uncertainty_calibration_integration:
+    enabled: true
+    level3_sample_ratio: 0.3  # 30% of calibration data from Level 3
+    combine_with_existing_data: true
+    
+    # Data balancing
+    balance_by_model: true
+    balance_by_temperature: true
+    min_samples_per_model: 10
+
+# Add to existing feature_engineering section
+feature_engineering:
+  level3_features:
+    - dependency_category
+    - parent_domain
+    - integration_pattern
+    - performance_characteristics
+    - dimension_scores
+    - dimension_uncertainties
+    - parsing_confidence
+
+# Add to existing evaluation section  
+evaluation:
+  level3_specific_metrics:
+    - dimension_accuracy
+    - choice_consistency
+    - confidence_calibration
+    - parsing_success_rate
+    
+  # Cross-level analysis
+  cross_level_validation:
+    enabled: true
+    compare_l1_vs_l3: true  # Compare ecosystem vs dependency importance
+    validate_consistency: true
+
+# Add to existing quality_thresholds section
+quality_thresholds:
+  level3_specific:
+    min_parsing_success_rate: 0.85
+    max_dimension_uncertainty: 0.7
+    min_confidence_correlation: 0.6
+    
+    # Dimension-specific thresholds
+    min_functional_necessity_weight: 0.3  # Should be most important
+    max_integration_depth_weight: 0.2    # Should be least important
+
+# Example usage configuration
+example_configurations:
+  development:
+    level3_dependency_comparison:
+      batch_processing:
+        max_pairs_per_parent: 3
+        batch_size: 10
+      data_sources:
+        parent_repos_csv: "test_data/parent_repos.csv"
+        dependencies_csv: "test_data/dependencies.csv"
+  
+  production:
+    level3_dependency_comparison:
+      batch_processing:
+        max_pairs_per_parent: 20
+        batch_size: 500
+      csv_validation:
+        validate_on_startup: true
+      uncertainty_calibration_integration:
+        level3_sample_ratio: 0.4
+

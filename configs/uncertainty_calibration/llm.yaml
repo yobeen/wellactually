@@ -16,7 +16,7 @@ cache:
 
 # L1 Prompt Configuration
 l1_prompts:
-  variation: "v1"  # Options: "default", "v1", "v2"
+  variation: "default"  # Options: "default", "v1", "v2"
 
 # API Configuration with Provider Filtering Support
 api:

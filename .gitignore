@@ -81,6 +81,7 @@ secrets.json
 
 # Data files (add specific exceptions as needed)
 data/raw/*.csv
+data/raw/*
 data/processed/*.csv
 data/augmented/*.csv
 data/external/*

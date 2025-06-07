@@ -173,9 +173,8 @@ Repository: {dep_a_context.get('url', 'unknown')}
 Name: {dep_a_context.get('name', 'unknown')}
 Description: {dep_a_context.get('description', 'No description available')}
 Category: {dep_a_context.get('category', 'unknown')}
-Primary Function: {dep_a_context.get('primary_function', 'unknown')}
 Integration Patterns: {dep_a_context.get('integration_patterns', 'unknown')}
-Performance Characteristics: {dep_a_context.get('performance_characteristics', 'unknown')}"""
+"""
 
         dep_b_section = f"""
 DEPENDENCY B:
@@ -183,9 +182,8 @@ Repository: {dep_b_context.get('url', 'unknown')}
 Name: {dep_b_context.get('name', 'unknown')}
 Description: {dep_b_context.get('description', 'No description available')}
 Category: {dep_b_context.get('category', 'unknown')}
-Primary Function: {dep_b_context.get('primary_function', 'unknown')}
 Integration Patterns: {dep_b_context.get('integration_patterns', 'unknown')}
-Performance Characteristics: {dep_b_context.get('performance_characteristics', 'unknown')}"""
+"""
         
         return dep_a_section + "\n" + dep_b_section
     
