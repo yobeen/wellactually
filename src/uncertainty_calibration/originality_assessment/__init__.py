@@ -30,14 +30,12 @@ Repositories are categorized into 9 categories (A-I) with specific weight matric
 from .originality_prompt_generator import OriginalityPromptGenerator
 from .originality_response_parser import OriginalityResponseParser, ParsedOriginalityResponse
 from .originality_assessment_pipeline import OriginalityAssessmentPipeline
-from .originality_query_integration import OriginalityQueryEngine, EnhancedQueryEngine
 
 __all__ = [
     # Core components
     'OriginalityPromptGenerator',
     'OriginalityResponseParser', 
     'OriginalityAssessmentPipeline',
-    'OriginalityQueryEngine',
     
     # Enhanced query engine
     'EnhancedQueryEngine',
