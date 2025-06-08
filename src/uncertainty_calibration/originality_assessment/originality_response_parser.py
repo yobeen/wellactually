@@ -43,7 +43,6 @@ class OriginalityResponseParser:
             'security_innovation',
             'standards_leadership',
             'cross_client_compatibility',
-            'domain_problem_solving'
         ]
         
         # Default weights (will be overridden by repository-specific weights)
@@ -55,7 +54,6 @@ class OriginalityResponseParser:
             'security_innovation': 0.125,
             'standards_leadership': 0.125,
             'cross_client_compatibility': 0.125,
-            'domain_problem_solving': 0.125
         }
     
     def parse_response(self, response_text: str, expected_weights: Dict[str, float], 

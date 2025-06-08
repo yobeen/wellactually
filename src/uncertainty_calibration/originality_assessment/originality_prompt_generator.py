@@ -97,7 +97,7 @@ class OriginalityPromptGenerator:
     
     def _build_system_prompt(self) -> str:
         """Build the system prompt with general instructions."""
-        return """You are an expert evaluating the originality and innovation of open source repositories within the Ethereum ecosystem. You will assess repositories across 8 specific criteria using the Ethereum Ecosystem Repository Originality Assessment Framework.
+        return """You are an expert evaluating the originality and innovation of open source repositories within the Ethereum ecosystem. You will assess repositories across specific criteria.
 
 Your task is to evaluate how much original work and innovation each repository represents, considering both technical contributions and ecosystem impact. Focus on distinguishing between original innovations versus adaptations of existing solutions.
 
@@ -112,7 +112,7 @@ Key principles:
                           criteria_config: Dict[str, Any], weights: Dict[str, float]) -> str:
         """Build the user prompt with repository-specific assessment request."""
         
-        repo_url = repo_config.get('url', '')
+        repo_url = repo_config.get('repo_url', '')
         repo_name = repo_config.get('name', 'Unknown')
         description = repo_config.get('description', '')
         category = repo_config.get('category', '')
@@ -121,13 +121,13 @@ Key principles:
         # Sort criteria by weight (descending) to emphasize important ones
         sorted_criteria = sorted(weights.items(), key=lambda x: x[1], reverse=True)
         
-        prompt = f"""# ORIGINALITY ASSESSMENT REQUEST
+        prompt = f"""# ORIGINALITY ASSESSMENT
 
 ## Repository Information
 - **URL**: {repo_url}
 - **Name**: {repo_name}
 - **Description**: {description}
-- **Category**: {category_name} (Category {category})
+- **Category**: {category_name}
 
 ## Assessment Framework
 
@@ -151,16 +151,11 @@ You are evaluating this repository as a **{category_name}** project. Based on th
 **Description**: {criterion_desc}
 
 **Scoring Guidelines** (1-10 scale):
-- **1-2**: {self._get_scoring_guideline(criterion_key, 'low')}
-- **5-6**: {self._get_scoring_guideline(criterion_key, 'medium')}
-- **9-10**: {self._get_scoring_guideline(criterion_key, 'high')}
+- **1-3**: {self._get_scoring_guideline(criterion_key, 'low')}
+- **4-6**: {self._get_scoring_guideline(criterion_key, 'medium')}
+- **7-10**: {self._get_scoring_guideline(criterion_key, 'high')}
 
 """
-            
-            if examples.get('high'):
-                prompt += f"**High Score Examples**: {', '.join(examples['high'])}\n"
-            if examples.get('low'):
-                prompt += f"**Low Score Examples**: {', '.join(examples['low'])}\n"
             
             prompt += "\n"
         
@@ -186,9 +181,8 @@ Please provide your assessment in the following JSON format:
 
 ```json
 {{
-    "repository_name": "{repo_name}",
-    "repository_url": "{repo_url}",
-    "originality_category": "{category}",
+    "repository_name": "repo_name",
+    "repository_url": "repo_url",
     "criteria_scores": {{
 """
         
@@ -196,18 +190,17 @@ Please provide your assessment in the following JSON format:
         for criterion_key, weight in weights.items():
             criterion_name = criteria_config.get(criterion_key, {}).get('name', criterion_key)
             prompt += f"""        "{criterion_key}": {{
-            "score": [1-10 integer],
-            "weight": {weight},
             "reasoning": "Detailed explanation of the score...",
-            "uncertainty": [0.0-1.0 confidence level]
+            "score": [1-10 integer],
+            "weight": [criteria weight],
         }},
 """
         
         prompt = prompt.rstrip(',\n') + """
     },
     "overall_reasoning": "Comprehensive explanation of the repository's originality and innovation...",
-    "final_originality_score": [calculated automatically as weighted average],
-    "assessment_confidence": [0.0-1.0 overall confidence in assessment]
+    "total_weight": "[sum of all weights - should be ~1.0]",
+    "target_score": "[weighted sum: Σ(weight_i × score_i)]"
 }
 ```
 
@@ -262,11 +255,6 @@ Please begin your assessment now."""
                 'medium': 'Strong interoperability features and cross-client testing',
                 'high': 'Foundational interoperability work that enables ecosystem growth'
             },
-            'domain_problem_solving': {
-                'low': 'Solves general programming problems with blockchain context',
-                'medium': 'Innovative solutions to complex blockchain-specific problems',
-                'high': 'Breakthrough solutions that enable new blockchain capabilities'
-            }
         }
         
         return guidelines.get(criterion_key, {}).get(level, 'Evaluate based on originality and innovation')

@@ -57,7 +57,6 @@ ORIGINALITY_CRITERIA = [
     'security_innovation',
     'standards_leadership',
     'cross_client_compatibility',
-    'domain_problem_solving'
 ]
 
 ORIGINALITY_CATEGORIES = {
