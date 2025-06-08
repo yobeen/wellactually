@@ -235,9 +235,9 @@ Assess each criterion carefully and provide scores, weights, and reasoning. Ensu
         for criterion_id, criterion in self.criteria_template.items():
             example_criteria.append(f'''    "{criterion_id}": {{
       "name": "{criterion['name']}",
+      "reasoning": "[Brief explanation for the score]"
       "score": [1-10],
       "weight": {criterion['weight']:.3f},
-      "reasoning": "[Brief explanation for the score]"
     }}''')
         
         # Fix: Move the join operation outside the f-string
@@ -253,9 +253,9 @@ Please respond in this exact JSON format:
 {criteria_json}
   }},
   "assessment_summary": {{
+    "overall_reasoning": "[Brief overall assessment]"
     "total_weight": "[sum of all weights - should be ~1.0]",
     "target_score": "[weighted sum: Σ(weight_i × score_i)]",
-    "overall_reasoning": "[Brief overall assessment]"
   }}
 }}"""
         
