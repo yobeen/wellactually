@@ -1,4 +1,4 @@
-# src/uncertainty_calibration/multi_model_engine.py
+# src/shared/multi_model_engine.py
 """
 Multi-Model Engine for LLM Data Augmentation - REFACTORED VERSION with Cache Integration
 Handles querying multiple LLM models through OpenRouter API with file-based caching.
@@ -9,8 +9,8 @@ import time
 import logging
 import requests
 from typing import Dict, List, Any, Optional
-from src.uncertainty_calibration.response_parser import ResponseParser, ModelResponse
-from src.uncertainty_calibration.cache_manager import CacheManager
+from src.shared.response_parser import ResponseParser, ModelResponse
+from src.shared.cache_manager import CacheManager
 
 logger = logging.getLogger(__name__)
 
@@ -182,7 +182,7 @@ class MultiModelEngine:
         payload = {
             "model": model_id,
             "messages": prompt,
-            "max_tokens": 10,
+           # "max_tokens": 10,
             "temperature": temperature,
             "logprobs": True,
             "top_logprobs": 5

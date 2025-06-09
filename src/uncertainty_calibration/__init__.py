@@ -4,30 +4,30 @@ Uncertainty Calibration Package - Enhanced with Model-Specific Postprocessing
 """
 
 # Core components needed for L1 validation
-from src.uncertainty_calibration.data_collection import (
+from src.calibration.data_collection import (
     UncertaintyDataCollector,
     CalibrationDataPoint
 )
 
-from src.uncertainty_calibration.multi_model_engine import (
+from src.shared.multi_model_engine import (
     MultiModelEngine
 )
 
-from src.uncertainty_calibration.level1_prompts import (
+from src.tasks.l1.level1_prompts import (
     Level1PromptGenerator
 )
 
-from src.uncertainty_calibration.model_metadata import (
+from src.shared.model_metadata import (
     get_model_metadata,
     validate_model_id
 )
 
-from src.uncertainty_calibration.response_parser import (
+from src.shared.response_parser import (
     ModelResponse,
     ResponseParser
 )
 
-from src.uncertainty_calibration.model_answer_postprocessor import (
+from src.shared.model_answer_postprocessor import (
     ModelAnswerPostprocessor,
     normalize_answer_token
 )

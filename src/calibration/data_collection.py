@@ -9,12 +9,12 @@ import numpy as np
 from typing import Dict, List, Any, Optional, Tuple
 import logging
 from dataclasses import dataclass
-from src.uncertainty_calibration.multi_model_engine import MultiModelEngine
-from src.uncertainty_calibration.response_parser import ModelResponse
-from src.uncertainty_calibration.level1_prompts import Level1PromptGenerator
-from src.uncertainty_calibration.level2_prompts import Level2PromptGenerator
-from src.uncertainty_calibration.level3_prompts import Level3PromptGenerator
-from src.uncertainty_calibration.model_metadata import get_model_metadata, validate_model_id
+from src.shared.multi_model_engine import MultiModelEngine
+from src.shared.response_parser import ModelResponse
+from src.tasks.l1.level1_prompts import Level1PromptGenerator
+from src.tasks.originality.level2_prompts import Level2PromptGenerator
+from src.tasks.l3.level3_prompts import Level3PromptGenerator
+from src.shared.model_metadata import get_model_metadata, validate_model_id
 
 logger = logging.getLogger(__name__)
 

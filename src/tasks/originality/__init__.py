@@ -1,4 +1,4 @@
-# src/uncertainty_calibration/originality_assessment/__init__.py
+# src/tasks/originality/__init__.py
 """
 Originality Assessment Package
 

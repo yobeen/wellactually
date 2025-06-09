@@ -1,4 +1,4 @@
-# src/uncertainty_calibration/cache_manager.py
+# src/shared/cache_manager.py
 #!/usr/bin/env python3
 """
 File-based cache manager for LLM API responses.

@@ -14,9 +14,9 @@ import pandas as pd
 import os
 from omegaconf import OmegaConf
 
-from src.uncertainty_calibration.data_collection import UncertaintyDataCollector
-from src.uncertainty_calibration.feature_engineering import TwoModelFeatureEngineer
-from src.uncertainty_calibration.two_model_trainer import TwoModelTrainer
+from src.calibration.data_collection import UncertaintyDataCollector
+from src.calibration.feature_engineering import TwoModelFeatureEngineer
+from src.calibration.two_model_trainer import TwoModelTrainer
 
 # Configure logging
 logging.basicConfig(

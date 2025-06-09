@@ -18,8 +18,8 @@ from datetime import datetime
 import statistics
 
 # Import existing infrastructure
-from src.uncertainty_calibration.multi_model_engine import MultiModelEngine
-from src.uncertainty_calibration.model_metadata import get_model_metadata
+from src.shared.multi_model_engine import MultiModelEngine
+from src.shared.model_metadata import get_model_metadata
 
 # Import enhanced originality assessment components
 from .originality_prompt_generator import OriginalityPromptGenerator
@@ -298,7 +298,7 @@ class OriginalityAssessmentPipeline:
         except Exception as e:
             logger.error(f"Error in custom originality query: {e}")
             # Return error response
-            from src.uncertainty_calibration.response_parser import ModelResponse
+            from src.shared.response_parser import ModelResponse
             return ModelResponse(
                 model_id=model_id,
                 success=False,

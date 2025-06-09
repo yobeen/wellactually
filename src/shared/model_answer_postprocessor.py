@@ -1,4 +1,4 @@
-# src/uncertainty_calibration/model_answer_postprocessor.py
+# src/shared/model_answer_postprocessor.py
 #!/usr/bin/env python3
 """
 Model-specific answer postprocessing for handling tokenization artifacts.

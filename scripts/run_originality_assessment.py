@@ -14,7 +14,7 @@ from datetime import datetime
 # Add src to path for imports
 sys.path.append(str(Path(__file__).parent.parent))
 
-from src.uncertainty_calibration.originality_assessment.originality_assessment_pipeline import OriginalityAssessmentPipeline
+from src.tasks.originality.originality_assessment_pipeline import OriginalityAssessmentPipeline
 
 logger = logging.getLogger(__name__)
 

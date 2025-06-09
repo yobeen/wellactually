@@ -33,7 +33,7 @@ class RepositoryExtractor:
         """
         try:
             # Load training data
-            df = pd.read_csv(csv_path)
+            df = pd.read_csv(csv_path).head(1)
             logger.info(f"Loaded {len(df)} rows from {csv_path}")
             
             # Extract all repository URLs

@@ -10,9 +10,9 @@ from typing import Dict, Any, Optional
 
 from src.api.dependency_models import DependencyComparisonRequest, DependencyComparisonResponse, DimensionAssessment, OverallAssessment
 from src.api.llm_orchestrator import LLMOrchestrator
-from src.uncertainty_calibration.dependency_context_extractor import DependencyContextExtractor
-from src.uncertainty_calibration.level3_prompts import Level3PromptGenerator
-from src.uncertainty_calibration.dependency_response_parser import DependencyResponseParser
+from src.tasks.l3.dependency_context_extractor import DependencyContextExtractor
+from src.tasks.l3.level3_prompts import Level3PromptGenerator
+from src.tasks.l3.dependency_response_parser import DependencyResponseParser
 
 logger = logging.getLogger(__name__)
 

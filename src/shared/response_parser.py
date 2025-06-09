@@ -1,4 +1,4 @@
-# src/uncertainty_calibration/response_parser.py
+# src/shared/response_parser.py
 """
 Enhanced response parser with model-specific answer postprocessing integration.
 Updated to provide access to full content logprobs for criteria assessment.
@@ -12,7 +12,7 @@ from dataclasses import dataclass
 import copy
 
 # Import the new postprocessor
-from src.uncertainty_calibration.model_answer_postprocessor import ModelAnswerPostprocessor
+from src.shared.model_answer_postprocessor import ModelAnswerPostprocessor
 
 logger = logging.getLogger(__name__)
 

@@ -1,19 +1,16 @@
-# LightGBM Uncertainty Calibration Framework
+# Well Actually - LLM Assessment Framework
 
-A production-ready framework for calibrating uncertainty scores from heterogeneous LLMs using gradient boosting. Transforms raw perplexity scores into reliable confidence estimates that accurately predict answer correctness.
+A comprehensive framework for evaluating software repositories in the Ethereum ecosystem using multiple LLM-based assessment tasks. Originally developed for uncertainty calibration, the project has evolved into a modular collection of specialized assessment pipelines with shared infrastructure.
 
 ## Overview
 
-Instead of complex model-specific calibration methods, this framework uses LightGBM to learn the universal mapping:
-```
-f(raw_uncertainty, model_metadata) → P(answer_is_correct)
-```
+Well Actually provides three main assessment capabilities:
 
-This automatically handles:
-- Different uncertainty scales across model sizes
-- Model-specific calibration behaviors  
-- Temperature effects on uncertainty
-- Non-linear relationships between features
+1. **Repository Comparison (L1)**: Compare two repositories for their contribution to the Ethereum ecosystem
+2. **Originality Assessment (L2)**: Evaluate how original vs dependency-reliant a repository is (1-10 scale)
+3. **Criteria Assessment**: Detailed evaluation against 11 specific importance criteria
+4. **Dependency Comparison (L3)**: Compare dependencies within a repository context
+5. **Uncertainty Calibration**: Transform raw LLM uncertainty scores into reliable confidence estimates
 
 ## Quick Start
 
@@ -23,218 +20,235 @@ This automatically handles:
 pip install -r requirements.txt
 ```
 
-### 2. Data Exploration
+### 2. Assessment Tasks
 
 ```bash
-python scripts/explore_data.py
+# Repository comparison validation
+python scripts/validate_l1.py
+
+# Originality assessment
+python scripts/run_originality_assessment.py
+
+# Criteria-based assessment
+python scripts/run_criteria_assessment.py
+
+# Test specific pipelines
+python scripts/test_originality_pipeline.py
 ```
 
-### 3. Training Calibration Model
+### 3. API Server
 
 ```bash
-# Full training pipeline
-python scripts/train_uncertainty_calibration.py
+# Start FastAPI server
+python src/api/main.py
 
-# Quick test with minimal data
-python scripts/train_uncertainty_calibration.py --quick_test
-
-# Custom configuration
-python scripts/train_uncertainty_calibration.py \
-    --config configs/uncertainty_calibration/llm.yaml \
-    --models "openai/gpt-4o" "deepseek/deepseek-chat" \
-    --max_samples 20
+# Or with uvicorn
+uvicorn src.api.main:app --reload
 ```
 
-### 4. Using Trained Model
+### 4. Uncertainty Calibration (Original Framework)
 
 ```bash
-# Interactive mode
-python scripts/calibrate_uncertainties.py \
-    --model_path models/uncertainty_calibration/calibration_model.lgb \
-    --interactive
+# Train calibration model
+python scripts/train.py
 
-# Batch processing
-python scripts/calibrate_uncertainties.py \
-    --model_path models/uncertainty_calibration/calibration_model.lgb \
-    --input_csv input_uncertainties.csv \
-    --output_csv calibrated_results.csv
+# Run inference
+python scripts/inference.py
 ```
 
-## Project Structure
+## New Project Structure
 
 ```
-src/uncertainty_calibration/
-├── __init__.py                 # Package initialization
-├── model_metadata.py           # Model parameter definitions  
-├── data_collection.py          # Temperature sweep data collection
-├── feature_engineering.py      # Response to feature conversion
-├── lightgbm_trainer.py        # LightGBM training logic
-├── calibration_pipeline.py    # Production inference pipeline
-└── evaluation.py              # Calibration quality metrics
+src/
+├── shared/                     # Shared components
+│   ├── multi_model_engine.py   # LLM query management
+│   ├── cache_manager.py        # Response caching
+│   ├── response_parser.py      # Response parsing utilities
+│   ├── model_metadata.py       # Model configurations
+│   └── model_answer_postprocessor.py
+├── tasks/                      # Assessment tasks
+│   ├── l1/                     # Repository comparisons
+│   │   ├── level1_prompts.py
+│   │   ├── l1_analysis.py
+│   │   └── l1_*.py
+│   ├── originality/            # Originality assessment
+│   │   ├── originality_assessment_pipeline.py
+│   │   ├── originality_prompt_generator.py
+│   │   ├── originality_response_parser.py
+│   │   └── level2_prompts.py
+│   ├── criteria/               # Criteria-based assessment
+│   │   ├── criteria_assessment_pipeline.py
+│   │   ├── criteria_prompt_generator.py
+│   │   ├── fuzzy_response_parser.py
+│   │   └── *.py
+│   └── l3/                     # Dependency comparisons
+│       ├── level3_prompts.py
+│       ├── dependency_context_extractor.py
+│       └── dependency_response_parser.py
+├── calibration/                # Original uncertainty calibration
+│   ├── calibration_pipeline.py
+│   ├── lightgbm_trainer.py
+│   ├── feature_engineering.py
+│   ├── data_collection.py
+│   └── evaluation.py
+├── api/                        # FastAPI endpoints
+│   ├── main.py
+│   ├── llm_orchestrator.py
+│   └── *_handler.py
+└── utils/                      # Utilities
+    └── data_loader.py
 
-configs/uncertainty_calibration/
-└── llm.yaml                    # LLM and training configuration
-
-scripts/
-├── explore_data.py             # Data exploration
-├── train_uncertainty_calibration.py  # Complete training pipeline
-└── calibrate_uncertainties.py # Inference script
+configs/
+├── config.yaml                 # Main configuration
+├── uncertainty_calibration/
+│   └── llm.yaml               # LLM settings
+└── seed_repositories.yaml     # Ethereum repository metadata
 ```
 
-## Data Flow
+## Assessment Tasks
 
-### 1. Data Collection
-- Load `train.csv` with human preference judgments
-- Convert each row to appropriate prompts (Level 1-3)
-- Query multiple LLMs at different temperatures [0.0, 0.2, 0.4, 0.6, 0.8, 1.0]
-- Extract perplexity/uncertainty scores from logprobs
+### Repository Comparison (L1)
+Compares two repositories against the Ethereum ecosystem:
+- **Input**: Two repository URLs + "ethereum" context
+- **Output**: A vs B vs Equal + confidence
+- **Usage**: Ecosystem importance ranking
 
-### 2. Feature Engineering
-Core features (as specified in framework):
-- `raw_uncertainty`: Perplexity score from model
-- `model_name`: Categorical model identifier
-- `param_count`: Model parameters in billions
-- `temperature`: Sampling temperature
+### Originality Assessment (L2)  
+Evaluates repository originality across multiple criteria:
+- **Input**: Single repository URL
+- **Output**: Originality score (1-10) + detailed reasoning
+- **Categories**: A-I (Execution Clients, Libraries, Tools, etc.)
+- **Criteria**: 8 assessment dimensions with category-specific weights
 
-Additional features:
-- `level`: Data level (1=comparison, 2=originality, 3=dependency)
-- `provider`: Model organization (openai, meta, etc.)
-- `architecture`: Model architecture type
-- `log_param_count`: Log-scaled parameters
-- `is_zero_temp`: Zero temperature flag
-- `temp_squared`: Non-linear temperature effect
+### Criteria Assessment
+Detailed evaluation against 11 importance criteria:
+- **Input**: Repository URL + criteria weights
+- **Output**: Per-criterion scores + overall assessment
+- **Use case**: Comprehensive repository evaluation
 
-### 3. Training
-- LightGBM binary classifier predicts `P(answer_is_correct)`
-- Cross-validation with stratification by model and level
-- Early stopping to prevent overfitting
-- Feature importance analysis
-
-### 4. Evaluation
-Calibration quality metrics:
-- **Expected Calibration Error (ECE)**: Average difference between confidence and accuracy
-- **Maximum Calibration Error (MCE)**: Worst-case calibration error
-- **Brier Score**: Proper scoring rule decomposed into reliability + resolution
-- **ROC AUC**: Discrimination ability
-- **Sharpness**: How far predictions are from uninformative (0.5)
+### Dependency Comparison (L3)
+Compares dependencies within a repository context:
+- **Input**: Two dependencies + parent repository
+- **Output**: Dependency preference + reasoning
 
 ## Configuration
 
 ### Core Settings (`configs/uncertainty_calibration/llm.yaml`)
 
 ```yaml
-# Model selection
+# Model selection (12+ supported models)
 models:
   primary_models:
     gpt_4o: "openai/gpt-4o"
     llama_4_maverick: "meta-llama/llama-4-maverick"
     deepseek_v3: "deepseek/deepseek-chat"
 
-# Temperature sweep
+# Temperature sweep for uncertainty
 temperature_sweep:
   temperatures: [0.0, 0.2, 0.4, 0.6, 0.8, 1.0]
 
-# Data collection
-data_collection:
-  max_samples_per_level: 30
+# API configuration
+api:
+  openrouter_api_key: ${oc.env:OPENROUTER_API_KEY}
+  requests_per_minute: 60
 
-# LightGBM parameters
-lightgbm:
-  params:
-    objective: "binary"
-    learning_rate: 0.05
-    num_leaves: 31
+# Caching
+cache:
+  enabled: true
+  directory: "cache"
 ```
 
-### Quality Thresholds
+### Repository Metadata (`configs/seed_repositories.yaml`)
+Contains 30+ Ethereum repositories with:
+- Repository URLs and metadata
+- Originality categories (A-I)
+- Domain classifications
+- Architecture types
 
-```yaml
-quality_thresholds:
-  max_ece: 0.1          # Maximum Expected Calibration Error
-  min_roc_auc: 0.65     # Minimum discrimination ability
-```
-
-## Data Levels
-
-The framework handles three types of data from `train.csv`:
-
-### Level 1: Seed Repository Comparisons
-- `parent == "ethereum"`
-- Compares two repositories: "Which contributes more to Ethereum ecosystem?"
-- Output: A vs B vs Equal
-
-### Level 2: Originality Assessment  
-- `parent == "originality"`
-- Assesses single repository originality on 1-10 scale
-- Output: Originality bucket (1-10)
-
-### Level 3: Dependency Comparisons
-- `parent == <repository_url>`
-- Compares dependencies within parent repository
-- Output: A vs B vs Equal
-
-## Production Usage
-
-```python
-from src.uncertainty_calibration import UncertaintyCalibrationPipeline
-
-# Load trained pipeline
-pipeline = create_pipeline_from_config("configs/uncertainty_calibration/llm.yaml")
-
-# Calibrate new uncertainties
-raw_uncertainties = [0.3, 0.7, 0.2]
-model_names = ["openai/gpt-4o", "deepseek/deepseek-chat", "meta-llama/llama-4-maverick"]
-temperatures = [0.0, 0.0, 0.2]
-
-calibrated_confidences = pipeline.predict_calibrated_uncertainty(
-    raw_uncertainties, model_names, temperatures
-)
-
-# Results: [0.82, 0.31, 0.76] - probabilities that answers are correct
-```
-
-## Expected Results
-
-**Before Calibration**: Raw uncertainty 0.7 from different models means different things
-
-**After Calibration**: All uncertainty scores map to meaningful confidence levels:
-- 0.9 confidence → 90% chance the answer is correct
-- 0.3 confidence → 30% chance the answer is correct
-
-**Key Benefits**:
-- **Unified Scale**: All models produce comparable uncertainty scores
-- **Predictive**: Uncertainty accurately predicts correctness
-- **Automatic**: No manual calibration curves or model-specific tuning
-- **Extensible**: Easy to add new models or features
-
-## Troubleshooting
-
-### Common Issues
-
-1. **API Rate Limits**: Reduce `requests_per_minute` in config
-2. **Out of Memory**: Reduce `max_samples_per_level` for large datasets
-3. **Poor Calibration**: Check data quality, increase training samples
-4. **Missing Models**: Verify model IDs in `model_metadata.py`
-
-### Debugging
+## API Endpoints
 
 ```bash
-# Enable debug logging
-export PYTHONPATH=src
-python -c "
-import logging
-logging.basicConfig(level=logging.DEBUG)
-from src.uncertainty_calibration import run_calibration_pipeline
-run_calibration_pipeline('configs/uncertainty_calibration/llm.yaml')
-"
+# Repository comparison
+POST /compare
+{
+  "repo_a": "https://github.com/ethereum/go-ethereum",
+  "repo_b": "https://github.com/ethereum/solidity",
+  "parent": "ethereum"
+}
+
+# Originality assessment  
+POST /assess
+{
+  "repository_url": "https://github.com/ethereum/go-ethereum"
+}
+
+# Criteria assessment
+POST /criteria
+{
+  "repository_url": "https://github.com/ethereum/go-ethereum",
+  "criteria_weights": {...}
+}
 ```
 
-## Contributing
+## Shared Infrastructure
 
-1. Add new models to `model_metadata.py`
-2. Extend features in `feature_engineering.py`
-3. Add evaluation metrics in `evaluation.py`
-4. Update configuration in `llm.yaml`
+### MultiModelEngine
+- Manages queries across 12+ LLM models via OpenRouter
+- Intelligent caching with correlation analysis  
+- Rate limiting and provider filtering
+- Temperature sweeps for uncertainty quantification
+
+### Response Processing
+- Standardized response parsing across tasks
+- Model-specific answer postprocessing
+- Uncertainty extraction from logprobs
+- Robust error handling
+
+## Data Structure
+
+All assessments use structured data from `train.csv`:
+- **Level 1**: `parent == "ethereum"` (repository comparisons)
+- **Level 2**: `parent == "originality"` (originality assessment)
+- **Level 3**: `parent == <repo_url>` (dependency comparisons)
+
+## Environment Setup
+
+Required environment variables:
+```bash
+export OPENROUTER_API_KEY="your_key_here"
+export PYTHONPATH="src"
+```
+
+## Development
+
+### Adding New Assessment Tasks
+1. Create new folder in `src/tasks/`
+2. Implement prompt generator and response parser
+3. Add pipeline orchestrator
+4. Update API handlers if needed
+
+### Adding New Models
+1. Update `src/shared/model_metadata.py`
+2. Add model configuration to `llm.yaml`
+3. Test with existing pipelines
+
+## Original Uncertainty Calibration
+
+The framework includes the original LightGBM-based uncertainty calibration:
+
+```python
+from src.calibration.calibration_pipeline import UncertaintyCalibrationPipeline
+
+# Load trained pipeline
+pipeline = UncertaintyCalibrationPipeline.from_config("configs/uncertainty_calibration/llm.yaml")
+
+# Calibrate uncertainties
+confidences = pipeline.predict_calibrated_uncertainty(
+    raw_uncertainties=[0.3, 0.7, 0.2],
+    model_names=["openai/gpt-4o", "deepseek/deepseek-chat"],
+    temperatures=[0.0, 0.2]
+)
+```
 
 ## License
 

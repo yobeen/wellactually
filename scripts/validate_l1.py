@@ -12,10 +12,10 @@ import logging
 from pathlib import Path
 from omegaconf import OmegaConf
 
-from src.uncertainty_calibration.data_collection import UncertaintyDataCollector
+from src.calibration.data_collection import UncertaintyDataCollector
 from src.utils.data_loader import load_l1_data
-from src.uncertainty_calibration.l1_core_analysis import run_analysis
-from src.uncertainty_calibration.l1_voting_analysis import run_voting_analysis
+from src.tasks.l1.l1_core_analysis import run_analysis
+from src.tasks.l1.l1_voting_analysis import run_voting_analysis
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -67,9 +67,9 @@ def main():
     
     # Initialize data collector with multiple models for voting
     print("\n2. Initializing data collector...")
-    test_models = ["openai/gpt-4o",
+    test_models = [
+            "openai/gpt-4o",
             "meta-llama/llama-4-maverick",
-            "deepseek/deepseek-chat",
             "x-ai/grok-3-beta",
             "mistralai/mixtral-8x22b-instruct",
             "google/gemma-3-27b-it",
@@ -97,7 +97,7 @@ def main():
     try:
         calibration_data_points = collector.collect_training_data(
             train_df=l1_data,
-            temperatures=[0.7],
+            temperatures=[0.2],
             max_samples_per_level=len(l1_data)  # Process all L1 data
         )
         

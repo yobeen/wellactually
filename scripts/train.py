@@ -14,7 +14,7 @@ import pandas as pd
 # Add src to Python path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from src.uncertainty_calibration import (
+from src.calibration.calibration_pipeline import (
     UncertaintyCalibrationPipeline,
     CalibrationPipelineConfig,
     create_pipeline_from_config

@@ -16,7 +16,7 @@ from datetime import datetime
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from omegaconf import OmegaConf
-from src.uncertainty_calibration.criteria_assessment import CriteriaAssessmentPipeline
+from src.tasks.criteria import CriteriaAssessmentPipeline
 
 def setup_logging(verbose: bool = False):
     """Setup logging configuration."""
@@ -78,8 +78,8 @@ Examples:
     parser.add_argument(
         "--model", 
         type=str, 
-        default="openai/gpt-4o",
-        help="LLM model to use for assessment (default: openai/gpt-4o)"
+        default="deepseek/deepseek-r1-0528",
+        help="LLM model to use for assessment (default: deepseek/deepseek-r1-0528)"
     )
     
     parser.add_argument(

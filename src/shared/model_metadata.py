@@ -1,4 +1,4 @@
-# src/uncertainty_calibration/model_metadata.py
+# src/shared/model_metadata.py
 #!/usr/bin/env python3
 """
 Model metadata for LLM uncertainty calibration.

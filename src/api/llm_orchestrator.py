@@ -9,10 +9,10 @@ import time
 from typing import Dict, Any, List, Optional, Tuple
 from omegaconf import DictConfig
 
-from src.uncertainty_calibration.multi_model_engine import MultiModelEngine
-from src.uncertainty_calibration.level1_prompts import Level1PromptGenerator
-from src.uncertainty_calibration.response_parser import ResponseParser, ModelResponse
-from src.uncertainty_calibration.model_metadata import get_model_metadata
+from src.shared.multi_model_engine import MultiModelEngine
+from src.tasks.l1.level1_prompts import Level1PromptGenerator
+from src.shared.response_parser import ResponseParser, ModelResponse
+from src.shared.model_metadata import get_model_metadata
 
 logger = logging.getLogger(__name__)
 

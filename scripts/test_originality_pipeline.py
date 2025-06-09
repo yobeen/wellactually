@@ -14,8 +14,8 @@ from omegaconf import OmegaConf
 # Add project root to path
 sys.path.append(str(Path(__file__).parent.parent))
 
-from src.uncertainty_calibration.originality_assessment.originality_prompt_generator import OriginalityPromptGenerator
-from src.uncertainty_calibration.originality_assessment.originality_assessment_pipeline import OriginalityAssessmentPipeline
+from src.tasks.originality.originality_prompt_generator import OriginalityPromptGenerator
+from src.tasks.originality.originality_assessment_pipeline import OriginalityAssessmentPipeline
 
 # Setup logging
 logging.basicConfig(

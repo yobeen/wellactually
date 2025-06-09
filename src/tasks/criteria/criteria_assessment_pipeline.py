@@ -1,4 +1,4 @@
-# src/uncertainty_calibration/criteria_assessment/criteria_assessment_pipeline.py
+# src/tasks/criteria/criteria_assessment_pipeline.py
 """
 Main pipeline for criteria-based repository assessment.
 Contains business logic for orchestrating the complete assessment workflow.
@@ -11,8 +11,8 @@ from typing import Dict, List, Any
 from datetime import datetime
 
 # Import existing infrastructure  
-from ..multi_model_engine import MultiModelEngine
-from ..model_metadata import get_model_metadata
+from src.shared.multi_model_engine import MultiModelEngine
+from src.shared.model_metadata import get_model_metadata
 
 # Import criteria assessment components
 from .repo_extractor import RepositoryExtractor

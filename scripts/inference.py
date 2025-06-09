@@ -16,12 +16,9 @@ import numpy as np
 # Add src to Python path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from src.uncertainty_calibration import (
-    LightGBMCalibrationTrainer,
-    CalibrationFeatureEngineer,
-    get_model_metadata,
-    validate_model_id
-)
+from src.calibration.lightgbm_trainer import LightGBMCalibrationTrainer
+from src.calibration.feature_engineering import TwoModelFeatureEngineer
+from src.shared.model_metadata import get_model_metadata, validate_model_id
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -71,7 +68,7 @@ def main():
             logger.error(f"Model metadata not found: {metadata_path}")
             return 1
             
-        feature_engineer = CalibrationFeatureEngineer()
+        feature_engineer = TwoModelFeatureEngineer()
         # Note: In production, you'd need to load the fitted encoders
         
     except Exception as e:
