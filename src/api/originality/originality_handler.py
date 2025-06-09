@@ -7,7 +7,9 @@ Skeleton implementation for future development.
 import logging
 import random
 import time
+from pathlib import Path
 from typing import Dict, Any, Optional
+import json
 
 from src.api.core.requests import OriginalityRequest
 from src.api.core.responses import OriginalityResponse
@@ -21,55 +23,52 @@ class OriginalityHandler:
     This is a skeleton implementation for future development.
     """
     
-    def __init__(self, llm_orchestrator: LLMOrchestrator):
+    def __init__(self, llm_orchestrator: LLMOrchestrator,
+                 originality_data_dir: str = "data/processed/originality"):
         """
         Initialize originality handler.
         
         Args:
             llm_orchestrator: LLM orchestrator service
+            originality_data_dir: Directory containing originality assessment data
         """
         self.llm_orchestrator = llm_orchestrator
-        logger.info("OriginalityHandler initialized (SKELETON)")
+        self.originality_data_dir = Path(originality_data_dir)
+        self._special_case_enabled = True
+        logger.info("OriginalityHandler initialized with special case support")
     
     async def handle_originality_assessment(self, request: OriginalityRequest) -> OriginalityResponse:
         """
         Handle repository originality assessment.
-        This is a skeleton implementation that returns mock results.
+        Uses pre-computed originality data if available, falls back to LLM otherwise.
         
         Args:
             request: Originality request
             
         Returns:
-            OriginalityResponse with skeleton results
+            OriginalityResponse with assessment results
         """
         try:
             start_time = time.time()
             
-            # Extract repository information
-            repo_info = self.llm_orchestrator.extract_repo_info(request.repo)
+            # Extract owner/repo from URL
+            owner, repo = self._extract_owner_repo_from_url(request.repo)
             
-            logger.info(f"Processing originality assessment for: {repo_info['name']} (SKELETON)")
+            logger.info(f"Processing originality assessment for: {owner}/{repo}")
             
-            # Get model and temperature from parameters
-            model_id = request.parameters.get('model_id')
-            temperature = request.parameters.get('temperature', 0.7)
+            # Try special case first
+            if self._special_case_enabled:
+                special_case_response = self._try_special_case_assessment(
+                    owner, repo, request, start_time
+                )
+                if special_case_response:
+                    logger.info(f"Originality assessment completed via special case: "
+                               f"score={special_case_response.originality:.2f}")
+                    return special_case_response
             
-            # Query LLM using orchestrator (skeleton implementation)
-            model_response = await self.llm_orchestrator.query_originality_assessment(
-                repo_info=repo_info,
-                model_id=model_id,
-                temperature=temperature
-            )
-            
-            # Transform to API response format
-            api_response = self._transform_to_originality_response(
-                model_response, request, start_time
-            )
-            
-            logger.info(f"Originality assessment completed (SKELETON): "
-                       f"score={api_response.originality:.2f}")
-            
-            return api_response
+            # Fallback to LLM assessment
+            logger.info(f"Falling back to LLM assessment for {owner}/{repo}")
+            return await self._llm_assessment(request, start_time)
             
         except Exception as e:
             logger.error(f"Error in originality assessment: {e}")
@@ -110,12 +109,133 @@ class OriginalityHandler:
                 originality=originality,
                 uncertainty=uncertainty,
                 explanation=explanation,
+                method="llm_assessment",
                 **additional_fields
             )
             
         except Exception as e:
             logger.error(f"Error transforming originality response: {e}")
             raise
+    
+    def _extract_owner_repo_from_url(self, url: str) -> tuple[str, str]:
+        """
+        Extract owner and repo from GitHub URL.
+        Handles URLs like:
+        - https://github.com/a16z/helios
+        - https://github.com/originality/a16z/helios (strips 'originality')
+        
+        Args:
+            url: GitHub repository URL
+            
+        Returns:
+            Tuple of (owner, repo)
+        """
+        try:
+            # Remove protocol and domain
+            path = url.replace('https://github.com/', '').replace('http://github.com/', '')
+            path = path.strip('/')
+            
+            parts = path.split('/')
+            
+            # Handle URLs with 'originality' prefix
+            if len(parts) >= 3 and parts[0] == 'originality':
+                return parts[1], parts[2]
+            elif len(parts) >= 2:
+                return parts[0], parts[1]
+            else:
+                raise ValueError(f"Invalid GitHub URL format: {url}")
+                
+        except Exception as e:
+            logger.error(f"Failed to extract owner/repo from URL {url}: {e}")
+            raise ValueError(f"Invalid repository URL: {url}")
+    
+    def _try_special_case_assessment(self, owner: str, repo: str, 
+                                   request: OriginalityRequest, start_time: float) -> Optional[OriginalityResponse]:
+        """
+        Try to get originality assessment from pre-computed data.
+        
+        Args:
+            owner: Repository owner
+            repo: Repository name
+            request: Original request
+            start_time: Request start time
+            
+        Returns:
+            OriginalityResponse if data available, None otherwise
+        """
+        try:
+            # Look for assessment file
+            assessment_file = self.originality_data_dir / owner / repo / "detailed_originality_assessments_with_uncertainty.json"
+            
+            if not assessment_file.exists():
+                logger.info(f"No pre-computed originality data found for {owner}/{repo}")
+                return None
+            
+            # Load assessment data
+            with open(assessment_file, 'r') as f:
+                assessment_data = json.load(f)
+            
+            # Handle list format (take first item)
+            if isinstance(assessment_data, list) and len(assessment_data) > 0:
+                assessment_data = assessment_data[0]
+            elif isinstance(assessment_data, list):
+                logger.warning(f"Empty assessment data list for {owner}/{repo}")
+                return None
+            
+            # Extract required fields
+            originality_score = assessment_data.get('final_originality_score', 0.5)
+            uncertainty = assessment_data.get('overall_reasoning_uncertainty', 0.3)
+            reasoning = assessment_data.get('overall_reasoning', 'Pre-computed assessment')
+            category = assessment_data.get('originality_category', 'Unknown')
+            
+            # Calculate processing time
+            processing_time_ms = (time.time() - start_time) * 1000
+            
+            logger.info(f"Loaded pre-computed originality data for {owner}/{repo}: score={originality_score:.3f}")
+            
+            return OriginalityResponse(
+                originality=originality_score,
+                uncertainty=uncertainty,
+                explanation=f"Assessment-based originality evaluation. {reasoning}",
+                repository_category=category,
+                processing_time_ms=round(processing_time_ms, 2),
+                cache_hit=True,
+                method="special_case_originality"
+            )
+            
+        except Exception as e:
+            logger.warning(f"Failed to load pre-computed originality data for {owner}/{repo}: {e}")
+            return None
+    
+    async def _llm_assessment(self, request: OriginalityRequest, start_time: float) -> OriginalityResponse:
+        """
+        Perform LLM-based originality assessment as fallback.
+        
+        Args:
+            request: Originality request
+            start_time: Request start time
+            
+        Returns:
+            OriginalityResponse from LLM assessment
+        """
+        # Extract repository information using LLM orchestrator
+        repo_info = self.llm_orchestrator.extract_repo_info(request.repo)
+        
+        # Get model and temperature from parameters
+        model_id = request.parameters.get('model_id')
+        temperature = request.parameters.get('temperature', 0.7)
+        
+        # Query LLM using orchestrator
+        model_response = await self.llm_orchestrator.query_originality_assessment(
+            repo_info=repo_info,
+            model_id=model_id,
+            temperature=temperature
+        )
+        
+        # Transform to API response format
+        return self._transform_to_originality_response(
+            model_response, request, start_time
+        )
     
     def _extract_originality_score(self, model_response) -> float:
         """
@@ -197,6 +317,58 @@ class OriginalityHandler:
             additional_fields['tokens_used'] = getattr(model_response, 'tokens_used', 0)
         
         return additional_fields
+    
+    def enable_special_case(self, enabled: bool):
+        """
+        Enable or disable special case handling.
+        
+        Args:
+            enabled: Whether to enable special case handling
+        """
+        self._special_case_enabled = enabled
+        logger.info(f"Special case originality assessment {'enabled' if enabled else 'disabled'}")
+    
+    def get_special_case_stats(self) -> Dict[str, Any]:
+        """
+        Get statistics about special case originality data.
+        
+        Returns:
+            Dictionary with statistics about available originality data
+        """
+        try:
+            if not self.originality_data_dir.exists():
+                return {
+                    "enabled": self._special_case_enabled,
+                    "data_valid": False,
+                    "available_repositories": 0,
+                    "error": "Originality data directory not found"
+                }
+            
+            # Count available repositories
+            repo_count = 0
+            for owner_dir in self.originality_data_dir.iterdir():
+                if owner_dir.is_dir():
+                    for repo_dir in owner_dir.iterdir():
+                        if repo_dir.is_dir():
+                            assessment_file = repo_dir / "detailed_originality_assessments_with_uncertainty.json"
+                            if assessment_file.exists():
+                                repo_count += 1
+            
+            return {
+                "enabled": self._special_case_enabled,
+                "data_valid": repo_count > 0,
+                "available_repositories": repo_count,
+                "data_directory": str(self.originality_data_dir)
+            }
+            
+        except Exception as e:
+            logger.error(f"Error getting originality special case stats: {e}")
+            return {
+                "enabled": self._special_case_enabled,
+                "data_valid": False,
+                "available_repositories": 0,
+                "error": str(e)
+            }
     
     def _generate_mock_dependency_analysis(self, parameters: Dict[str, Any]) -> Dict[str, Any]:
         """

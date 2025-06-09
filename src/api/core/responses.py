@@ -127,6 +127,14 @@ class OriginalityResponse(BaseModel):
         None,
         description="Additional dependency analysis if requested"
     )
+    repository_category: Optional[str] = Field(
+        None,
+        description="Repository originality category (A-I)"
+    )
+    method: Optional[str] = Field(
+        None,
+        description="Assessment method used (special_case_originality, llm_assessment)"
+    )
     
     @validator('originality')
     def validate_originality(cls, v):

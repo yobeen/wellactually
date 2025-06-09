@@ -96,7 +96,7 @@ def test_originality_assessment():
     print("\n🔄 Testing Originality Assessment...")
     
     payload = {
-        "repo": "https://github.com/erigontech/erigon",
+        "repo": "https://github.com/originality/a16z/helios",
         "model": "deepseek/deepseek-r1-0528",
         "temperature": 0.7
     }
