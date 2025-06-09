@@ -6,6 +6,7 @@ Handles prompt generation, LLM querying, and response parsing.
 
 import logging
 import time
+import requests
 from typing import Dict, Any, List, Optional, Tuple
 from omegaconf import DictConfig
 
@@ -13,6 +14,7 @@ from src.shared.multi_model_engine import MultiModelEngine
 from src.tasks.l1.level1_prompts import Level1PromptGenerator
 from src.shared.response_parser import ResponseParser, ModelResponse
 from src.shared.model_metadata import get_model_metadata
+from src.tasks.originality.originality_prompt_generator import OriginalityPromptGenerator
 
 logger = logging.getLogger(__name__)
 
@@ -35,6 +37,9 @@ class LLMOrchestrator:
             self.multi_model_engine = MultiModelEngine(llm_config)
             self.level1_prompt_generator = Level1PromptGenerator(llm_config)
             self.response_parser = ResponseParser()
+            
+            # Initialize originality prompt generator
+            self.originality_prompt_generator = OriginalityPromptGenerator()
             
             logger.info("LLM Orchestrator initialized successfully")
             
@@ -118,7 +123,7 @@ class LLMOrchestrator:
                                          model_id: Optional[str] = None,
                                          temperature: float = 0.7) -> ModelResponse:
         """
-        Query LLM for repository originality assessment (skeleton implementation).
+        Query LLM for repository originality assessment using real implementation.
         
         Args:
             repo_info: Information about repository to assess
@@ -126,17 +131,157 @@ class LLMOrchestrator:
             temperature: Sampling temperature
             
         Returns:
-            ModelResponse with mock results for now
+            ModelResponse with real originality assessment
         """
-        logger.info("Originality assessment query (skeleton implementation)")
+        try:
+            # Use default model if not specified
+            if model_id is None:
+                model_id = self._get_default_model()
+            
+            repo_url = repo_info.get('url')
+            if not repo_url:
+                raise ValueError("Repository URL is required for originality assessment")
+            
+            logger.info(f"Starting originality assessment for {repo_url}")
+            
+            # Generate originality assessment prompt
+            messages = self.originality_prompt_generator.create_originality_assessment_prompt(repo_url)
+            
+            logger.debug(f"Generated originality prompt for {repo_info.get('name', repo_url)}")
+            
+            # Query LLM using the proven method from OriginalityAssessmentPipeline
+            start_time = time.time()
+            model_response = self._query_originality_assessment_internal(
+                model_id=model_id,
+                messages=messages,
+                temperature=temperature
+            )
+            processing_time = (time.time() - start_time) * 1000
+            
+            # Add processing time to response
+            model_response.processing_time_ms = processing_time
+            
+            logger.info(f"Originality assessment completed in {processing_time:.1f}ms")
+            
+            return model_response
+            
+        except Exception as e:
+            logger.error(f"Error in originality assessment query: {e}")
+            raise
+    
+    def _query_originality_assessment_internal(self, model_id: str, messages: List[Dict[str, str]], 
+                                             temperature: float) -> ModelResponse:
+        """
+        Internal method for originality assessments that need longer responses.
+        Adapted from OriginalityAssessmentPipeline._query_originality_assessment().
         
-        # TODO: Implement actual originality assessment logic
-        # For now, return a mock response
-        mock_response = self._create_mock_originality_response(
-            repo_info, "Originality assessment not yet implemented"
-        )
-        
-        return mock_response
+        Args:
+            model_id: Model identifier
+            messages: Message list in OpenAI format
+            temperature: Sampling temperature
+            
+        Returns:
+            ModelResponse with full originality assessment
+        """
+        try:
+            # Create custom payload for originality assessment with higher max_tokens
+            payload = {
+                "model": model_id,
+                "messages": messages,
+                "max_tokens": 4000,  # Much higher for detailed originality assessments
+                "temperature": temperature,
+                "logprobs": True,
+                "top_logprobs": 5
+            }
+            
+            # Add provider filtering if configured (copied from MultiModelEngine)
+            if hasattr(self.multi_model_engine.api_config.openrouter, 'providers') and self.multi_model_engine.api_config.openrouter.providers:
+                providers = list(self.multi_model_engine.api_config.openrouter.providers)
+                filtered_providers = self.multi_model_engine._filter_providers_for_model(model_id, providers)
+                if filtered_providers:
+                    payload["provider"] = {
+                        "only": filtered_providers
+                    }
+            
+            # Apply rate limiting
+            self.multi_model_engine._wait_if_needed()
+            
+            # Make API request with retry logic
+            api_response = None
+            for attempt in range(self.multi_model_engine.max_retries + 1):
+                try:
+                    response = requests.post(
+                        self.multi_model_engine.base_url,
+                        headers=self.multi_model_engine.headers,
+                        json=payload,
+                        timeout=self.multi_model_engine.timeout
+                    )
+                    
+                    if response.status_code == 200:
+                        api_response = response.json()
+                        break
+                    elif response.status_code == 429:  # Rate limited
+                        if attempt < self.multi_model_engine.max_retries:
+                            wait_time = (self.multi_model_engine.backoff_factor ** attempt) * 60
+                            logger.warning(f"Rate limited for {model_id}, waiting {wait_time:.1f}s")
+                            time.sleep(wait_time)
+                            continue
+                        else:
+                            api_response = self.multi_model_engine._create_api_error_response(
+                                f"Rate limit exceeded after {self.multi_model_engine.max_retries} retries"
+                            )
+                            break
+                    else:  # Other HTTP error
+                        error_msg = f"HTTP {response.status_code}: {response.text}"
+                        if attempt < self.multi_model_engine.max_retries:
+                            logger.warning(f"HTTP error for {model_id}: {error_msg}, retrying...")
+                            time.sleep(self.multi_model_engine.backoff_factor ** attempt)
+                            continue
+                        else:
+                            api_response = self.multi_model_engine._create_api_error_response(error_msg)
+                            break
+                            
+                except Exception as e:
+                    error_msg = f"Request exception: {str(e)}"
+                    if attempt < self.multi_model_engine.max_retries:
+                        logger.warning(f"Exception for {model_id}: {error_msg}, retrying...")
+                        time.sleep(self.multi_model_engine.backoff_factor ** attempt)
+                        continue
+                    else:
+                        api_response = self.multi_model_engine._create_api_error_response(error_msg)
+                        break
+            
+            if api_response is None:
+                api_response = self.multi_model_engine._create_api_error_response("Unexpected error in retry loop")
+            
+            # Parse response using the engine's response parser
+            parsed_response = self.multi_model_engine.response_parser.parse_response(
+                model_id, api_response, temperature
+            )
+            
+            # Update cost tracking
+            self.multi_model_engine.total_cost += parsed_response.cost_usd
+            
+            return parsed_response
+            
+        except Exception as e:
+            logger.error(f"Error in originality assessment query: {e}")
+            # Return error response
+            return ModelResponse(
+                model_id=model_id,
+                success=False,
+                content="",
+                logprobs=None,
+                uncertainty=1.0,
+                raw_choice="",
+                cost_usd=0.0,
+                tokens_used=0,
+                temperature=temperature,
+                error=str(e),
+                timestamp="",
+                answer_token_info={"extraction_success": False, "method": "error"},
+                full_content_logprobs=None
+            )
     
     def extract_repo_info(self, repo_url: str) -> Dict[str, Any]:
         """
