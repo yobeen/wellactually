@@ -110,6 +110,7 @@ class OriginalityHandler:
                 uncertainty=uncertainty,
                 explanation=explanation,
                 method="llm_assessment",
+                model_used=getattr(model_response, 'model_id', 'unknown'),
                 **additional_fields
             )
             
@@ -188,6 +189,14 @@ class OriginalityHandler:
             reasoning = assessment_data.get('overall_reasoning', 'Pre-computed assessment')
             category = assessment_data.get('originality_category', 'Unknown')
             
+            # Extract criteria scores (convert from 1-10 scale to 0-1 scale for API consistency)
+            criteria_scores_raw = assessment_data.get('criteria_scores', {})
+            criteria_scores = {}
+            for criterion, details in criteria_scores_raw.items():
+                if isinstance(details, dict) and 'score' in details:
+                    # API docs show 1-10 scale, but data is stored on 1-10 scale
+                    criteria_scores[criterion] = float(details['score'])
+            
             # Calculate processing time
             processing_time_ms = (time.time() - start_time) * 1000
             
@@ -200,7 +209,9 @@ class OriginalityHandler:
                 repository_category=category,
                 processing_time_ms=round(processing_time_ms, 2),
                 cache_hit=True,
-                method="special_case_originality"
+                method="special_case_originality",
+                criteria_scores=criteria_scores if criteria_scores else None,
+                model_used="pre-computed"
             )
             
         except Exception as e:

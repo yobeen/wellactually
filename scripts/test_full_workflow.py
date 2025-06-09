@@ -115,6 +115,26 @@ def test_originality_assessment():
             print(f"   Originality Score: {result.get('originality')}")
             print(f"   Uncertainty: {result.get('uncertainty')}")
             print(f"   Category: {result.get('repository_category')}")
+            
+            # Validate API_DOCS.md compliance
+            expected_fields = [
+                'originality', 'uncertainty', 'explanation', 
+                'criteria_scores', 'model_used', 'repository_category'
+            ]
+            missing_fields = [field for field in expected_fields if field not in result]
+            
+            if missing_fields:
+                print(f"⚠️  Missing API_DOCS.md fields: {missing_fields}")
+            else:
+                print(f"✅ All API_DOCS.md fields present")
+            
+            # Validate criteria scores if present
+            if 'criteria_scores' in result and result['criteria_scores']:
+                criteria_count = len(result['criteria_scores'])
+                print(f"   Criteria Scores: {criteria_count} criteria provided")
+                for criterion, score in result['criteria_scores'].items():
+                    print(f"     {criterion}: {score}")
+            
             return True
         else:
             print(f"❌ Originality Assessment failed: {response.text}")

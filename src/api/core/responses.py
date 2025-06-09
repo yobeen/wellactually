@@ -135,6 +135,14 @@ class OriginalityResponse(BaseModel):
         None,
         description="Assessment method used (special_case_originality, llm_assessment)"
     )
+    criteria_scores: Optional[Dict[str, float]] = Field(
+        None,
+        description="Detailed scores for each originality criterion (1-10 scale)"
+    )
+    model_used: Optional[str] = Field(
+        None,
+        description="Model identifier used for assessment"
+    )
     
     @validator('originality')
     def validate_originality(cls, v):
