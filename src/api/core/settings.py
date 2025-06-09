@@ -7,7 +7,8 @@ Loads existing LLM configuration and extends with API-specific settings.
 import os
 from pathlib import Path
 from typing import Optional, List
-from pydantic import BaseSettings, Field
+from pydantic import Field
+from pydantic_settings import BaseSettings
 from omegaconf import OmegaConf, DictConfig
 import logging
 
@@ -180,8 +181,9 @@ class APISettings(BaseSettings):
         
         return validation_results
     
-    class Config:
-        """Pydantic configuration."""
-        env_file = ".env"
-        env_file_encoding = 'utf-8'
-        case_sensitive = False
+    model_config = {
+        "env_file": ".env",
+        "env_file_encoding": "utf-8",
+        "case_sensitive": False,
+        "extra": "allow"
+    }

@@ -60,6 +60,7 @@ types-PyYAML>=6.0.0
 fastapi>=0.104.0
 uvicorn[standard]>=0.24.0
 pydantic>=2.5.0
+pydantic-settings>=2.0.0  # For BaseSettings in Pydantic v2
 
 # Additional API dependencies
 python-multipart>=0.0.6  # For form data support if needed

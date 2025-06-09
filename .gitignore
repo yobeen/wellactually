@@ -82,8 +82,8 @@ secrets.json
 # Data files (add specific exceptions as needed)
 data/raw/*.csv
 data/raw/*
-data/processed/*.csv
-data/augmented/*.csv
+data/processed/*
+data/augmented/*
 data/external/*
 !data/raw/.gitkeep
 !data/processed/.gitkeep

@@ -9,8 +9,8 @@ import random
 import time
 from typing import Dict, Any, Optional
 
-from src.api.originality.requests import OriginalityRequest
-from src.api.originality.responses import OriginalityResponse
+from src.api.core.requests import OriginalityRequest
+from src.api.core.responses import OriginalityResponse
 from src.api.core.llm_orchestrator import LLMOrchestrator
 
 logger = logging.getLogger(__name__)
