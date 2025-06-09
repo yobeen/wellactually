@@ -367,34 +367,7 @@ class LLMOrchestrator:
             raw_choice=choice,
             cost_usd=0.0,
             tokens_used=0,
-            temperature=0.7,
-            processing_time_ms=100.0
+            temperature=0.7
         )
-        
-        return mock_response
-    
-    def _create_mock_originality_response(self, repo_info: Dict, explanation: str) -> ModelResponse:
-        """Create mock originality response for skeleton implementation."""
-        import random
-        
-        # Generate reasonable mock data
-        originality_score = random.uniform(0.3, 0.8)
-        uncertainty = random.uniform(0.1, 0.3)
-        
-        mock_response = ModelResponse(
-            model_id="mock/skeleton",
-            success=True,
-            content=f"Mock originality: {originality_score:.2f}. {explanation}",
-            logprobs={'high': 0.5, 'medium': 0.3, 'low': 0.2},
-            uncertainty=uncertainty,
-            raw_choice=f"{originality_score:.2f}",
-            cost_usd=0.0,
-            tokens_used=0,
-            temperature=0.7,
-            processing_time_ms=80.0
-        )
-        
-        # Add custom field for originality score
-        mock_response.originality_score = originality_score
         
         return mock_response

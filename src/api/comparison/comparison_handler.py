@@ -85,10 +85,34 @@ class ComparisonHandler:
         try:
             start_time = time.time()
             
+            logger.info(f"Starting L3 comparison processing...")
+            logger.info(f"  Repo A: {request.repo_a}")
+            logger.info(f"  Repo B: {request.repo_b}")
+            logger.info(f"  Parent: {request.parent}")
+            logger.info(f"  Parameters: {request.parameters}")
+            
             # Extract repository information
-            dep_a_info = self.llm_orchestrator.extract_repo_info(request.repo_a)
-            dep_b_info = self.llm_orchestrator.extract_repo_info(request.repo_b)
-            parent_info = self.llm_orchestrator.extract_repo_info(request.parent)
+            logger.info("Extracting repository information...")
+            try:
+                dep_a_info = self.llm_orchestrator.extract_repo_info(request.repo_a)
+                logger.info(f"  Dep A info extracted: {dep_a_info}")
+            except Exception as e:
+                logger.error(f"Failed to extract repo A info: {e}")
+                raise
+            
+            try:
+                dep_b_info = self.llm_orchestrator.extract_repo_info(request.repo_b)
+                logger.info(f"  Dep B info extracted: {dep_b_info}")
+            except Exception as e:
+                logger.error(f"Failed to extract repo B info: {e}")
+                raise
+            
+            try:
+                parent_info = self.llm_orchestrator.extract_repo_info(request.parent)
+                logger.info(f"  Parent info extracted: {parent_info}")
+            except Exception as e:
+                logger.error(f"Failed to extract parent info: {e}")
+                raise
             
             logger.info(f"Processing L3 comparison: {dep_a_info['name']} vs {dep_b_info['name']} "
                        f"for parent {parent_info['name']} (SKELETON)")
@@ -96,20 +120,33 @@ class ComparisonHandler:
             # Get model and temperature from parameters
             model_id = request.parameters.get('model_id')
             temperature = request.parameters.get('temperature', 0.7)
+            logger.info(f"Using model: {model_id}, temperature: {temperature}")
             
             # Query LLM using orchestrator (skeleton implementation)
-            model_response = await self.llm_orchestrator.query_l3_comparison(
-                dep_a_info=dep_a_info,
-                dep_b_info=dep_b_info,
-                parent_info=parent_info,
-                model_id=model_id,
-                temperature=temperature
-            )
+            logger.info("Querying LLM orchestrator for L3 comparison...")
+            try:
+                model_response = await self.llm_orchestrator.query_l3_comparison(
+                    dep_a_info=dep_a_info,
+                    dep_b_info=dep_b_info,
+                    parent_info=parent_info,
+                    model_id=model_id,
+                    temperature=temperature
+                )
+                logger.info(f"LLM query completed: {type(model_response)}")
+            except Exception as e:
+                logger.error(f"LLM query failed: {e}")
+                raise
             
             # Transform to API response format
-            api_response = self._transform_to_comparison_response(
-                model_response, request, start_time, is_skeleton=True
-            )
+            logger.info("Transforming to API response format...")
+            try:
+                api_response = self._transform_to_comparison_response(
+                    model_response, request, start_time, is_skeleton=True
+                )
+                logger.info(f"Response transformation completed")
+            except Exception as e:
+                logger.error(f"Response transformation failed: {e}")
+                raise
             
             logger.info(f"L3 comparison completed (SKELETON): choice={api_response.choice}, "
                        f"multiplier={api_response.multiplier:.2f}")
@@ -117,7 +154,7 @@ class ComparisonHandler:
             return api_response
             
         except Exception as e:
-            logger.error(f"Error in L3 comparison: {e}")
+            logger.error(f"Error in L3 comparison: {e}", exc_info=True)
             raise
     
     def _should_use_special_case(self, request: ComparisonRequest) -> bool:
