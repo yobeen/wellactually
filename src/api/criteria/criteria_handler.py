@@ -8,8 +8,8 @@ import logging
 import time
 from typing import Dict, Any, Optional
 
-from src.api.criteria_models import CriteriaRequest, CriteriaResponse, CriterionScore
-from src.api.llm_orchestrator import LLMOrchestrator
+from src.api.criteria.criteria_models import CriteriaRequest, CriteriaResponse, CriterionScore
+from src.api.core.llm_orchestrator import LLMOrchestrator
 from src.tasks.criteria.repo_extractor import RepositoryExtractor
 from src.tasks.criteria.criteria_prompt_generator import CriteriaPromptGenerator
 from src.tasks.criteria.fuzzy_response_parser import FuzzyCriteriaResponseParser

@@ -8,8 +8,8 @@ import logging
 import time
 from typing import Dict, Any, Optional
 
-from src.api.dependency_models import DependencyComparisonRequest, DependencyComparisonResponse, DimensionAssessment, OverallAssessment
-from src.api.llm_orchestrator import LLMOrchestrator
+from src.api.comparison.dependency_models import DependencyComparisonRequest, DependencyComparisonResponse, DimensionAssessment, OverallAssessment
+from src.api.core.llm_orchestrator import LLMOrchestrator
 from src.tasks.l3.dependency_context_extractor import DependencyContextExtractor
 from src.tasks.l3.level3_prompts import Level3PromptGenerator
 from src.tasks.l3.dependency_response_parser import DependencyResponseParser

@@ -1,7 +1,7 @@
 # src/api/main.py
 """
 FastAPI server for LLM repository comparison and originality assessment API.
-Enhanced with criteria assessment endpoint.
+Enhanced with criteria assessment endpoint and special case comparison support.
 """
 
 import logging
@@ -13,14 +13,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 import uvicorn
 
-from wellactually.src.api.requests import ComparisonRequest, OriginalityRequest
-from wellactually.src.api.responses import ComparisonResponse, OriginalityResponse, ErrorResponse
-from wellactually.src.api.criteria_models import CriteriaRequest, CriteriaResponse
-from wellactually.src.api.llm_orchestrator import LLMOrchestrator
-from wellactually.src.api.comparison_handler import ComparisonHandler
-from wellactually.src.api.originality_handler import OriginalityHandler
-from wellactually.src.api.criteria_handler import CriteriaHandler
-from wellactually.src.api.settings import APISettings
+from src.api.core.requests import ComparisonRequest, OriginalityRequest
+from src.api.core.responses import ComparisonResponse, OriginalityResponse, ErrorResponse
+from src.api.criteria.criteria_models import CriteriaRequest, CriteriaResponse
+from src.api.core.llm_orchestrator import LLMOrchestrator
+from src.api.comparison.comparison_handler import ComparisonHandler
+from src.api.originality.originality_handler import OriginalityHandler
+from src.api.criteria.criteria_handler import CriteriaHandler
+from src.api.core.settings import APISettings
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -48,10 +48,22 @@ async def lifespan(app: FastAPI):
         # Initialize core orchestrator
         llm_orchestrator = LLMOrchestrator(settings.llm_config)
         
-        # Initialize handlers
+        # Initialize handlers with special case support
         comparison_handler = ComparisonHandler(llm_orchestrator)
         originality_handler = OriginalityHandler(llm_orchestrator)
         criteria_handler = CriteriaHandler(llm_orchestrator)
+        
+        # Validate special case data on startup
+        logger.info("Validating special case data...")
+        validation_results = comparison_handler.validate_special_case_data()
+        
+        if validation_results.get('valid', False):
+            logger.info(f"Special case data valid: {validation_results.get('total_assessments', 0)} assessments available")
+        else:
+            logger.warning("Special case data validation failed - will fall back to standard LLM comparisons")
+            if validation_results.get('errors'):
+                for error in validation_results['errors'][:3]:
+                    logger.warning(f"  Validation error: {error}")
         
         logger.info("LLM API server startup complete")
         
@@ -67,8 +79,8 @@ async def lifespan(app: FastAPI):
 # Create FastAPI app
 app = FastAPI(
     title="LLM Repository Assessment API",
-    description="API for repository comparison, originality assessment, and criteria evaluation using LLMs",
-    version="1.0.0",
+    description="API for repository comparison, originality assessment, and criteria evaluation using LLMs with special case support",
+    version="1.1.0",
     lifespan=lifespan
 )
 
@@ -101,7 +113,7 @@ def get_criteria_handler() -> CriteriaHandler:
     return criteria_handler
 
 @app.exception_handler(Exception)
-async def global_exception_handler(request, exc):
+async def global_exception_handler(_request, exc):
     """Global exception handler for unhandled errors."""
     logger.error(f"Unhandled exception: {exc}", exc_info=True)
     return JSONResponse(
@@ -114,20 +126,38 @@ async def global_exception_handler(request, exc):
 
 @app.get("/health")
 async def health_check():
-    """Health check endpoint."""
-    return {"status": "healthy", "service": "llm-repository-api"}
+    """Health check endpoint with special case status."""
+    special_case_stats = comparison_handler.get_special_case_stats() if comparison_handler else {}
+    
+    return {
+        "status": "healthy", 
+        "service": "llm-repository-api",
+        "version": "1.1.0",
+        "special_case": {
+            "enabled": special_case_stats.get("enabled", False),
+            "data_valid": special_case_stats.get("data_valid", False),
+            "available_repositories": special_case_stats.get("available_repositories", 0)
+        }
+    }
 
 @app.get("/")
 async def root():
     """Root endpoint with API information."""
     return {
         "service": "LLM Repository Assessment API",
-        "version": "1.0.0",
+        "version": "1.1.0",
+        "features": [
+            "Repository comparison with special case support",
+            "Originality assessment", 
+            "Criteria-based evaluation",
+            "Automatic fallback to LLM when needed"
+        ],
         "endpoints": {
             "health": "/health",
             "comparison": "/compare",
             "originality": "/assess",
-            "criteria": "/criteria"
+            "criteria": "/criteria",
+            "special_case_status": "/special-case/status"
         }
     }
 
@@ -138,6 +168,8 @@ async def compare_repositories(
 ) -> ComparisonResponse:
     """
     Compare two repositories for their relative importance.
+    For Level 1 (parent="ethereum"), uses criteria-based comparison when available,
+    falls back to LLM-based comparison otherwise.
     
     Args:
         request: Comparison request with repo_a, repo_b, parent, and optional parameters
@@ -222,6 +254,61 @@ async def assess_criteria(
         logger.error(f"Error processing criteria assessment: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="Failed to process criteria assessment")
 
+@app.get("/special-case/status")
+async def get_special_case_status(
+    handler: ComparisonHandler = Depends(get_comparison_handler)
+):
+    """
+    Get status and statistics about special case comparison functionality.
+    
+    Returns:
+        Dictionary with special case status, validation results, and available repositories
+    """
+    try:
+        stats = handler.get_special_case_stats()
+        validation = handler.validate_special_case_data()
+        
+        return {
+            "special_case": stats,
+            "validation": validation,
+            "description": {
+                "enabled": "Special case uses criteria assessment data for L1 comparisons",
+                "fallback": "Automatically falls back to LLM when assessment data unavailable",
+                "data_source": "data/processed/criteria_assessment/detailed_assessments.json"
+            }
+        }
+        
+    except Exception as e:
+        logger.error(f"Error getting special case status: {e}")
+        raise HTTPException(status_code=500, detail="Failed to retrieve special case status")
+
+@app.post("/special-case/toggle")
+async def toggle_special_case(
+    enabled: bool,
+    handler: ComparisonHandler = Depends(get_comparison_handler)
+):
+    """
+    Enable or disable special case handling.
+    
+    Args:
+        enabled: Whether to enable special case handling
+        
+    Returns:
+        Updated status information
+    """
+    try:
+        handler.enable_special_case(enabled)
+        
+        return {
+            "message": f"Special case handling {'enabled' if enabled else 'disabled'}",
+            "enabled": enabled,
+            "timestamp": "2024-01-15T10:30:00Z"  # Could be dynamic
+        }
+        
+    except Exception as e:
+        logger.error(f"Error toggling special case: {e}")
+        raise HTTPException(status_code=500, detail="Failed to toggle special case handling")
+
 @app.get("/cache/stats")
 async def get_cache_stats():
     """Get cache statistics for monitoring."""
@@ -234,6 +321,63 @@ async def get_cache_stats():
     except Exception as e:
         logger.error(f"Error getting cache stats: {e}")
         raise HTTPException(status_code=500, detail="Failed to retrieve cache stats")
+
+@app.get("/debug/comparison-methods")
+async def get_comparison_methods():
+    """
+    Debug endpoint to show available comparison methods and their conditions.
+    
+    Returns:
+        Information about when each comparison method is used
+    """
+    return {
+        "comparison_methods": {
+            "special_case_criteria": {
+                "description": "Uses pre-computed criteria assessment scores",
+                "conditions": [
+                    "parent == 'ethereum'",
+                    "Both repositories have assessment data available",
+                    "Special case handling is enabled"
+                ],
+                "advantages": [
+                    "Fast response (no LLM call)",
+                    "Consistent scoring",
+                    "Detailed reasoning based on criteria"
+                ],
+                "data_source": "data/processed/criteria_assessment/detailed_assessments.json"
+            },
+            "llm_based": {
+                "description": "Uses Language Model for comparison",
+                "conditions": [
+                    "Special case conditions not met",
+                    "Fallback when assessment data unavailable"
+                ],
+                "advantages": [
+                    "Flexible reasoning",
+                    "Can handle any repository pair",
+                    "Dynamic analysis"
+                ],
+                "models_available": [
+                    "openai/gpt-4o",
+                    "meta-llama/llama-4-maverick", 
+                    "x-ai/grok-3-beta",
+                    "deepseek/deepseek-chat-v3-0324"
+                ]
+            }
+        },
+        "level_routing": {
+            "level_1": {
+                "condition": "parent == 'ethereum'",
+                "description": "Ethereum ecosystem repository comparisons",
+                "methods": ["special_case_criteria", "llm_based"]
+            },
+            "level_3": {
+                "condition": "parent != 'ethereum'",
+                "description": "Dependency comparisons within parent repositories",
+                "methods": ["llm_based"]
+            }
+        }
+    }
 
 if __name__ == "__main__":
     # For development only
