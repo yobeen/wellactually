@@ -16,8 +16,8 @@ class DependencyContextExtractor:
     Extracts and manages dependency context from CSV files for Level 3 comparisons.
     """
     
-    def __init__(self, parent_csv_path: str = "data/external/parent_repos.csv", 
-                 dependencies_csv_path: str = "data/external/dependencies.csv"):
+    def __init__(self, parent_csv_path: str = "data/raw/DeepFunding Repos Enhanced via OpenQ - ENHANCED TEAMS.csv", 
+                 dependencies_csv_path: str = "data/raw/DeepFunding Repos Enhanced via OpenQ - ENHANCED TEAMS.csv"):
         """
         Initialize the dependency context extractor.
         
@@ -105,10 +105,9 @@ class DependencyContextExtractor:
             
             self._parent_df = pd.read_csv(self.parent_csv_path)
             
-            # Validate required columns
+            # Validate required columns (mapped to actual CSV structure)
             required_columns = [
-                'parent_url', 'name', 'description', 'primary_language', 
-                'domain', 'architecture_type', 'key_functions'
+                'githubLink', 'name', 'description', 'languages'
             ]
             
             missing_columns = [col for col in required_columns if col not in self._parent_df.columns]
@@ -129,10 +128,9 @@ class DependencyContextExtractor:
             
             self._dependencies_df = pd.read_csv(self.dependencies_csv_path)
             
-            # Validate required columns
+            # Validate required columns (mapped to actual CSV structure)
             required_columns = [
-                'dependency_url', 'name', 'description', 'category', 
-                'primary_function', 'integration_patterns'
+                'githubLink', 'name', 'description'
             ]
             
             missing_columns = [col for col in required_columns if col not in self._dependencies_df.columns]
@@ -148,8 +146,8 @@ class DependencyContextExtractor:
     def _extract_parent_context(self, parent_url: str) -> Dict[str, Any]:
         """Extract context for a parent repository."""
         try:
-            # Find parent in dataframe
-            parent_row = self._parent_df[self._parent_df['parent_url'] == parent_url]
+            # Find parent in dataframe using githubLink column
+            parent_row = self._parent_df[self._parent_df['githubLink'] == parent_url]
             
             if parent_row.empty:
                 raise ValueError(f"Parent repository not found: {parent_url}")
@@ -158,13 +156,13 @@ class DependencyContextExtractor:
             
             return {
                 "url": parent_url,
-                "name": parent_data.get('name', 'unknown'),
-                "description": parent_data.get('description', ''),
-                "primary_language": parent_data.get('primary_language', 'unknown'),
-                "domain": parent_data.get('domain', 'unknown'),
-                "architecture_type": parent_data.get('architecture_type', 'unknown'),
-                "key_functions": parent_data.get('key_functions', ''),
-                "dependency_management": parent_data.get('dependency_management_approach', 'unknown')
+                "name": parent_data['name'] if 'name' in parent_data and pd.notna(parent_data['name']) else 'unknown',
+                "description": parent_data['description'] if 'description' in parent_data and pd.notna(parent_data['description']) else '',
+                "primary_language": parent_data['languages'].split(',')[0].strip() if 'languages' in parent_data and pd.notna(parent_data['languages']) else 'unknown',
+                "domain": "blockchain",  # Default for this dataset
+                "architecture_type": "unknown",  # Not available in current CSV
+                "key_functions": parent_data['description'] if 'description' in parent_data and pd.notna(parent_data['description']) else '',
+                "dependency_management": "unknown"  # Not available in current CSV
             }
             
         except Exception as e:
@@ -174,8 +172,8 @@ class DependencyContextExtractor:
     def _extract_dependency_context(self, dependency_url: str) -> Dict[str, Any]:
         """Extract context for a dependency repository."""
         try:
-            # Find dependency in dataframe
-            dep_row = self._dependencies_df[self._dependencies_df['dependency_url'] == dependency_url]
+            # Find dependency in dataframe using githubLink column
+            dep_row = self._dependencies_df[self._dependencies_df['githubLink'] == dependency_url]
             
             if dep_row.empty:
                 raise ValueError(f"Dependency not found: {dependency_url}")
@@ -184,14 +182,14 @@ class DependencyContextExtractor:
             
             return {
                 "url": dependency_url,
-                "name": dep_data.get('name', 'unknown'),
-                "description": dep_data.get('description', ''),
-                "category": dep_data.get('category', 'unknown'),
-                "primary_function": dep_data.get('primary_function', ''),
-                "integration_patterns": dep_data.get('integration_patterns', ''),
-                "performance_characteristics": dep_data.get('performance_characteristics', ''),
-                "parent_repos": dep_data.get('parent_repos', ''),
-                "alternatives": dep_data.get('alternatives', '')
+                "name": dep_data['name'] if 'name' in dep_data and pd.notna(dep_data['name']) else 'unknown',
+                "description": dep_data['description'] if 'description' in dep_data and pd.notna(dep_data['description']) else '',
+                "category": "dependency",  # Default category
+                "primary_function": dep_data['description'] if 'description' in dep_data and pd.notna(dep_data['description']) else '',
+                "integration_patterns": "unknown",  # Not available in current CSV
+                "performance_characteristics": "unknown",  # Not available in current CSV
+                "parent_repos": "unknown",  # Not available in current CSV
+                "alternatives": "unknown"  # Not available in current CSV
             }
             
         except Exception as e:
@@ -208,7 +206,7 @@ class DependencyContextExtractor:
         try:
             return self._extract_parent_context(parent_url), None
         except Exception as e:
-            logger.warning(f"Parent repository not found in CSV, using fallback: {parent_url}")
+            logger.warning(f"Parent repository not found in CSV, using fallback: {parent_url} (Error: {e})")
             return self._create_fallback_parent_context(parent_url), f"Parent repo {parent_url} not found in CSV"
     
     def _extract_dependency_context_safe(self, dependency_url: str) -> Tuple[Dict[str, Any], Optional[str]]:
