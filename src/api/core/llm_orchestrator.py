@@ -25,14 +25,16 @@ class LLMOrchestrator:
     Orchestrates LLM operations using existing uncertainty calibration components.
     """
     
-    def __init__(self, llm_config: DictConfig):
+    def __init__(self, llm_config: DictConfig, default_model: Optional[str] = None):
         """
         Initialize the LLM orchestrator.
         
         Args:
             llm_config: LLM configuration from loaded YAML
+            default_model: Default model to use (overrides config default)
         """
         self.config = llm_config
+        self.default_model = default_model
         
         # Initialize existing components
         try:
@@ -318,12 +320,21 @@ class LLMOrchestrator:
     def _get_default_model(self) -> str:
         """Get default model from configuration."""
         try:
+            # Use explicitly set default model if provided
+            if self.default_model:
+                logger.debug(f"Using configured default model: {self.default_model}")
+                return self.default_model
+                
+            # Fall back to first primary model from config
             primary_models = self.config.get('models', {}).get('primary_models', {})
             if primary_models:
-                # Use first primary model as default
-                return list(primary_models.values())[0]
+                first_model = list(primary_models.values())[0]
+                logger.debug(f"Using first primary model from config: {first_model}")
+                return first_model
             else:
-                return "openai/gpt-4o"  # Fallback default
+                logger.debug("Using hardcoded fallback model: deepseek/deepseek-r1-0528")
+                return "deepseek/deepseek-r1-0528"  # Updated fallback default
         except Exception:
-            return "openai/gpt-4o"
+            logger.debug("Exception occurred, using hardcoded fallback model: deepseek/deepseek-r1-0528")
+            return "deepseek/deepseek-r1-0528"
     

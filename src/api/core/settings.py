@@ -36,7 +36,7 @@ class APISettings(BaseSettings):
     
     # API-specific settings
     default_temperature: float = Field(default=0.7, env="DEFAULT_TEMPERATURE")
-    default_model: str = Field(default="openai/gpt-4o", env="DEFAULT_MODEL")
+    default_model: str = Field(default="deepseek/deepseek-r1-0528", env="DEFAULT_MODEL")
     request_timeout: int = Field(default=120, env="REQUEST_TIMEOUT")
     max_retries: int = Field(default=3, env="MAX_RETRIES")
     

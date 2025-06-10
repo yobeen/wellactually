@@ -48,8 +48,14 @@ async def lifespan(app: FastAPI):
         # Load configuration
         settings = APISettings()
         
+        # Log configuration details
+        logger.info(f"Default model configured: {settings.default_model}")
+        logger.info(f"Default temperature: {settings.default_temperature}")
+        logger.info(f"Cache enabled: {settings.enable_cache}")
+        logger.info(f"LLM config path: {settings.llm_config_path}")
+        
         # Initialize core orchestrator
-        llm_orchestrator = LLMOrchestrator(settings.llm_config)
+        llm_orchestrator = LLMOrchestrator(settings.llm_config, settings.default_model)
         
         # Initialize handlers with special case support
         comparison_handler = ComparisonHandler(llm_orchestrator)
@@ -116,7 +122,7 @@ def get_criteria_handler() -> CriteriaHandler:
     return criteria_handler
 
 @app.exception_handler(Exception)
-async def global_exception_handler(_request, exc):
+async def global_exception_handler(request, exc):
     """Global exception handler for unhandled errors."""
     logger.error(f"Unhandled exception: {exc}", exc_info=True)
     return JSONResponse(
