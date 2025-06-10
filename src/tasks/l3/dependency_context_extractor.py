@@ -7,7 +7,7 @@ Extracts repository context from CSV files for dependency assessments.
 import pandas as pd
 import json
 import logging
-from typing import Dict, Any, Tuple, Optional, List
+from typing import Dict, Any, Tuple, Optional
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
@@ -230,7 +230,7 @@ class DependencyContextExtractor:
         """
         try:
             return self._extract_parent_context(parent_url), None
-        except Exception as e:
+        except Exception:
             fallback_context = self._create_fallback_parent_context(parent_url)
             if fallback_context.get('assessment_fallback'):
                 logger.info(f"Parent repository found in assessments data: {parent_url}")
@@ -332,7 +332,6 @@ class DependencyContextExtractor:
         # Extract key information from criteria scores
         criteria_scores = assessment.get('criteria_scores', {})
         core_protocol = criteria_scores.get('core_protocol', {})
-        market_adoption = criteria_scores.get('market_adoption', {})
         security = criteria_scores.get('security_infrastructure', {})
         
         # Create description from overall reasoning or core protocol reasoning

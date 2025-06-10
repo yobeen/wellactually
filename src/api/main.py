@@ -11,9 +11,11 @@ from typing import Dict, Any
 from dotenv import load_dotenv
 load_dotenv()
 
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, HTTPException, Depends, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.exceptions import RequestValidationError
+from pydantic import ValidationError
 import uvicorn
 
 from src.api.core.requests import ComparisonRequest, OriginalityRequest
@@ -120,6 +122,28 @@ def get_criteria_handler() -> CriteriaHandler:
     if criteria_handler is None:
         raise HTTPException(status_code=503, detail="Service not initialized")
     return criteria_handler
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    """Handle Pydantic validation errors with detailed logging."""
+    logger.warning(f"Validation error on {request.method} {request.url.path}")
+    logger.warning(f"Validation details: {exc.errors()}")
+    
+    # Try to log the request body if possible
+    try:
+        body = await request.body()
+        if body:
+            logger.warning(f"Request body: {body.decode('utf-8')[:500]}...")
+    except Exception:
+        logger.warning("Could not read request body")
+    
+    return JSONResponse(
+        status_code=400,
+        content=ErrorResponse(
+            error="Validation error",
+            detail=str(exc)
+        ).dict()
+    )
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request, exc):
@@ -229,9 +253,11 @@ async def assess_originality(
         
     except ValueError as e:
         logger.warning(f"Validation error in originality assessment: {e}")
+        logger.warning(f"Request data: repo={getattr(request, 'repo', 'N/A')}")
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         logger.error(f"Error processing originality assessment: {e}", exc_info=True)
+        logger.error(f"Request data: repo={getattr(request, 'repo', 'N/A')}")
         raise HTTPException(status_code=500, detail="Failed to process originality assessment")
 
 @app.post("/criteria", response_model=CriteriaResponse)
