@@ -47,8 +47,8 @@ class LLMOrchestrator:
             self.level3_prompt_generator = Level3PromptGenerator()
             self.dependency_response_parser = DependencyResponseParser()
             self.dependency_context_extractor = DependencyContextExtractor(
-                parent_csv_path="data/raw/parent_repositories.csv",
-                dependencies_csv_path="data/raw/dependencies.csv"
+                parent_csv_path="data/raw/DeepFunding Repos Enhanced via OpenQ - ENHANCED TEAMS.csv",
+                dependencies_csv_path="data/raw/DeepFunding Repos Enhanced via OpenQ - ENHANCED TEAMS.csv"
             )
             
             logger.info("LLM Orchestrator initialized successfully")

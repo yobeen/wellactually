@@ -4,27 +4,31 @@ level3_dependency_comparison:
   
   # Data sources
   data_sources:
-    parent_repos_csv: "data/external/parent_repos.csv"
-    dependencies_csv: "data/external/dependencies.csv"
+    parent_repos_csv: "data/raw/DeepFunding Repos Enhanced via OpenQ - ENHANCED TEAMS.csv"
+    dependencies_csv: "data/raw/DeepFunding Repos Enhanced via OpenQ - ENHANCED TEAMS.csv"
     
   # CSV schema validation
   csv_validation:
     required_parent_columns:
-      - "parent_url"
+      - "githubLink"
       - "name" 
       - "description"
-      - "primary_language"
-      - "domain"
-      - "architecture_type"
-      - "key_functions"
+      - "owner"
+      - "languages"
+      - "reputation"
+      - "activity"
+      - "popularity"
     
     required_dependency_columns:
-      - "dependency_url"
+      - "githubLink"
       - "name"
       - "description"
-      - "category"
-      - "primary_function"
-      - "integration_patterns"
+      - "owner"
+      - "languages"
+      - "dependencies"
+      - "reputation"
+      - "activity"
+      - "popularity"
     
     validate_on_startup: true
     
@@ -96,10 +100,13 @@ level3_dependency_comparison:
 # Add to existing feature_engineering section
 feature_engineering:
   level3_features:
-    - dependency_category
-    - parent_domain
-    - integration_pattern
-    - performance_characteristics
+    - owner
+    - languages
+    - reputation
+    - activity
+    - popularity
+    - totalStars
+    - commitCount
     - dimension_scores
     - dimension_uncertainties
     - parsing_confidence
@@ -137,8 +144,8 @@ example_configurations:
         max_pairs_per_parent: 3
         batch_size: 10
       data_sources:
-        parent_repos_csv: "test_data/parent_repos.csv"
-        dependencies_csv: "test_data/dependencies.csv"
+        parent_repos_csv: "data/raw/DeepFunding Repos Enhanced via OpenQ - ENHANCED TEAMS.csv"
+        dependencies_csv: "data/raw/DeepFunding Repos Enhanced via OpenQ - ENHANCED TEAMS.csv"
   
   production:
     level3_dependency_comparison:
