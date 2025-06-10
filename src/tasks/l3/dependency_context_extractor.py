@@ -146,8 +146,8 @@ class DependencyContextExtractor:
     def _extract_parent_context(self, parent_url: str) -> Dict[str, Any]:
         """Extract context for a parent repository."""
         try:
-            # Find parent in dataframe using githubLink column
-            parent_row = self._parent_df[self._parent_df['githubLink'] == parent_url]
+            # Find parent in dataframe using flexible URL matching
+            parent_row = self._find_repo_by_url(self._parent_df, parent_url)
             
             if parent_row.empty:
                 raise ValueError(f"Parent repository not found: {parent_url}")
@@ -172,8 +172,8 @@ class DependencyContextExtractor:
     def _extract_dependency_context(self, dependency_url: str) -> Dict[str, Any]:
         """Extract context for a dependency repository."""
         try:
-            # Find dependency in dataframe using githubLink column
-            dep_row = self._dependencies_df[self._dependencies_df['githubLink'] == dependency_url]
+            # Find dependency in dataframe using flexible URL matching
+            dep_row = self._find_repo_by_url(self._dependencies_df, dependency_url)
             
             if dep_row.empty:
                 raise ValueError(f"Dependency not found: {dependency_url}")
@@ -218,7 +218,7 @@ class DependencyContextExtractor:
         """
         try:
             return self._extract_dependency_context(dependency_url), None
-        except Exception as e:
+        except Exception:
             logger.warning(f"Dependency not found in CSV, using fallback: {dependency_url}")
             return self._create_fallback_dependency_context(dependency_url), f"Dependency {dependency_url} not found in CSV"
     
@@ -257,6 +257,57 @@ class DependencyContextExtractor:
             "fallback_context": True
         }
     
+    def _find_repo_by_url(self, df: pd.DataFrame, search_url: str) -> pd.DataFrame:
+        """
+        Find repository in dataframe using flexible URL matching.
+        Handles various URL formats like:
+        - https://github.com/owner/repo
+        - owner/repo
+        - github.com/owner/repo
+        """
+        # First try exact match
+        exact_match = df[df['githubLink'] == search_url]
+        if not exact_match.empty:
+            return exact_match
+        
+        # Normalize URLs for comparison
+        normalized_search = self._normalize_github_url(search_url)
+        
+        # Try matching against normalized URLs
+        for idx, row in df.iterrows():
+            if pd.notna(row['githubLink']):
+                normalized_csv_url = self._normalize_github_url(row['githubLink'])
+                if normalized_search == normalized_csv_url:
+                    return df.iloc[[idx]]
+        
+        # Return empty DataFrame if no match found
+        return pd.DataFrame()
+    
+    def _normalize_github_url(self, url: str) -> str:
+        """
+        Normalize GitHub URL to owner/repo format for comparison.
+        """
+        try:
+            # Remove common prefixes
+            url = url.strip()
+            url = url.replace('https://github.com/', '')
+            url = url.replace('http://github.com/', '')
+            url = url.replace('github.com/', '')
+            url = url.replace('www.github.com/', '')
+            
+            # Remove trailing slash and .git
+            url = url.rstrip('/')
+            url = url.replace('.git', '')
+            
+            # Ensure it's in owner/repo format
+            parts = url.split('/')
+            if len(parts) >= 2:
+                return f"{parts[0]}/{parts[1]}"
+            
+            return url
+        except Exception:
+            return url
+
     def _extract_name_from_url(self, url: str) -> str:
         """Extract repository name from GitHub URL."""
         try:
