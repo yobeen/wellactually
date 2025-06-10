@@ -5,8 +5,9 @@ Extracts repository context from CSV files for dependency assessments.
 """
 
 import pandas as pd
+import json
 import logging
-from typing import Dict, Any, Tuple, Optional
+from typing import Dict, Any, Tuple, Optional, List
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
@@ -17,20 +18,24 @@ class DependencyContextExtractor:
     """
     
     def __init__(self, parent_csv_path: str = "data/raw/DeepFunding Repos Enhanced via OpenQ - ENHANCED TEAMS.csv", 
-                 dependencies_csv_path: str = "data/raw/DeepFunding Repos Enhanced via OpenQ - ENHANCED TEAMS.csv"):
+                 dependencies_csv_path: str = "data/raw/DeepFunding Repos Enhanced via OpenQ - ENHANCED TEAMS.csv",
+                 assessments_json_path: str = "data/processed/criteria_assessment/detailed_assessments.json"):
         """
         Initialize the dependency context extractor.
         
         Args:
             parent_csv_path: Path to parent repositories CSV
             dependencies_csv_path: Path to dependencies CSV
+            assessments_json_path: Path to detailed assessments JSON for fallback data
         """
         self.parent_csv_path = parent_csv_path
         self.dependencies_csv_path = dependencies_csv_path
+        self.assessments_json_path = assessments_json_path
         
         # Cache for loaded data
         self._parent_df = None
         self._dependencies_df = None
+        self._assessments_data = None
         
         logger.info("DependencyContextExtractor initialized")
     
@@ -96,6 +101,9 @@ class DependencyContextExtractor:
         
         if self._dependencies_df is None:
             self._load_dependencies_data()
+            
+        if self._assessments_data is None:
+            self._load_assessments_data()
     
     def _load_parent_data(self):
         """Load parent repositories CSV data."""
@@ -142,6 +150,23 @@ class DependencyContextExtractor:
         except Exception as e:
             logger.error(f"Error loading dependencies CSV: {e}")
             raise
+    
+    def _load_assessments_data(self):
+        """Load detailed assessments JSON data for fallback context."""
+        try:
+            if not Path(self.assessments_json_path).exists():
+                logger.warning(f"Assessments JSON not found: {self.assessments_json_path}")
+                self._assessments_data = []
+                return
+            
+            with open(self.assessments_json_path, 'r', encoding='utf-8') as f:
+                self._assessments_data = json.load(f)
+            
+            logger.info(f"Loaded {len(self._assessments_data)} assessment records")
+            
+        except Exception as e:
+            logger.warning(f"Error loading assessments JSON: {e}")
+            self._assessments_data = []
     
     def _extract_parent_context(self, parent_url: str) -> Dict[str, Any]:
         """Extract context for a parent repository."""
@@ -206,8 +231,13 @@ class DependencyContextExtractor:
         try:
             return self._extract_parent_context(parent_url), None
         except Exception as e:
-            logger.warning(f"Parent repository not found in CSV, using fallback: {parent_url} (Error: {e})")
-            return self._create_fallback_parent_context(parent_url), f"Parent repo {parent_url} not found in CSV"
+            fallback_context = self._create_fallback_parent_context(parent_url)
+            if fallback_context.get('assessment_fallback'):
+                logger.info(f"Parent repository found in assessments data: {parent_url}")
+                return fallback_context, None  # No warning if found in assessments
+            else:
+                logger.warning(f"Parent repository not found in any data source: {parent_url}")
+                return fallback_context, f"Parent repo {parent_url} not found in CSV or assessments"
     
     def _extract_dependency_context_safe(self, dependency_url: str) -> Tuple[Dict[str, Any], Optional[str]]:
         """
@@ -219,12 +249,41 @@ class DependencyContextExtractor:
         try:
             return self._extract_dependency_context(dependency_url), None
         except Exception:
-            logger.warning(f"Dependency not found in CSV, using fallback: {dependency_url}")
-            return self._create_fallback_dependency_context(dependency_url), f"Dependency {dependency_url} not found in CSV"
+            fallback_context = self._create_fallback_dependency_context(dependency_url)
+            if fallback_context.get('assessment_fallback'):
+                logger.info(f"Dependency found in assessments data: {dependency_url}")
+                return fallback_context, None  # No warning if found in assessments
+            else:
+                logger.warning(f"Dependency not found in any data source: {dependency_url}")
+                return fallback_context, f"Dependency {dependency_url} not found in CSV or assessments"
+    
+    def _find_assessment_by_url(self, repo_url: str) -> Optional[Dict[str, Any]]:
+        """Find repository assessment data by URL."""
+        if not self._assessments_data:
+            return None
+        
+        # Normalize the search URL
+        normalized_search = self._normalize_github_url(repo_url)
+        
+        for assessment in self._assessments_data:
+            assessment_url = assessment.get('repository_url', '')
+            if assessment_url:
+                normalized_assessment = self._normalize_github_url(assessment_url)
+                if normalized_search == normalized_assessment:
+                    return assessment
+        
+        return None
     
     def _create_fallback_parent_context(self, parent_url: str) -> Dict[str, Any]:
         """Create fallback context for parent repository not found in CSV."""
-        # Extract basic info from URL
+        # Try to find in assessments data first
+        assessment = self._find_assessment_by_url(parent_url)
+        
+        if assessment:
+            logger.info(f"Found parent in assessments data: {parent_url}")
+            return self._create_context_from_assessment(parent_url, assessment, is_parent=True)
+        
+        # Extract basic info from URL as final fallback
         name = self._extract_name_from_url(parent_url)
         
         return {
@@ -241,7 +300,14 @@ class DependencyContextExtractor:
     
     def _create_fallback_dependency_context(self, dependency_url: str) -> Dict[str, Any]:
         """Create fallback context for dependency repository not found in CSV."""
-        # Extract basic info from URL
+        # Try to find in assessments data first
+        assessment = self._find_assessment_by_url(dependency_url)
+        
+        if assessment:
+            logger.info(f"Found dependency in assessments data: {dependency_url}")
+            return self._create_context_from_assessment(dependency_url, assessment, is_parent=False)
+        
+        # Extract basic info from URL as final fallback
         name = self._extract_name_from_url(dependency_url)
         
         return {
@@ -256,6 +322,65 @@ class DependencyContextExtractor:
             "alternatives": "unknown",
             "fallback_context": True
         }
+    
+    def _create_context_from_assessment(self, repo_url: str, assessment: Dict[str, Any], 
+                                       is_parent: bool = True) -> Dict[str, Any]:
+        """Create context from assessment data."""
+        name = assessment.get('repository_name', self._extract_name_from_url(repo_url))
+        target_score = assessment.get('target_score', 0)
+        
+        # Extract key information from criteria scores
+        criteria_scores = assessment.get('criteria_scores', {})
+        core_protocol = criteria_scores.get('core_protocol', {})
+        market_adoption = criteria_scores.get('market_adoption', {})
+        security = criteria_scores.get('security_infrastructure', {})
+        
+        # Create description from overall reasoning or core protocol reasoning
+        description = assessment.get('overall_reasoning', '')
+        if not description and core_protocol:
+            description = core_protocol.get('reasoning', '')
+        if not description:
+            description = f"Repository with target score {target_score:.2f}"
+        
+        # Determine primary language and domain from criteria
+        primary_language = "unknown"
+        domain = "blockchain"  # Default for assessment data
+        
+        # Determine category from scores
+        if core_protocol.get('score', 0) >= 7:
+            category = "core_infrastructure"
+        elif security.get('score', 0) >= 5:
+            category = "security_tool"
+        else:
+            category = "ethereum_tool"
+        
+        if is_parent:
+            return {
+                "url": repo_url,
+                "name": name,
+                "description": description,
+                "primary_language": primary_language,
+                "domain": domain,
+                "architecture_type": category,
+                "key_functions": f"Target importance score: {target_score:.2f}",
+                "dependency_management": "unknown",
+                "assessment_fallback": True,
+                "target_score": target_score
+            }
+        else:
+            return {
+                "url": repo_url,
+                "name": name,
+                "description": description,
+                "category": category,
+                "primary_function": f"Target importance score: {target_score:.2f}",
+                "integration_patterns": "unknown",
+                "performance_characteristics": f"Importance score: {target_score:.2f}",
+                "parent_repos": "unknown",
+                "alternatives": "unknown",
+                "assessment_fallback": True,
+                "target_score": target_score
+            }
     
     def _find_repo_by_url(self, df: pd.DataFrame, search_url: str) -> pd.DataFrame:
         """
