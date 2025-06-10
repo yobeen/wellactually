@@ -150,9 +150,9 @@ class CriteriaAssessmentLoader:
                 if not assessment.criteria_scores:
                     validation_results["errors"].append(f"Missing criteria_scores for {url}")
                 
-                # Check for failed parsing indicators
+                # Check for failed parsing indicators (approximate equality for floating point)
                 all_uncertainties_half = all(
-                    criterion.get("raw_uncertainty", 0) == 0.5
+                    abs(criterion.get("raw_uncertainty", 0) - 0.5) < 1e-10
                     for criterion in assessment.criteria_scores.values()
                 )
                 

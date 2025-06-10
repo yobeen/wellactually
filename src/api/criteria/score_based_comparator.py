@@ -151,8 +151,8 @@ class ScoreBasedComparator:
                 for criterion in assessment.criteria_scores.values()
             ]
             
-            # Check if all uncertainties are exactly 0.5
-            return len(uncertainties) > 0 and all(u == 0.5 for u in uncertainties)
+            # Check if all uncertainties are approximately 0.5 (within floating point tolerance)
+            return len(uncertainties) > 0 and all(abs(u - 0.5) < 1e-10 for u in uncertainties)
         
         # Detect parsing failures
         parsing_failure_a = has_parsing_failure(assessment_a)

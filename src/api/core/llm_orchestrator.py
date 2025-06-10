@@ -46,7 +46,10 @@ class LLMOrchestrator:
             # Initialize L3 components
             self.level3_prompt_generator = Level3PromptGenerator()
             self.dependency_response_parser = DependencyResponseParser()
-            self.dependency_context_extractor = DependencyContextExtractor()
+            self.dependency_context_extractor = DependencyContextExtractor(
+                parent_csv_path="data/raw/parent_repositories.csv",
+                dependencies_csv_path="data/raw/dependencies.csv"
+            )
             
             logger.info("LLM Orchestrator initialized successfully")
             

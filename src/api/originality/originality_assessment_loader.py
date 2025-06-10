@@ -177,10 +177,10 @@ class OriginalityAssessmentLoader:
                 if not assessment.parsing_success:
                     validation_results["warnings"].append(f"Parsing failed for {url}")
                 
-                # Check for suspiciously uniform uncertainties
+                # Check for suspiciously uniform uncertainties (with floating point tolerance)
                 if assessment.criteria_uncertainties:
                     unique_uncertainties = set(assessment.criteria_uncertainties.values())
-                    if len(unique_uncertainties) == 1 and 0.5 in unique_uncertainties:
+                    if len(unique_uncertainties) == 1 and any(abs(u - 0.5) < 1e-10 for u in unique_uncertainties):
                         validation_results["warnings"].append(
                             f"All uncertainties are 0.5 for {url} - possible parsing failure"
                         )
