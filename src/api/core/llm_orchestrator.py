@@ -6,8 +6,7 @@ Handles prompt generation, LLM querying, and response parsing.
 
 import logging
 import time
-import requests
-from typing import Dict, Any, List, Optional, Tuple
+from typing import Dict, Any, Optional, Tuple
 from omegaconf import DictConfig
 
 from src.shared.multi_model_engine import MultiModelEngine
@@ -15,6 +14,9 @@ from src.tasks.l1.level1_prompts import Level1PromptGenerator
 from src.shared.response_parser import ResponseParser, ModelResponse
 from src.shared.model_metadata import get_model_metadata
 from src.tasks.originality.originality_prompt_generator import OriginalityPromptGenerator
+from src.tasks.l3.level3_prompts import Level3PromptGenerator
+from src.tasks.l3.dependency_response_parser import DependencyResponseParser
+from src.tasks.l3.dependency_context_extractor import DependencyContextExtractor
 
 logger = logging.getLogger(__name__)
 
@@ -40,6 +42,11 @@ class LLMOrchestrator:
             
             # Initialize originality prompt generator
             self.originality_prompt_generator = OriginalityPromptGenerator()
+            
+            # Initialize L3 components
+            self.level3_prompt_generator = Level3PromptGenerator()
+            self.dependency_response_parser = DependencyResponseParser()
+            self.dependency_context_extractor = DependencyContextExtractor()
             
             logger.info("LLM Orchestrator initialized successfully")
             
@@ -97,7 +104,7 @@ class LLMOrchestrator:
                                  parent_info: Dict[str, Any], model_id: Optional[str] = None,
                                  temperature: float = 0.7) -> ModelResponse:
         """
-        Query LLM for Level 3 dependency comparison (skeleton implementation).
+        Query LLM for Level 3 dependency comparison using real implementation.
         
         Args:
             dep_a_info: Information about first dependency
@@ -107,23 +114,104 @@ class LLMOrchestrator:
             temperature: Sampling temperature
             
         Returns:
-            ModelResponse with mock results for now
+            ModelResponse with dependency comparison results
         """
-        logger.info("L3 comparison query (skeleton implementation)")
-        
-        # TODO: Implement actual L3 comparison logic
-        # For now, return a mock response
-        mock_response = self._create_mock_comparison_response(
-            dep_a_info, dep_b_info, parent_info, "L3 comparison not yet implemented"
-        )
-        
-        return mock_response
+        try:
+            # Use default model if not specified
+            if model_id is None:
+                model_id = self._get_default_model()
+            
+            parent_url = parent_info.get('url')
+            dep_a_url = dep_a_info.get('url')
+            dep_b_url = dep_b_info.get('url')
+            
+            if not all([parent_url, dep_a_url, dep_b_url]):
+                raise ValueError("Parent and dependency URLs are required for L3 comparison")
+            
+            logger.info(f"Starting L3 dependency comparison: {dep_a_url} vs {dep_b_url} for {parent_url}")
+            
+            # Extract detailed context using DependencyContextExtractor
+            try:
+                comparison_context = self.dependency_context_extractor.extract_comparison_context(
+                    parent_url, dep_a_url, dep_b_url
+                )
+                parent_context = comparison_context["parent"]
+                dep_a_context = comparison_context["dependency_a"]
+                dep_b_context = comparison_context["dependency_b"]
+            except Exception as e:
+                logger.warning(f"Could not extract detailed context, using basic info: {e}")
+                # Fallback to basic info provided
+                parent_context = parent_info
+                dep_a_context = dep_a_info
+                dep_b_context = dep_b_info
+            
+            # Generate L3 comparison prompt using Level3PromptGenerator
+            messages = self.level3_prompt_generator.create_dependency_comparison_prompt(
+                parent_context, dep_a_context, dep_b_context
+            )
+            
+            logger.debug(f"Generated L3 prompt for {dep_a_info.get('name', dep_a_url)} vs {dep_b_info.get('name', dep_b_url)}")
+            
+            # Query LLM using MultiModelEngine interface
+            start_time = time.time()
+            model_response = self.multi_model_engine.query_single_model_with_temperature(
+                model_id=model_id,
+                prompt=messages,
+                temperature=temperature
+            )
+            processing_time = (time.time() - start_time) * 1000
+            
+            # Parse the response using DependencyResponseParser
+            try:
+                parsed_response = self.dependency_response_parser.parse_response(
+                    model_response.content,
+                    parent_url,
+                    dep_a_url,
+                    dep_b_url,
+                    model_response.full_content_logprobs
+                )
+                
+                # Convert parsed response to match ModelResponse format
+                overall_assessment = parsed_response.overall_assessment
+                choice = overall_assessment.get('choice', 'Equal')
+                confidence = overall_assessment.get('confidence', 0.5)
+                reasoning = overall_assessment.get('reasoning', '')
+                
+                # Update ModelResponse with parsed data
+                model_response.raw_choice = choice
+                model_response.uncertainty = 1.0 - confidence
+                model_response.content = f"Choice: {choice}. Reasoning: {reasoning}"
+                
+                # Store parsed response in a custom field for API response
+                model_response.parsed_dependency_response = parsed_response
+                
+            except Exception as e:
+                logger.warning(f"Could not parse L3 response, using raw content: {e}")
+                # Fallback to basic choice extraction
+                content_lower = model_response.content.lower()
+                if 'choice: a' in content_lower or 'dependency a' in content_lower:
+                    model_response.raw_choice = 'A'
+                elif 'choice: b' in content_lower or 'dependency b' in content_lower:
+                    model_response.raw_choice = 'B'
+                else:
+                    model_response.raw_choice = 'Equal'
+            
+            # Add processing time to response
+            model_response.processing_time_ms = processing_time
+            
+            logger.info(f"L3 dependency comparison completed in {processing_time:.1f}ms")
+            
+            return model_response
+            
+        except Exception as e:
+            logger.error(f"Error in L3 dependency comparison query: {e}")
+            raise
     
     async def query_originality_assessment(self, repo_info: Dict[str, Any],
                                          model_id: Optional[str] = None,
                                          temperature: float = 0.7) -> ModelResponse:
         """
-        Query LLM for repository originality assessment using real implementation.
+        Query LLM for repository originality assessment using MultiModelEngine interface.
         
         Args:
             repo_info: Information about repository to assess
@@ -149,11 +237,11 @@ class LLMOrchestrator:
             
             logger.debug(f"Generated originality prompt for {repo_info.get('name', repo_url)}")
             
-            # Query LLM using the proven method from OriginalityAssessmentPipeline
+            # Query LLM using MultiModelEngine interface with higher max_tokens for detailed assessments
             start_time = time.time()
-            model_response = self._query_originality_assessment_internal(
+            model_response = self.multi_model_engine.query_single_model_with_temperature(
                 model_id=model_id,
-                messages=messages,
+                prompt=messages,
                 temperature=temperature
             )
             processing_time = (time.time() - start_time) * 1000
@@ -169,119 +257,6 @@ class LLMOrchestrator:
             logger.error(f"Error in originality assessment query: {e}")
             raise
     
-    def _query_originality_assessment_internal(self, model_id: str, messages: List[Dict[str, str]], 
-                                             temperature: float) -> ModelResponse:
-        """
-        Internal method for originality assessments that need longer responses.
-        Adapted from OriginalityAssessmentPipeline._query_originality_assessment().
-        
-        Args:
-            model_id: Model identifier
-            messages: Message list in OpenAI format
-            temperature: Sampling temperature
-            
-        Returns:
-            ModelResponse with full originality assessment
-        """
-        try:
-            # Create custom payload for originality assessment with higher max_tokens
-            payload = {
-                "model": model_id,
-                "messages": messages,
-                "max_tokens": 4000,  # Much higher for detailed originality assessments
-                "temperature": temperature,
-                "logprobs": True,
-                "top_logprobs": 5
-            }
-            
-            # Add provider filtering if configured (copied from MultiModelEngine)
-            if hasattr(self.multi_model_engine.api_config.openrouter, 'providers') and self.multi_model_engine.api_config.openrouter.providers:
-                providers = list(self.multi_model_engine.api_config.openrouter.providers)
-                filtered_providers = self.multi_model_engine._filter_providers_for_model(model_id, providers)
-                if filtered_providers:
-                    payload["provider"] = {
-                        "only": filtered_providers
-                    }
-            
-            # Apply rate limiting
-            self.multi_model_engine._wait_if_needed()
-            
-            # Make API request with retry logic
-            api_response = None
-            for attempt in range(self.multi_model_engine.max_retries + 1):
-                try:
-                    response = requests.post(
-                        self.multi_model_engine.base_url,
-                        headers=self.multi_model_engine.headers,
-                        json=payload,
-                        timeout=self.multi_model_engine.timeout
-                    )
-                    
-                    if response.status_code == 200:
-                        api_response = response.json()
-                        break
-                    elif response.status_code == 429:  # Rate limited
-                        if attempt < self.multi_model_engine.max_retries:
-                            wait_time = (self.multi_model_engine.backoff_factor ** attempt) * 60
-                            logger.warning(f"Rate limited for {model_id}, waiting {wait_time:.1f}s")
-                            time.sleep(wait_time)
-                            continue
-                        else:
-                            api_response = self.multi_model_engine._create_api_error_response(
-                                f"Rate limit exceeded after {self.multi_model_engine.max_retries} retries"
-                            )
-                            break
-                    else:  # Other HTTP error
-                        error_msg = f"HTTP {response.status_code}: {response.text}"
-                        if attempt < self.multi_model_engine.max_retries:
-                            logger.warning(f"HTTP error for {model_id}: {error_msg}, retrying...")
-                            time.sleep(self.multi_model_engine.backoff_factor ** attempt)
-                            continue
-                        else:
-                            api_response = self.multi_model_engine._create_api_error_response(error_msg)
-                            break
-                            
-                except Exception as e:
-                    error_msg = f"Request exception: {str(e)}"
-                    if attempt < self.multi_model_engine.max_retries:
-                        logger.warning(f"Exception for {model_id}: {error_msg}, retrying...")
-                        time.sleep(self.multi_model_engine.backoff_factor ** attempt)
-                        continue
-                    else:
-                        api_response = self.multi_model_engine._create_api_error_response(error_msg)
-                        break
-            
-            if api_response is None:
-                api_response = self.multi_model_engine._create_api_error_response("Unexpected error in retry loop")
-            
-            # Parse response using the engine's response parser
-            parsed_response = self.multi_model_engine.response_parser.parse_response(
-                model_id, api_response, temperature
-            )
-            
-            # Update cost tracking
-            self.multi_model_engine.total_cost += parsed_response.cost_usd
-            
-            return parsed_response
-            
-        except Exception as e:
-            logger.error(f"Error in originality assessment query: {e}")
-            # Return error response
-            return ModelResponse(
-                model_id=model_id,
-                success=False,
-                content="",
-                logprobs=None,
-                uncertainty=1.0,
-                raw_choice="",
-                cost_usd=0.0,
-                tokens_used=0,
-                temperature=temperature,
-                error=str(e),
-                timestamp="",
-                answer_token_info={"extraction_success": False, "method": "error"},
-                full_content_logprobs=None
-            )
     
     def extract_repo_info(self, repo_url: str) -> Dict[str, Any]:
         """
@@ -349,25 +324,3 @@ class LLMOrchestrator:
         except Exception:
             return "openai/gpt-4o"
     
-    def _create_mock_comparison_response(self, repo_a_info: Dict, repo_b_info: Dict,
-                                       context_info: Dict, explanation: str) -> ModelResponse:
-        """Create mock comparison response for skeleton implementations."""
-        import random
-        
-        # Generate reasonable mock data
-        choice = random.choice(['A', 'B'])
-        uncertainty = random.uniform(0.1, 0.3)  # Low uncertainty for mock
-        
-        mock_response = ModelResponse(
-            model_id="mock/skeleton",
-            success=True,
-            content=f"Mock comparison: {choice}. {explanation}",
-            logprobs={'A': 0.6, 'B': 0.4} if choice == 'A' else {'A': 0.4, 'B': 0.6},
-            uncertainty=uncertainty,
-            raw_choice=choice,
-            cost_usd=0.0,
-            tokens_used=0,
-            temperature=0.7
-        )
-        
-        return mock_response
