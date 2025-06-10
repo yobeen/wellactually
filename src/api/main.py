@@ -8,6 +8,9 @@ import logging
 from contextlib import asynccontextmanager
 from typing import Dict, Any
 
+from dotenv import load_dotenv
+load_dotenv()
+
 from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
