@@ -93,7 +93,9 @@ class CacheManager:
         safe_model_id = model_id.replace("/", "-").replace(":", "-")
         
         model_cache_dir = self.cache_dir / safe_model_id
-        model_cache_dir.mkdir(parents=True, exist_ok=True)
+        if not model_cache_dir.exists():
+            model_cache_dir.mkdir(parents=True, exist_ok=True)
+            logger.info(f"Created new cache directory for model: {model_id}")
         
         return model_cache_dir / f"{cache_key}.json"
     
@@ -171,9 +173,14 @@ class CacheManager:
                 "raw_api_response": cleaned_response
             }
             
+            # Check if this is a new cache file
+            is_new_file = not cache_file.exists()
+            
             # Atomic write using temporary file
             self._atomic_write_json(cache_file, cache_data)
             
+            if is_new_file:
+                logger.info(f"Created new cache file: {cache_file}")
             logger.debug(f"Cached response: {model_id} temp={temperature}")
             
         except Exception as e:
