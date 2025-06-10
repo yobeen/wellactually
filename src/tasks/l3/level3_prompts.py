@@ -152,8 +152,11 @@ Analyze each dimension carefully, score both dependencies, provide reasoning, an
     
     def _build_parent_context_section(self, parent_context: Dict[str, Any]) -> str:
         """Build the parent repository context section."""
+        parent_fallback = parent_context.get('fallback_context', False)
+        parent_note = " (Note: Limited context - repository not found in CSV data)" if parent_fallback else ""
+        
         return f"""
-PARENT REPOSITORY CONTEXT:
+PARENT REPOSITORY CONTEXT:{parent_note}
 Repository: {parent_context.get('url', 'unknown')}
 Name: {parent_context.get('name', 'unknown')}
 Description: {parent_context.get('description', 'No description available')}
@@ -167,8 +170,15 @@ Dependency Management: {parent_context.get('dependency_management', 'unknown')}"
                                   dep_b_context: Dict[str, Any]) -> str:
         """Build the dependencies context section."""
         
+        # Check if fallback context is being used
+        dep_a_fallback = dep_a_context.get('fallback_context', False)
+        dep_b_fallback = dep_b_context.get('fallback_context', False)
+        
+        dep_a_note = " (Note: Limited context - repository not found in CSV data)" if dep_a_fallback else ""
+        dep_b_note = " (Note: Limited context - repository not found in CSV data)" if dep_b_fallback else ""
+        
         dep_a_section = f"""
-DEPENDENCY A:
+DEPENDENCY A:{dep_a_note}
 Repository: {dep_a_context.get('url', 'unknown')}
 Name: {dep_a_context.get('name', 'unknown')}
 Description: {dep_a_context.get('description', 'No description available')}
@@ -177,7 +187,7 @@ Integration Patterns: {dep_a_context.get('integration_patterns', 'unknown')}
 """
 
         dep_b_section = f"""
-DEPENDENCY B:
+DEPENDENCY B:{dep_b_note}
 Repository: {dep_b_context.get('url', 'unknown')}
 Name: {dep_b_context.get('name', 'unknown')}
 Description: {dep_b_context.get('description', 'No description available')}

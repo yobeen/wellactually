@@ -38,6 +38,7 @@ class DependencyContextExtractor:
                                  dep_b_url: str) -> Dict[str, Any]:
         """
         Extract context for a dependency comparison.
+        Gracefully handles missing repositories by using fallback context.
         
         Args:
             parent_url: URL of the parent repository
@@ -47,19 +48,29 @@ class DependencyContextExtractor:
         Returns:
             Dictionary with parent and dependency contexts
         """
+        warnings = []
+        
         try:
             # Load CSV data if not cached
             self._ensure_data_loaded()
             
-            # Extract parent context
-            parent_context = self._extract_parent_context(parent_url)
+            # Extract parent context (with fallback)
+            parent_context, parent_warning = self._extract_parent_context_safe(parent_url)
+            if parent_warning:
+                warnings.append(parent_warning)
             
-            # Extract dependency contexts
-            dep_a_context = self._extract_dependency_context(dep_a_url)
-            dep_b_context = self._extract_dependency_context(dep_b_url)
+            # Extract dependency contexts (with fallbacks)
+            dep_a_context, dep_a_warning = self._extract_dependency_context_safe(dep_a_url)
+            if dep_a_warning:
+                warnings.append(dep_a_warning)
+                
+            dep_b_context, dep_b_warning = self._extract_dependency_context_safe(dep_b_url)
+            if dep_b_warning:
+                warnings.append(dep_b_warning)
             
-            # Validate that dependencies are related to parent
-            self._validate_dependency_relationship(parent_context, dep_a_context, dep_b_context)
+            # Log any warnings about missing repositories
+            if warnings:
+                logger.warning(f"Missing repository data: {'; '.join(warnings)}")
             
             return {
                 "parent": parent_context,
@@ -68,7 +79,9 @@ class DependencyContextExtractor:
                 "comparison_metadata": {
                     "parent_url": parent_url,
                     "dep_a_url": dep_a_url,
-                    "dep_b_url": dep_b_url
+                    "dep_b_url": dep_b_url,
+                    "warnings": warnings,
+                    "fallback_used": len(warnings) > 0
                 }
             }
             
@@ -184,6 +197,79 @@ class DependencyContextExtractor:
         except Exception as e:
             logger.error(f"Error extracting dependency context for {dependency_url}: {e}")
             raise
+    
+    def _extract_parent_context_safe(self, parent_url: str) -> Tuple[Dict[str, Any], Optional[str]]:
+        """
+        Extract parent context with fallback for missing repositories.
+        
+        Returns:
+            Tuple of (context_dict, warning_message)
+        """
+        try:
+            return self._extract_parent_context(parent_url), None
+        except Exception as e:
+            logger.warning(f"Parent repository not found in CSV, using fallback: {parent_url}")
+            return self._create_fallback_parent_context(parent_url), f"Parent repo {parent_url} not found in CSV"
+    
+    def _extract_dependency_context_safe(self, dependency_url: str) -> Tuple[Dict[str, Any], Optional[str]]:
+        """
+        Extract dependency context with fallback for missing repositories.
+        
+        Returns:
+            Tuple of (context_dict, warning_message)
+        """
+        try:
+            return self._extract_dependency_context(dependency_url), None
+        except Exception as e:
+            logger.warning(f"Dependency not found in CSV, using fallback: {dependency_url}")
+            return self._create_fallback_dependency_context(dependency_url), f"Dependency {dependency_url} not found in CSV"
+    
+    def _create_fallback_parent_context(self, parent_url: str) -> Dict[str, Any]:
+        """Create fallback context for parent repository not found in CSV."""
+        # Extract basic info from URL
+        name = self._extract_name_from_url(parent_url)
+        
+        return {
+            "url": parent_url,
+            "name": name,
+            "description": f"Repository context not available in CSV data",
+            "primary_language": "unknown",
+            "domain": "unknown",
+            "architecture_type": "unknown", 
+            "key_functions": "unknown",
+            "dependency_management": "unknown",
+            "fallback_context": True
+        }
+    
+    def _create_fallback_dependency_context(self, dependency_url: str) -> Dict[str, Any]:
+        """Create fallback context for dependency repository not found in CSV."""
+        # Extract basic info from URL
+        name = self._extract_name_from_url(dependency_url)
+        
+        return {
+            "url": dependency_url,
+            "name": name,
+            "description": f"Dependency context not available in CSV data",
+            "category": "unknown",
+            "primary_function": "unknown",
+            "integration_patterns": "unknown",
+            "performance_characteristics": "unknown",
+            "parent_repos": "unknown",
+            "alternatives": "unknown",
+            "fallback_context": True
+        }
+    
+    def _extract_name_from_url(self, url: str) -> str:
+        """Extract repository name from GitHub URL."""
+        try:
+            # Handle GitHub URLs like https://github.com/owner/repo
+            if 'github.com' in url:
+                parts = url.rstrip('/').split('/')
+                if len(parts) >= 2:
+                    return parts[-1]  # repo name
+            return url.split('/')[-1] if '/' in url else url
+        except Exception:
+            return "unknown"
     
     def _validate_dependency_relationship(self, parent_context: Dict, 
                                         dep_a_context: Dict, dep_b_context: Dict):
