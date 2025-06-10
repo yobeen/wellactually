@@ -8,12 +8,12 @@ for Level 3 dependency importance assessments.
 
 from .dependency_context_extractor import DependencyContextExtractor
 from .dependency_response_parser import DependencyResponseParser
-from .level3_prompts import DependencyPromptGenerator
+from .level3_prompts import Level3PromptGenerator
 
 __all__ = [
     'DependencyContextExtractor',
     'DependencyResponseParser', 
-    'DependencyPromptGenerator'
+    'Level3PromptGenerator'
 ]
 
 __version__ = "1.0.0"

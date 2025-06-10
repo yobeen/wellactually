@@ -45,13 +45,13 @@ class Level3PromptGenerator:
                 ],
                 "scoring_guidance": "1=Negligible performance impact, 3=Minor overhead, 5=Moderate performance consideration, 8=Significant performance factor, 10=Performance critical component"
             },
-            "replaceability": {
-                "name": "Replaceability",
+            "replacement_difficulty": {
+                "name": "Replacement Difficulty",
                 "weight": 0.2,
-                "description": "How easily could this dependency be replaced, removed, or substituted?",
+                "description": "How difficult would it be to replace, remove, or substitute this dependency?",
                 "indicators": [
                     "Availability of alternative libraries",
-                    "API complexity and coupling",
+                    "API complexity and coupling", 
                     "Migration effort required",
                     "Vendor lock-in considerations",
                     "Community and ecosystem support"

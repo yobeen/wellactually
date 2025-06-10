@@ -39,14 +39,14 @@ class DependencyResponseParser:
         # Default dimension IDs (in order)
         self.default_dimensions = [
             "functional_necessity", "performance_impact", 
-            "replaceability", "integration_depth"
+            "replacement_difficulty", "integration_depth"
         ]
         
         # Default weights
         self.default_weights = {
             "functional_necessity": 0.4,
             "performance_impact": 0.3,
-            "replaceability": 0.2,
+            "replacement_difficulty": 0.2,
             "integration_depth": 0.1
         }
     

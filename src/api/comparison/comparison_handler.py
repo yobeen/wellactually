@@ -74,13 +74,12 @@ class ComparisonHandler:
     async def handle_l3_comparison(self, request: ComparisonRequest) -> ComparisonResponse:
         """
         Handle Level 3 comparison (dependencies within parent repository).
-        This is a skeleton implementation.
         
         Args:
             request: Comparison request
             
         Returns:
-            ComparisonResponse with skeleton results
+            ComparisonResponse with dependency comparison results
         """
         try:
             start_time = time.time()
@@ -115,14 +114,14 @@ class ComparisonHandler:
                 raise
             
             logger.info(f"Processing L3 comparison: {dep_a_info['name']} vs {dep_b_info['name']} "
-                       f"for parent {parent_info['name']} (SKELETON)")
+                       f"for parent {parent_info['name']}")
             
             # Get model and temperature from parameters
             model_id = request.parameters.get('model_id')
             temperature = request.parameters.get('temperature', 0.7)
             logger.info(f"Using model: {model_id}, temperature: {temperature}")
             
-            # Query LLM using orchestrator (skeleton implementation)
+            # Query LLM using orchestrator
             logger.info("Querying LLM orchestrator for L3 comparison...")
             try:
                 model_response = await self.llm_orchestrator.query_l3_comparison(
@@ -141,14 +140,14 @@ class ComparisonHandler:
             logger.info("Transforming to API response format...")
             try:
                 api_response = self._transform_to_comparison_response(
-                    model_response, request, start_time, is_skeleton=True
+                    model_response, request, start_time, is_skeleton=False
                 )
                 logger.info(f"Response transformation completed")
             except Exception as e:
                 logger.error(f"Response transformation failed: {e}")
                 raise
             
-            logger.info(f"L3 comparison completed (SKELETON): choice={api_response.choice}, "
+            logger.info(f"L3 comparison completed: choice={api_response.choice}, "
                        f"multiplier={api_response.multiplier:.2f}")
             
             return api_response
@@ -347,7 +346,9 @@ class ComparisonHandler:
             processing_time_ms = (time.time() - start_time) * 1000
             
             # Map choice from A/B/Equal to 1/2 numeric format
+            print(f"DEBUG: raw_choice before mapping = '{model_response.raw_choice}'")
             choice = self._map_choice_to_numeric(model_response.raw_choice)
+            print(f"DEBUG: mapped choice = {choice}")
             
             # Calculate multiplier from uncertainty (inverse relationship)
             multiplier = self._calculate_multiplier_from_uncertainty(model_response.uncertainty)
