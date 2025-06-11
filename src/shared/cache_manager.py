@@ -100,7 +100,7 @@ class CacheManager:
         return model_cache_dir / f"{cache_key}.json"
     
     def get_cached_response(self, model_id: str, prompt: List[Dict[str, str]], 
-                           temperature: float) -> Optional[Dict]:
+                           temperature: float, cache_key_suffix: str = "") -> Optional[Dict]:
         """
         Retrieve cached response if available.
         
@@ -108,6 +108,7 @@ class CacheManager:
             model_id: Model identifier
             prompt: Prompt messages
             temperature: Sampling temperature
+            cache_key_suffix: Additional suffix for cache key (e.g., for max_tokens)
             
         Returns:
             Raw API response dict or None if not cached
@@ -116,7 +117,7 @@ class CacheManager:
             return None
         
         try:
-            cache_key = self.generate_cache_key(model_id, prompt, temperature)
+            cache_key = self.generate_cache_key(model_id, prompt, temperature) + cache_key_suffix
             cache_file = self.get_cache_file_path(model_id, cache_key)
             
             if not cache_file.exists():
@@ -139,7 +140,7 @@ class CacheManager:
             return None
     
     def save_response_to_cache(self, model_id: str, prompt: List[Dict[str, str]], 
-                              temperature: float, raw_api_response: Dict):
+                              temperature: float, raw_api_response: Dict, cache_key_suffix: str = ""):
         """
         Save raw API response to cache.
         
@@ -148,12 +149,13 @@ class CacheManager:
             prompt: Prompt messages
             temperature: Sampling temperature
             raw_api_response: Raw API response dictionary
+            cache_key_suffix: Additional suffix for cache key (e.g., for max_tokens)
         """
         if not self.enabled:
             return
         
         try:
-            cache_key = self.generate_cache_key(model_id, prompt, temperature)
+            cache_key = self.generate_cache_key(model_id, prompt, temperature) + cache_key_suffix
             cache_file = self.get_cache_file_path(model_id, cache_key)
             
             # Create cache data structure

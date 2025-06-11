@@ -344,7 +344,8 @@ class ResponseParser:
         parsed_logprobs, answer_token_info, full_content_logprobs = self._extract_logprobs_enhanced(
             logprobs_data, model_id, expected_answer_format
         )
-        uncertainty = self._calculate_uncertainty(parsed_logprobs)
+        # Calculate uncertainty from perplexity of all tokens
+        uncertainty = self._calculate_uncertainty_from_perplexity(full_content_logprobs)
         raw_choice = self._extract_raw_choice(parsed_logprobs, content, answer_token_info)
         
         # Extract normalized answer if available
@@ -492,8 +493,60 @@ class ResponseParser:
         
         return preprocessed_tokens
     
+    def _calculate_uncertainty_from_perplexity(self, full_content_logprobs: Optional[List[Dict]]) -> float:
+        """
+        Calculate uncertainty based on perplexity of all answer tokens.
+        
+        Args:
+            full_content_logprobs: List of token logprob dictionaries
+            
+        Returns:
+            Uncertainty score between 0.0 and 1.0
+        """
+        if not full_content_logprobs:
+            return 1.0  # Maximum uncertainty if no logprobs available
+        
+        try:
+            # Extract logprobs for all tokens
+            token_logprobs = []
+            for token_data in full_content_logprobs:
+                if isinstance(token_data, dict) and 'logprob' in token_data:
+                    logprob = token_data['logprob']
+                    if logprob is not None and not np.isnan(logprob) and not np.isinf(logprob):
+                        token_logprobs.append(logprob)
+            
+            if not token_logprobs:
+                return 1.0  # Maximum uncertainty if no valid logprobs
+            
+            # Calculate average logprob (log probability)
+            avg_logprob = np.mean(token_logprobs)
+            
+            # Convert to perplexity: perplexity = 2^(-avg_logprob)
+            perplexity = 2 ** (-avg_logprob)
+            
+            # Normalize perplexity to uncertainty range [0, 1]
+            # Lower perplexity = higher confidence = lower uncertainty
+            # We use a sigmoid-like transformation to map perplexity to [0, 1]
+            # Typical perplexity ranges from 1 (perfect) to 100+ (very uncertain)
+            
+            # Clamp perplexity to reasonable range
+            perplexity = max(1.0, min(100.0, perplexity))
+            
+            # Transform to uncertainty: higher perplexity = higher uncertainty
+            # Using logarithmic scaling: uncertainty = log(perplexity) / log(100)
+            uncertainty = np.log(perplexity) / np.log(100.0)
+            
+            # Ensure uncertainty is in [0, 1] range
+            uncertainty = max(0.0, min(1.0, uncertainty))
+            
+            return uncertainty
+            
+        except Exception as e:
+            logger.warning(f"Error calculating uncertainty from perplexity: {e}")
+            return 0.5  # Return neutral uncertainty on error
+
     def _calculate_uncertainty(self, probabilities: Dict[str, float]) -> float:
-        """Calculate uncertainty as normalized entropy."""
+        """Calculate uncertainty as normalized entropy (legacy method)."""
         if not probabilities:
             return 1.0
         

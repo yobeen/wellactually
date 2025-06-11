@@ -116,10 +116,11 @@ class ComparisonHandler:
             logger.info(f"Processing L3 comparison: {dep_a_info['name']} vs {dep_b_info['name']} "
                        f"for parent {parent_info['name']}")
             
-            # Get model and temperature from parameters
+            # Get model, temperature, and simplified option from parameters
             model_id = request.parameters.get('model_id')
             temperature = request.parameters.get('temperature', 0.7)
-            logger.info(f"Using model: {model_id}, temperature: {temperature}")
+            simplified = request.parameters.get('simplified', False)
+            logger.info(f"Using model: {model_id}, temperature: {temperature}, simplified: {simplified}")
             
             # Query LLM using orchestrator
             logger.info("Querying LLM orchestrator for L3 comparison...")
@@ -129,7 +130,8 @@ class ComparisonHandler:
                     dep_b_info=dep_b_info,
                     parent_info=parent_info,
                     model_id=model_id,
-                    temperature=temperature
+                    temperature=temperature,
+                    simplified=simplified
                 )
                 logger.info(f"LLM query completed: {type(model_response)}")
             except Exception as e:

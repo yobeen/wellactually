@@ -107,7 +107,7 @@ class LLMOrchestrator:
     
     async def query_l3_comparison(self, dep_a_info: Dict[str, Any], dep_b_info: Dict[str, Any],
                                  parent_info: Dict[str, Any], model_id: Optional[str] = None,
-                                 temperature: float = 0.7) -> ModelResponse:
+                                 temperature: float = 0.7, simplified: bool = False) -> ModelResponse:
         """
         Query LLM for Level 3 dependency comparison using real implementation.
         
@@ -117,6 +117,7 @@ class LLMOrchestrator:
             parent_info: Information about parent repository
             model_id: Model to use
             temperature: Sampling temperature
+            simplified: If True, returns only overall assessment choice without detailed reasoning/dimensions
             
         Returns:
             ModelResponse with dependency comparison results
@@ -152,17 +153,28 @@ class LLMOrchestrator:
             
             # Generate L3 comparison prompt using Level3PromptGenerator
             messages = self.level3_prompt_generator.create_dependency_comparison_prompt(
-                parent_context, dep_a_context, dep_b_context
+                parent_context, dep_a_context, dep_b_context, simplified
             )
             
             logger.debug(f"Generated L3 prompt for {dep_a_info.get('name', dep_a_url)} vs {dep_b_info.get('name', dep_b_url)}")
             
             # Query LLM using MultiModelEngine interface
             start_time = time.time()
+            
+            # Use special model and token limit for simplified responses
+            if simplified:
+                actual_model_id = "google/gemma-3-27b-it"
+                max_tokens = 10
+                logger.info(f"Using simplified model: {actual_model_id} with max_tokens: {max_tokens}")
+            else:
+                actual_model_id = model_id
+                max_tokens = None
+            
             model_response = self.multi_model_engine.query_single_model_with_temperature(
-                model_id=model_id,
+                model_id=actual_model_id,
                 prompt=messages,
-                temperature=temperature
+                temperature=temperature,
+                max_tokens=max_tokens
             )
             processing_time = (time.time() - start_time) * 1000
             

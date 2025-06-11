@@ -346,15 +346,36 @@ class DependencyResponseParser:
         # Extract overall assessment
         overall_assessment = parsed_data.get("overall_assessment", {})
         
-        # Validate and fill missing dimensions with enhanced uncertainty calculation
-        validated_dimensions = self._validate_and_fill_dimensions_enhanced(
-            dimension_assessments, warnings, logprobs_data
-        )
+        # Check if this is an ultra-simplified response (only contains choice)
+        is_ultra_simplified = "choice" in parsed_data and len(parsed_data) == 1
         
-        # Extract metadata
-        parent_name = parsed_data.get("parent_name", "unknown")
-        dep_a_name = parsed_data.get("dependency_a_name", "unknown") 
-        dep_b_name = parsed_data.get("dependency_b_name", "unknown")
+        if is_ultra_simplified:
+            # Ultra-simplified: only {"choice": "A"}
+            overall_assessment = {"choice": parsed_data["choice"]}
+            is_simplified = True
+        else:
+            # Check if this is a simplified response (no dimension assessments)
+            is_simplified = not dimension_assessments and overall_assessment.get("choice")
+        
+        if is_simplified:
+            # For simplified responses, create empty dimensions
+            validated_dimensions = {}
+            warnings.append("Simplified response format detected - no dimension assessments")
+        else:
+            # Validate and fill missing dimensions with enhanced uncertainty calculation
+            validated_dimensions = self._validate_and_fill_dimensions_enhanced(
+                dimension_assessments, warnings, logprobs_data
+            )
+        
+        # Extract metadata (use unknown for ultra-simplified responses)
+        if is_ultra_simplified:
+            parent_name = "unknown"
+            dep_a_name = "unknown" 
+            dep_b_name = "unknown"
+        else:
+            parent_name = parsed_data.get("parent_name", "unknown")
+            dep_a_name = parsed_data.get("dependency_a_name", "unknown") 
+            dep_b_name = parsed_data.get("dependency_b_name", "unknown")
         
         return ParsedDependencyResponse(
             parent_url=parent_url,

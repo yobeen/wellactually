@@ -102,7 +102,7 @@ class MultiModelEngine:
         return filtered_providers
 
     def query_single_model_with_temperature(self, model_id: str, prompt: List[Dict[str, str]],
-                                            temperature: float = 0.0) -> ModelResponse:
+                                            temperature: float = 0.0, max_tokens: Optional[int] = None) -> ModelResponse:
         """
         Query a single model with specific temperature, using cache when available.
 
@@ -110,24 +110,26 @@ class MultiModelEngine:
             model_id: OpenRouter model identifier
             prompt: Message list in OpenAI format
             temperature: Sampling temperature
+            max_tokens: Maximum tokens to generate (optional)
 
         Returns:
             ModelResponse with parsed data and uncertainty
         """
         
-        # Check cache first
-        cached_response = self.cache_manager.get_cached_response(model_id, prompt, temperature)
+        # Check cache first (include max_tokens in cache key)
+        cache_key_suffix = f"_mt{max_tokens}" if max_tokens is not None else ""
+        cached_response = self.cache_manager.get_cached_response(model_id, prompt, temperature, cache_key_suffix)
         if cached_response is not None:
-            logger.debug(f"Cache hit for {model_id} at temp={temperature}")
+            logger.debug(f"Cache hit for {model_id} at temp={temperature}, max_tokens={max_tokens}")
             # Parse cached response
             parsed_response = self.response_parser.parse_response(model_id, cached_response, temperature)
         else:
             # Make API request
-            api_response = self._make_api_request(model_id, prompt, temperature)
+            api_response = self._make_api_request(model_id, prompt, temperature, max_tokens)
             
             # Save to cache if successful
             if self._is_successful_api_response(api_response):
-                self.cache_manager.save_response_to_cache(model_id, prompt, temperature, api_response)
+                self.cache_manager.save_response_to_cache(model_id, prompt, temperature, api_response, cache_key_suffix)
             
             # Parse response using ResponseParser
             parsed_response = self.response_parser.parse_response(model_id, api_response, temperature)
@@ -166,7 +168,7 @@ class MultiModelEngine:
         return responses
 
     def _make_api_request(self, model_id: str, prompt: List[Dict[str, str]], 
-                         temperature: float) -> Dict:
+                         temperature: float, max_tokens: Optional[int] = None) -> Dict:
         """
         Make API request with retry logic and rate limiting.
         
@@ -174,6 +176,7 @@ class MultiModelEngine:
             model_id: Model identifier
             prompt: Message list
             temperature: Temperature
+            max_tokens: Maximum tokens to generate (optional)
             
         Returns:
             Raw API response dictionary or error dictionary
@@ -182,11 +185,14 @@ class MultiModelEngine:
         payload = {
             "model": model_id,
             "messages": prompt,
-           # "max_tokens": 10,
             "temperature": temperature,
             "logprobs": True,
             "top_logprobs": 5
         }
+        
+        # Add max_tokens if specified
+        if max_tokens is not None:
+            payload["max_tokens"] = max_tokens
 
         # Add provider filtering if configured
         if hasattr(self.api_config.openrouter, 'providers') and self.api_config.openrouter.providers:

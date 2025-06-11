@@ -381,6 +381,150 @@ class OriginalityHandler:
                 "error": str(e)
             }
     
+    def get_bulk_cached_originality(self) -> Dict[str, Any]:
+        """
+        Load and return bulk cached originality assessment results for all processed repositories.
+        
+        Returns:
+            Dictionary with cached originality assessment results
+        """
+        try:
+            logger.info("Loading bulk cached originality assessments")
+            
+            if not self.originality_data_dir.exists():
+                return {
+                    "error": "Originality data directory not found",
+                    "total_repositories": 0,
+                    "assessments": []
+                }
+            
+            assessments = []
+            
+            # Traverse all owner/repo directories
+            for owner_dir in self.originality_data_dir.iterdir():
+                if not owner_dir.is_dir() or owner_dir.name == "originality_list.csv":
+                    continue
+                    
+                for repo_dir in owner_dir.iterdir():
+                    if not repo_dir.is_dir():
+                        continue
+                    
+                    try:
+                        # Load detailed assessment data
+                        assessment_file = repo_dir / "detailed_originality_assessments_with_uncertainty.json"
+                        scores_file = repo_dir / "originality_scores.json"
+                        uncertainty_file = repo_dir / "uncertainty_metrics.json"
+                        
+                        if not assessment_file.exists():
+                            logger.warning(f"Missing assessment file for {owner_dir.name}/{repo_dir.name}")
+                            continue
+                        
+                        # Load assessment data
+                        with open(assessment_file, 'r') as f:
+                            assessment_data = json.load(f)
+                        
+                        # Handle list format (take first item)
+                        if isinstance(assessment_data, list) and len(assessment_data) > 0:
+                            assessment_data = assessment_data[0]
+                        elif isinstance(assessment_data, list):
+                            logger.warning(f"Empty assessment data for {owner_dir.name}/{repo_dir.name}")
+                            continue
+                        
+                        # Load scores data if available
+                        scores_data = {}
+                        if scores_file.exists():
+                            with open(scores_file, 'r') as f:
+                                scores_data = json.load(f)
+                        
+                        # Load uncertainty metrics if available
+                        uncertainty_data = {}
+                        if uncertainty_file.exists():
+                            with open(uncertainty_file, 'r') as f:
+                                uncertainty_data = json.load(f)
+                        
+                        # Extract key information
+                        repository_url = assessment_data.get('repository_url', f"https://github.com/{owner_dir.name}/{repo_dir.name}")
+                        repository_name = assessment_data.get('repository_name', repo_dir.name)
+                        originality_score = assessment_data.get('final_originality_score', 0.5)
+                        category = assessment_data.get('originality_category', 'Unknown')
+                        confidence = assessment_data.get('assessment_confidence', 0.7)
+                        overall_uncertainty = assessment_data.get('overall_reasoning_uncertainty', 0.3)
+                        aggregate_uncertainty = assessment_data.get('aggregate_uncertainty', 0.3)
+                        
+                        # Extract criteria scores
+                        criteria_scores = {}
+                        criteria_raw = assessment_data.get('criteria_scores', {})
+                        for criterion, details in criteria_raw.items():
+                            if isinstance(details, dict):
+                                criteria_scores[criterion] = {
+                                    'score': details.get('score', 0),
+                                    'weight': details.get('weight', 0),
+                                    'reasoning': details.get('reasoning', ''),
+                                    'uncertainty': details.get('raw_uncertainty', 0.3)
+                                }
+                        
+                        # Extract criteria uncertainties
+                        criteria_uncertainties = assessment_data.get('criteria_uncertainties', {})
+                        
+                        # Create assessment entry
+                        assessment_entry = {
+                            "repository_url": repository_url,
+                            "repository_name": repository_name,
+                            "owner": owner_dir.name,
+                            "repo": repo_dir.name,
+                            "originality_score": originality_score,
+                            "originality_category": category,
+                            "assessment_confidence": confidence,
+                            "overall_uncertainty": overall_uncertainty,
+                            "aggregate_uncertainty": aggregate_uncertainty,
+                            "criteria_scores": criteria_scores,
+                            "criteria_uncertainties": criteria_uncertainties,
+                            "method": "pre_computed_originality"
+                        }
+                        
+                        # Add uncertainty metrics if available
+                        if uncertainty_data:
+                            assessment_entry["uncertainty_metrics"] = uncertainty_data
+                        
+                        # Add simple score mapping if available
+                        if repository_url in scores_data:
+                            assessment_entry["simple_score"] = scores_data[repository_url]
+                        
+                        assessments.append(assessment_entry)
+                        
+                    except Exception as e:
+                        logger.warning(f"Error processing originality data for {owner_dir.name}/{repo_dir.name}: {e}")
+                        continue
+            
+            logger.info(f"Loaded {len(assessments)} bulk cached originality assessments")
+            
+            # Extract repository URLs for summary
+            repository_urls = [a["repository_url"] for a in assessments]
+            
+            return {
+                "total_repositories": len(assessments),
+                "repositories": repository_urls,
+                "assessments": assessments,
+                "metadata": {
+                    "data_source": "data/processed/originality/*/",
+                    "method": "pre_computed_cached",
+                    "assessment_type": "originality",
+                    "files_used": [
+                        "detailed_originality_assessments_with_uncertainty.json",
+                        "originality_scores.json",
+                        "uncertainty_metrics.json"
+                    ]
+                }
+            }
+            
+        except Exception as e:
+            logger.error(f"Error loading bulk cached originality: {e}", exc_info=True)
+            return {
+                "error": str(e),
+                "total_repositories": 0,
+                "assessments": []
+            }
+
     def _generate_mock_dependency_analysis(self, parameters: Dict[str, Any]) -> Dict[str, Any]:
         """
         Generate mock dependency analysis for skeleton implementation.

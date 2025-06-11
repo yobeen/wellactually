@@ -75,7 +75,8 @@ class Level3PromptGenerator:
     
     def create_dependency_comparison_prompt(self, parent_context: Dict[str, Any], 
                                           dep_a_context: Dict[str, Any], 
-                                          dep_b_context: Dict[str, Any]) -> List[Dict[str, str]]:
+                                          dep_b_context: Dict[str, Any],
+                                          simplified: bool = False) -> List[Dict[str, str]]:
         """
         Create a dependency comparison prompt using the 4-dimension framework.
         
@@ -83,6 +84,7 @@ class Level3PromptGenerator:
             parent_context: Context about the parent repository
             dep_a_context: Context about first dependency
             dep_b_context: Context about second dependency
+            simplified: If True, returns only overall assessment choice without detailed reasoning/dimensions
             
         Returns:
             List of message dictionaries in OpenAI format
@@ -96,12 +98,29 @@ class Level3PromptGenerator:
             dependencies_section = self._build_dependencies_section(dep_a_context, dep_b_context)
             
             # Build response format
-            response_format = self._build_response_format(dep_a_context, dep_b_context)
+            response_format = self._build_response_format(dep_a_context, dep_b_context, simplified)
             
-            prompt = [
-                {
-                    "role": "system",
-                    "content": f"""You are an expert software architect evaluating dependency relationships within software projects. You will assess which of two dependencies is more important for a specific parent repository using a structured 4-dimension framework.
+            if simplified:
+                # Simplified system message
+                system_content = """You are an expert software architect evaluating dependency relationships within software projects. You will assess which of two dependencies is more important for a specific parent repository.
+
+Your goal is to determine which dependency is more critical for the parent repository's success and functionality based on your expert judgment.
+
+Provide your response in the exact JSON format specified with only the overall choice."""
+                
+                # Simplified user message
+                user_content = f"""Please assess which dependency is more important for the parent repository:
+
+{parent_section}
+
+{dependencies_section}
+
+{response_format}
+
+Based on your expert analysis, determine which dependency is more critical overall and provide only the choice."""
+            else:
+                # Full system message with framework
+                system_content = f"""You are an expert software architect evaluating dependency relationships within software projects. You will assess which of two dependencies is more important for a specific parent repository using a structured 4-dimension framework.
 
 DEPENDENCY IMPORTANCE ASSESSMENT FRAMEWORK:
 
@@ -115,10 +134,9 @@ For each dimension, provide:
 Your goal is to determine which dependency is more critical for the parent repository's success and functionality.
 
 Provide your response in the exact JSON format specified."""
-                },
-                {
-                    "role": "user", 
-                    "content": f"""Please assess which dependency is more important for the parent repository using the 4-dimension framework:
+                
+                # Full user message with framework analysis
+                user_content = f"""Please assess which dependency is more important for the parent repository using the 4-dimension framework:
 
 {parent_section}
 
@@ -127,6 +145,15 @@ Provide your response in the exact JSON format specified."""
 {response_format}
 
 Analyze each dimension carefully, score both dependencies, provide reasoning, and determine which dependency is more critical overall."""
+            
+            prompt = [
+                {
+                    "role": "system",
+                    "content": system_content
+                },
+                {
+                    "role": "user", 
+                    "content": user_content
                 }
             ]
             
@@ -153,7 +180,7 @@ Analyze each dimension carefully, score both dependencies, provide reasoning, an
     def _build_parent_context_section(self, parent_context: Dict[str, Any]) -> str:
         """Build the parent repository context section."""
         parent_fallback = parent_context.get('fallback_context', False)
-        parent_note = " (Note: Limited context - repository not found in CSV data)" if parent_fallback else ""
+        parent_note = " (Note: Limited context)" if parent_fallback else ""
         
         return f"""
 PARENT REPOSITORY CONTEXT:{parent_note}
@@ -174,8 +201,8 @@ Dependency Management: {parent_context.get('dependency_management', 'unknown')}"
         dep_a_fallback = dep_a_context.get('fallback_context', False)
         dep_b_fallback = dep_b_context.get('fallback_context', False)
         
-        dep_a_note = " (Note: Limited context - repository not found in CSV data)" if dep_a_fallback else ""
-        dep_b_note = " (Note: Limited context - repository not found in CSV data)" if dep_b_fallback else ""
+        dep_a_note = " (Note: Limited context)" if dep_a_fallback else ""
+        dep_b_note = " (Note: Limited context)" if dep_b_fallback else ""
         
         dep_a_section = f"""
 DEPENDENCY A:{dep_a_note}
@@ -198,25 +225,37 @@ Integration Patterns: {dep_b_context.get('integration_patterns', 'unknown')}
         return dep_a_section + "\n" + dep_b_section
     
     def _build_response_format(self, dep_a_context: Dict[str, Any], 
-                             dep_b_context: Dict[str, Any]) -> str:
+                             dep_b_context: Dict[str, Any], simplified: bool = False) -> str:
         """Build the expected response format section."""
         
         dep_a_name = dep_a_context.get('name', 'dependency_a')
         dep_b_name = dep_b_context.get('name', 'dependency_b')
         
-        example_dimensions = []
-        for dimension_id, dimension in self.dimension_framework.items():
-            example_dimensions.append(f'''    "{dimension_id}": {{
+        if simplified:
+            # Simplified format with only overall assessment choice
+            response_format = f"""
+Please respond in this exact JSON format:
+
+{{
+  {{
+    "choice": "[A|B|Equal]"
+  }}
+}}"""
+        else:
+            # Full format with dimensions and detailed reasoning
+            example_dimensions = []
+            for dimension_id, dimension in self.dimension_framework.items():
+                example_dimensions.append(f'''    "{dimension_id}": {{
       "name": "{dimension['name']}",
       "score_a": [1-10],
       "score_b": [1-10],
       "weight": {dimension['weight']:.3f},
       "reasoning": "[Compare both dependencies on this dimension]"
     }}''')
-        
-        dimensions_json = ',\n'.join(example_dimensions)
-        
-        response_format = f"""
+            
+            dimensions_json = ',\n'.join(example_dimensions)
+            
+            response_format = f"""
 Please respond in this exact JSON format:
 
 {{
@@ -231,7 +270,6 @@ Please respond in this exact JSON format:
   }},
   "overall_assessment": {{
     "choice": "[A|B|Equal]",
-    "confidence": "[0.0-1.0]",
     "weighted_score_a": "[calculated weighted sum for dependency A]",
     "weighted_score_b": "[calculated weighted sum for dependency B]", 
     "reasoning": "[Overall comparison explaining which dependency is more important and why]"

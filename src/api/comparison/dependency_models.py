@@ -28,7 +28,7 @@ class DependencyComparisonRequest(BaseModel):
     parameters: Optional[Dict[str, Any]] = Field(
         default_factory=dict,
         description="Optional parameters for the assessment",
-        example={"model_id": "openai/gpt-4o", "temperature": 0.0}
+        example={"model_id": "openai/gpt-4o", "temperature": 0.0, "simplified": False}
     )
     
     @validator('parent_repo', 'dependency_a', 'dependency_b')
@@ -69,7 +69,8 @@ class DependencyComparisonRequest(BaseModel):
                 "parameters": {
                     "model_id": "openai/gpt-4o",
                     "temperature": 0.0,
-                    "include_model_metadata": True
+                    "include_model_metadata": True,
+                    "simplified": False
                 }
             }
         }
@@ -116,25 +117,25 @@ class OverallAssessment(BaseModel):
         regex="^(A|B|Equal)$",
         example="A"
     )
-    confidence: float = Field(
-        ...,
-        description="Confidence in the choice [0,1]",
+    confidence: Optional[float] = Field(
+        None,
+        description="Confidence in the choice [0,1] (not available for simplified responses)",
         ge=0.0, le=1.0,
         example=0.75
     )
-    weighted_score_a: float = Field(
-        ...,
-        description="Weighted sum of scores for dependency A",
+    weighted_score_a: Optional[float] = Field(
+        None,
+        description="Weighted sum of scores for dependency A (not available for simplified responses)",
         example=6.8
     )
-    weighted_score_b: float = Field(
-        ...,
-        description="Weighted sum of scores for dependency B",
+    weighted_score_b: Optional[float] = Field(
+        None,
+        description="Weighted sum of scores for dependency B (not available for simplified responses)",
         example=5.2
     )
-    reasoning: str = Field(
-        ...,
-        description="Overall reasoning for the comparison decision",
+    reasoning: Optional[str] = Field(
+        None,
+        description="Overall reasoning for the comparison decision (not available for simplified responses)",
         example="Dependency A is more important overall because it provides critical functionality..."
     )
 
@@ -171,9 +172,9 @@ class DependencyComparisonResponse(BaseModel):
         description="Second dependency name",
         example="pydantic"
     )
-    dimension_assessments: Dict[str, DimensionAssessment] = Field(
-        ...,
-        description="Assessment scores for each dimension"
+    dimension_assessments: Optional[Dict[str, DimensionAssessment]] = Field(
+        None,
+        description="Assessment scores for each dimension (empty for simplified responses)"
     )
     overall_assessment: OverallAssessment = Field(
         ...,

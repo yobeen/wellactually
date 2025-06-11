@@ -191,7 +191,8 @@ async def root():
             "originality": "/assess",
             "criteria": "/criteria",
             "special_case_status": "/special-case/status",
-            "bulk_cached_comparisons": "/cached-comparisons/bulk"
+            "bulk_cached_comparisons": "/cached-comparisons/bulk",
+            "bulk_cached_originality": "/cached-originality/bulk"
         }
     }
 
@@ -380,6 +381,29 @@ async def get_bulk_cached_comparisons(
     except Exception as e:
         logger.error(f"Error processing bulk cached comparisons: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="Failed to process bulk cached comparisons")
+
+@app.get("/cached-originality/bulk")
+async def get_bulk_cached_originality(
+    handler: OriginalityHandler = Depends(get_originality_handler)
+):
+    """
+    Return bulk cached originality assessment data for all processed repositories.
+    Uses pre-computed originality assessment data from individual repository files.
+    
+    Returns:
+        Dictionary with cached originality results for all available repositories
+    """
+    try:
+        logger.info("Processing bulk cached originality request")
+        
+        bulk_results = handler.get_bulk_cached_originality()
+        
+        logger.info(f"Bulk cached originality complete: {len(bulk_results.get('assessments', []))} repositories")
+        return bulk_results
+        
+    except Exception as e:
+        logger.error(f"Error processing bulk cached originality: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Failed to process bulk cached originality")
 
 @app.get("/debug/comparison-methods")
 async def get_comparison_methods():
