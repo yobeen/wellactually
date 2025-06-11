@@ -164,7 +164,7 @@ class LLMOrchestrator:
             # Use special model and token limit for simplified responses
             if simplified:
                 actual_model_id = "google/gemma-3-27b-it"
-                max_tokens = 10
+                max_tokens = 20
                 logger.info(f"SIMPLIFIED MODE ACTIVATED: Using model={actual_model_id}, max_tokens={max_tokens}")
             else:
                 actual_model_id = model_id

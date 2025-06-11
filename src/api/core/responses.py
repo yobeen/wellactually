@@ -11,8 +11,8 @@ class ComparisonResponse(BaseModel):
     
     choice: int = Field(
         ..., 
-        description="Which repository is better (1 for repo_a, 2 for repo_b)",
-        ge=1, le=2,
+        description="Which repository is better (1 for repo_a, 2 for repo_b, 0 for equal)",
+        ge=0, le=2,
         example=1
     )
     multiplier: Optional[float] = Field(
@@ -55,9 +55,9 @@ class ComparisonResponse(BaseModel):
     
     @validator('choice')
     def validate_choice(cls, v):
-        """Validate choice is 1 or 2."""
-        if v not in [1, 2]:
-            raise ValueError("Choice must be 1 or 2")
+        """Validate choice is 0, 1, or 2."""
+        if v not in [0, 1, 2]:
+            raise ValueError("Choice must be 0 (equal), 1 (repo_a), or 2 (repo_b)")
         return v
     
     @validator('multiplier')

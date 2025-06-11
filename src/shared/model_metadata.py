@@ -102,7 +102,7 @@ TEMPERATURE_SWEEP = [0.0, 0.2, 0.4, 0.6, 0.8, 1.0]
 
 # Default sampling parameters
 DEFAULT_SAMPLING_PARAMS = {
-    "max_tokens": 10,
+    "max_tokens": 20,
     "top_p": 1.0,
     "frequency_penalty": 0.0,
     "presence_penalty": 0.0,

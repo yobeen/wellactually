@@ -204,7 +204,7 @@ class OriginalityAssessmentPipeline:
                                     temperature: float) -> 'ModelResponse':
         """
         Custom query method for originality assessments that need longer responses.
-        Works around the MultiModelEngine's hardcoded max_tokens=10 limitation.
+        Works around the MultiModelEngine's hardcoded max_tokens=20 limitation.
         
         Args:
             model_id: Model identifier

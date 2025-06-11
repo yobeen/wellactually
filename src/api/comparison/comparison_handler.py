@@ -124,7 +124,7 @@ class ComparisonHandler:
             # Determine actual model that will be used
             if simplified:
                 actual_model_id = "google/gemma-3-27b-it"
-                logger.info(f"Using simplified mode: model={actual_model_id}, temperature={temperature}, max_tokens=10")
+                logger.info(f"Using simplified mode: model={actual_model_id}, temperature={temperature}, max_tokens=20")
             else:
                 actual_model_id = model_id
                 logger.info(f"Using full mode: model={actual_model_id}, temperature={temperature}, simplified={simplified}")
@@ -387,8 +387,14 @@ class ComparisonHandler:
             
             # Only add multiplier fields for non-simplified responses
             if not simplified:
-                multiplier = self._calculate_multiplier_from_uncertainty(model_response.uncertainty)
-                multiplier_uncertainty = self._calculate_multiplier_uncertainty(model_response.uncertainty)
+                # For equal choice (0), set multiplier to 1.0 (no preference)
+                if choice == 0:
+                    multiplier = 1.0
+                    multiplier_uncertainty = 0.5  # High uncertainty for equal choice
+                else:
+                    multiplier = self._calculate_multiplier_from_uncertainty(model_response.uncertainty)
+                    multiplier_uncertainty = self._calculate_multiplier_uncertainty(model_response.uncertainty)
+                    
                 response_fields["multiplier"] = multiplier
                 response_fields["multiplier_uncertainty"] = multiplier_uncertainty
             
