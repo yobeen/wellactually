@@ -15,9 +15,9 @@ class ComparisonResponse(BaseModel):
         ge=1, le=2,
         example=1
     )
-    multiplier: float = Field(
-        ..., 
-        description="How many times better the chosen repository is",
+    multiplier: Optional[float] = Field(
+        None, 
+        description="How many times better the chosen repository is (not present in simplified mode)",
         ge=1.0, le=999.0,
         example=2.5
     )
@@ -27,9 +27,9 @@ class ComparisonResponse(BaseModel):
         ge=0.0, le=1.0,
         example=0.15
     )
-    multiplier_uncertainty: float = Field(
-        ..., 
-        description="Uncertainty in the multiplier magnitude [0,1]",
+    multiplier_uncertainty: Optional[float] = Field(
+        None, 
+        description="Uncertainty in the multiplier magnitude [0,1] (not present in simplified mode)",
         ge=0.0, le=1.0,
         example=0.25
     )
@@ -63,14 +63,14 @@ class ComparisonResponse(BaseModel):
     @validator('multiplier')
     def validate_multiplier(cls, v):
         """Validate multiplier is in valid range."""
-        if not (1.0 <= v <= 999.0):
+        if v is not None and not (1.0 <= v <= 999.0):
             raise ValueError("Multiplier must be between 1.0 and 999.0")
         return v
     
     @validator('choice_uncertainty', 'multiplier_uncertainty')
     def validate_uncertainty(cls, v):
         """Validate uncertainty values are in [0,1] range."""
-        if not (0.0 <= v <= 1.0):
+        if v is not None and not (0.0 <= v <= 1.0):
             raise ValueError("Uncertainty must be between 0.0 and 1.0")
         return v
     

@@ -165,10 +165,11 @@ class LLMOrchestrator:
             if simplified:
                 actual_model_id = "google/gemma-3-27b-it"
                 max_tokens = 10
-                logger.info(f"Using simplified model: {actual_model_id} with max_tokens: {max_tokens}")
+                logger.info(f"SIMPLIFIED MODE ACTIVATED: Using model={actual_model_id}, max_tokens={max_tokens}")
             else:
                 actual_model_id = model_id
                 max_tokens = None
+                logger.info(f"FULL MODE: Using model={actual_model_id}, unlimited tokens")
             
             model_response = self.multi_model_engine.query_single_model_with_temperature(
                 model_id=actual_model_id,

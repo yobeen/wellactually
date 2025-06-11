@@ -120,7 +120,14 @@ class ComparisonHandler:
             model_id = request.parameters.get('model_id')
             temperature = request.parameters.get('temperature', 0.7)
             simplified = request.parameters.get('simplified', False)
-            logger.info(f"Using model: {model_id}, temperature: {temperature}, simplified: {simplified}")
+            
+            # Determine actual model that will be used
+            if simplified:
+                actual_model_id = "google/gemma-3-27b-it"
+                logger.info(f"Using simplified mode: model={actual_model_id}, temperature={temperature}, max_tokens=10")
+            else:
+                actual_model_id = model_id
+                logger.info(f"Using full mode: model={actual_model_id}, temperature={temperature}, simplified={simplified}")
             
             # Query LLM using orchestrator
             logger.info("Querying LLM orchestrator for L3 comparison...")
@@ -142,7 +149,7 @@ class ComparisonHandler:
             logger.info("Transforming to API response format...")
             try:
                 api_response = self._transform_to_comparison_response(
-                    model_response, request, start_time, is_skeleton=False
+                    model_response, request, start_time, is_skeleton=False, simplified=simplified
                 )
                 logger.info(f"Response transformation completed")
             except Exception as e:
@@ -330,7 +337,7 @@ class ComparisonHandler:
         return additional_fields
     
     def _transform_to_comparison_response(self, model_response, request: ComparisonRequest,
-                                        start_time: float, is_skeleton: bool = False) -> ComparisonResponse:
+                                        start_time: float, is_skeleton: bool = False, simplified: bool = False) -> ComparisonResponse:
         """
         Transform ModelResponse to ComparisonResponse API format.
         
@@ -339,6 +346,7 @@ class ComparisonHandler:
             request: Original request
             start_time: Request start time for calculating processing time
             is_skeleton: Whether this is a skeleton implementation
+            simplified: Whether this is a simplified response (affects fields included)
             
         Returns:
             ComparisonResponse in expected API format
@@ -352,12 +360,8 @@ class ComparisonHandler:
             choice = self._map_choice_to_numeric(model_response.raw_choice)
             print(f"DEBUG: mapped choice = {choice}")
             
-            # Calculate multiplier from uncertainty (inverse relationship)
-            multiplier = self._calculate_multiplier_from_uncertainty(model_response.uncertainty)
-            
             # Get uncertainty measures
             choice_uncertainty = model_response.uncertainty
-            multiplier_uncertainty = self._calculate_multiplier_uncertainty(model_response.uncertainty)
             
             # Get explanation
             explanation = model_response.content
@@ -369,14 +373,22 @@ class ComparisonHandler:
                 model_response, request.parameters, processing_time_ms
             )
             
-            return ComparisonResponse(
-                choice=choice,
-                multiplier=multiplier,
-                choice_uncertainty=choice_uncertainty,
-                multiplier_uncertainty=multiplier_uncertainty,
-                explanation=explanation,
+            # Build response fields conditionally based on simplified mode
+            response_fields = {
+                "choice": choice,
+                "choice_uncertainty": choice_uncertainty,
+                "explanation": explanation,
                 **additional_fields
-            )
+            }
+            
+            # Only add multiplier fields for non-simplified responses
+            if not simplified:
+                multiplier = self._calculate_multiplier_from_uncertainty(model_response.uncertainty)
+                multiplier_uncertainty = self._calculate_multiplier_uncertainty(model_response.uncertainty)
+                response_fields["multiplier"] = multiplier
+                response_fields["multiplier_uncertainty"] = multiplier_uncertainty
+            
+            return ComparisonResponse(**response_fields)
             
         except Exception as e:
             logger.error(f"Error transforming response: {e}")
