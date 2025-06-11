@@ -9,8 +9,11 @@ import sys
 import os
 import argparse
 import logging
+import tempfile
+import csv
 from pathlib import Path
 from datetime import datetime
+from dotenv import load_dotenv
 
 # Add src to path to import modules
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -38,6 +41,9 @@ def load_config(config_path: str = "configs/uncertainty_calibration/llm.yaml"):
 
 def validate_environment():
     """Validate that required environment variables are set."""
+    # Load .env file if it exists
+    load_dotenv()
+    
     required_vars = ["OPENROUTER_API_KEY"]
     
     missing_vars = []
@@ -49,8 +55,9 @@ def validate_environment():
         print("Error: Missing required environment variables:")
         for var in missing_vars:
             print(f"  - {var}")
-        print("\nPlease set these variables and try again.")
+        print("\nPlease set these variables in environment or .env file and try again.")
         print("Example: export OPENROUTER_API_KEY=your_api_key_here")
+        print("Or create .env file with: OPENROUTER_API_KEY=your_api_key_here")
         sys.exit(1)
 
 def main():
@@ -98,6 +105,12 @@ Examples:
     )
     
     parser.add_argument(
+        "--repo",
+        type=str,
+        help="Single repository URL to assess (creates temporary CSV)"
+    )
+    
+    parser.add_argument(
         "--output-dir",
         type=str,
         default=None,
@@ -138,6 +151,31 @@ Examples:
     # Load configuration
     logger.info(f"Loading configuration from {args.config}...")
     config = load_config(args.config)
+    
+    # Handle single repo assessment
+    temp_csv_path = None
+    if args.repo:
+        # Create temporary CSV file with single repo entry
+        temp_csv_fd, temp_csv_path = tempfile.mkstemp(suffix='.csv', text=True)
+        try:
+            with os.fdopen(temp_csv_fd, 'w', newline='') as f:
+                writer = csv.writer(f)
+                writer.writerow(['timestamp', 'juror', 'repo_a', 'repo_b', 'parent', 'choice', 'multiplier', 'reasoning'])
+                writer.writerow([
+                    datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%fZ'),
+                    'SingleRepoJuror',
+                    args.repo,
+                    args.repo,  # Use same repo for both to focus on individual assessment
+                    'single_repo',
+                    '1.0',
+                    '1.0',
+                    'Single repository assessment'
+                ])
+            args.train_csv = temp_csv_path
+            logger.info(f"Created temporary CSV for single repo assessment: {temp_csv_path}")
+        except Exception as e:
+            print(f"Error creating temporary CSV: {e}")
+            sys.exit(1)
     
     # Validate input files
     if not Path(args.train_csv).exists():
@@ -239,6 +277,12 @@ Examples:
             import traceback
             traceback.print_exc()
         return 1
+    
+    finally:
+        # Clean up temporary CSV file
+        if temp_csv_path and os.path.exists(temp_csv_path):
+            os.unlink(temp_csv_path)
+            logger.info("Cleaned up temporary CSV file")
 
 if __name__ == "__main__":
     sys.exit(main())
