@@ -570,3 +570,68 @@ class ComparisonHandler:
                 "available_repositories": 0,
                 "data_valid": False
             }
+    
+    def get_bulk_cached_comparisons(self) -> Dict[str, Any]:
+        """
+        Load and return bulk cached L1 comparison results from pre-computed file.
+        
+        Returns:
+            Dictionary with cached L1 comparison results
+        """
+        import json
+        from pathlib import Path
+        
+        try:
+            logger.info("Loading bulk cached L1 comparisons from file")
+            
+            comparison_file = Path("data/processed/l1_comparison_results.json")
+            
+            if not comparison_file.exists():
+                return {
+                    "error": "L1 comparison results file not found",
+                    "total_comparisons": 0,
+                    "comparisons": []
+                }
+            
+            # Load the cached comparison results
+            with open(comparison_file, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            
+            comparisons = data.get("comparisons", [])
+            
+            # Extract unique repositories from the comparisons
+            repositories = set()
+            for comp in comparisons:
+                repositories.add(comp.get("repo_a", ""))
+                repositories.add(comp.get("repo_b", ""))
+            repositories.discard("")  # Remove empty strings
+            
+            logger.info(f"Loaded {len(comparisons)} cached L1 comparisons for {len(repositories)} repositories")
+            
+            return {
+                "total_repositories": len(repositories),
+                "total_comparisons": len(comparisons),
+                "repositories": sorted(list(repositories)),
+                "comparisons": comparisons,
+                "metadata": {
+                    "data_source": "data/processed/l1_comparison_results.json",
+                    "method": "pre_computed_cached",
+                    "all_pairwise_combinations": True,
+                    "comparison_level": "L1"
+                }
+            }
+            
+        except json.JSONDecodeError as e:
+            logger.error(f"Invalid JSON in L1 comparison results file: {e}")
+            return {
+                "error": f"Invalid JSON format: {str(e)}",
+                "total_comparisons": 0,
+                "comparisons": []
+            }
+        except Exception as e:
+            logger.error(f"Error loading bulk cached comparisons: {e}", exc_info=True)
+            return {
+                "error": str(e),
+                "total_comparisons": 0,
+                "comparisons": []
+            }

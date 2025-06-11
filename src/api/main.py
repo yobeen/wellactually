@@ -190,7 +190,8 @@ async def root():
             "comparison": "/compare",
             "originality": "/assess",
             "criteria": "/criteria",
-            "special_case_status": "/special-case/status"
+            "special_case_status": "/special-case/status",
+            "bulk_cached_comparisons": "/cached-comparisons/bulk"
         }
     }
 
@@ -356,6 +357,29 @@ async def get_cache_stats():
     except Exception as e:
         logger.error(f"Error getting cache stats: {e}")
         raise HTTPException(status_code=500, detail="Failed to retrieve cache stats")
+
+@app.get("/cached-comparisons/bulk")
+async def get_bulk_cached_comparisons(
+    handler: ComparisonHandler = Depends(get_comparison_handler)
+):
+    """
+    Return bulk cached comparison data for Level 1 repositories.
+    Uses criteria assessment data from cached file.
+    
+    Returns:
+        Dictionary with cached comparison results for all available repository pairs
+    """
+    try:
+        logger.info("Processing bulk cached comparisons request")
+        
+        bulk_results = handler.get_bulk_cached_comparisons()
+        
+        logger.info(f"Bulk cached comparisons complete: {len(bulk_results.get('comparisons', []))} pairs")
+        return bulk_results
+        
+    except Exception as e:
+        logger.error(f"Error processing bulk cached comparisons: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Failed to process bulk cached comparisons")
 
 @app.get("/debug/comparison-methods")
 async def get_comparison_methods():
