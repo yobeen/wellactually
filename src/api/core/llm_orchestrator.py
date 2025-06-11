@@ -205,6 +205,11 @@ class LLMOrchestrator:
                 
             except Exception as e:
                 logger.warning(f"Could not parse L3 response, using raw content: {e}")
+                logger.warning(f"RAW LLM OUTPUT FOR DEBUG:")
+                logger.warning(f"Content: {repr(model_response.content)}")
+                logger.warning(f"Full content: {repr(getattr(model_response, 'full_content', 'N/A'))}")
+                logger.warning(f"Logprobs: {repr(getattr(model_response, 'full_content_logprobs', 'N/A'))}")
+                
                 # Fallback to basic choice extraction
                 content_lower = model_response.content.lower()
                 if 'choice: a' in content_lower or 'dependency a' in content_lower:

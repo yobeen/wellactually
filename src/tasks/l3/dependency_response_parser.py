@@ -74,6 +74,8 @@ class DependencyResponseParser:
             return self._create_response_from_json(
                 parsed_data, parent_url, dep_a_url, dep_b_url, method, warnings, logprobs_data
             )
+        else:
+            logger.warning("Strategy 1 (perfect JSON) failed")
         
         # Strategy 2: Try cleaned JSON parsing
         parsed_data, method = self._try_cleaned_json_parsing(raw_response)
@@ -83,6 +85,8 @@ class DependencyResponseParser:
             return self._create_response_from_json(
                 parsed_data, parent_url, dep_a_url, dep_b_url, method, warnings, logprobs_data
             )
+        else:
+            logger.warning("Strategy 2 (cleaned JSON) failed")
         
         # Strategy 3: Try regex extraction
         parsed_data, method = self._try_regex_extraction(raw_response)
@@ -92,6 +96,8 @@ class DependencyResponseParser:
             return self._create_response_from_extracted_data(
                 parsed_data, parent_url, dep_a_url, dep_b_url, method, warnings, logprobs_data
             )
+        else:
+            logger.warning("Strategy 3 (regex extraction) failed")
         
         # Strategy 4: Try line-by-line parsing
         parsed_data, method = self._try_line_parsing(raw_response)
@@ -101,10 +107,20 @@ class DependencyResponseParser:
             return self._create_response_from_extracted_data(
                 parsed_data, parent_url, dep_a_url, dep_b_url, method, warnings, logprobs_data
             )
+        else:
+            logger.warning("Strategy 4 (line parsing) failed")
         
-        # All parsing failed - raise error
+        # All parsing failed - raise error with detailed debug info
         error_msg = f"All parsing strategies failed for dependency comparison"
         logger.error(error_msg)
+        logger.error(f"RAW RESPONSE FOR DEBUG (len={len(raw_response)}):")
+        logger.error(f"Raw response: {repr(raw_response)}")
+        logger.error(f"First 500 chars: {repr(raw_response[:500])}")
+        logger.error(f"Last 500 chars: {repr(raw_response[-500:])}")
+        if logprobs_data:
+            logger.error(f"Logprobs available: {len(logprobs_data)} tokens")
+        else:
+            logger.error("No logprobs data available")
         raise ValueError(f"Failed to parse dependency response: {error_msg}")
     
     def _calculate_reasoning_perplexity(self, reasoning_text: str, 
