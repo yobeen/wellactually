@@ -156,8 +156,12 @@ class ComparisonHandler:
                 logger.error(f"Response transformation failed: {e}")
                 raise
             
-            logger.info(f"L3 comparison completed: choice={api_response.choice}, "
-                       f"multiplier={api_response.multiplier:.2f}")
+            # Log completion with conditional multiplier formatting
+            if hasattr(api_response, 'multiplier') and api_response.multiplier is not None:
+                logger.info(f"L3 comparison completed: choice={api_response.choice}, "
+                           f"multiplier={api_response.multiplier:.2f}")
+            else:
+                logger.info(f"L3 comparison completed: choice={api_response.choice} (simplified mode)")
             
             return api_response
             
@@ -394,15 +398,15 @@ class ComparisonHandler:
             logger.error(f"Error transforming response: {e}")
             raise
     
-    def _map_choice_to_numeric(self, raw_choice: str) -> int:
+    def _map_choice_to_numeric(self, raw_choice: str):
         """
-        Map A/B/Equal choice to 1/2 numeric format.
+        Map A/B/Equal choice to appropriate format.
         
         Args:
             raw_choice: Raw choice from LLM (A, B, Equal, etc.)
             
         Returns:
-            1 for A, 2 for B, random for Equal
+            1 for A, 2 for B, 0 for Equal, or "E" for Equal (depending on context)
         """
         if not raw_choice:
             return random.choice([1, 2])
@@ -414,8 +418,8 @@ class ComparisonHandler:
         elif choice_upper in ['B', '2']:
             return 2
         elif choice_upper in ['EQUAL', 'EQUALS', 'TIE']:
-            # For equal, randomly choose 1 or 2
-            return random.choice([1, 2])
+            # For equal, return 0 (or "E" - using 0 for now as it's more API-friendly)
+            return 0
         else:
             # Default fallback
             logger.warning(f"Unknown choice format: {raw_choice}, defaulting to random")
