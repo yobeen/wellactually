@@ -364,8 +364,11 @@ class ComparisonHandler:
             choice = self._map_choice_to_numeric(model_response.raw_choice)
             print(f"DEBUG: mapped choice = {choice}")
             
-            # Get uncertainty measures
+            # Get uncertainty measures with defensive check
             choice_uncertainty = model_response.uncertainty
+            if choice_uncertainty is None:
+                logger.warning("model_response.uncertainty is None for choice_uncertainty, using default 0.5")
+                choice_uncertainty = 0.5
             
             # Get explanation
             explanation = model_response.content
@@ -387,14 +390,20 @@ class ComparisonHandler:
             
             # Only add multiplier fields for non-simplified responses
             if not simplified:
-                # For equal choice (0), set multiplier to 1.0 (no preference)
-                if choice == 0:
-                    multiplier = 1.0
-                    multiplier_uncertainty = 0.5  # High uncertainty for equal choice
-                else:
-                    multiplier = self._calculate_multiplier_from_uncertainty(model_response.uncertainty)
-                    multiplier_uncertainty = self._calculate_multiplier_uncertainty(model_response.uncertainty)
-                    
+                # Defensive check for None uncertainty
+                uncertainty = model_response.uncertainty
+                if uncertainty is None:
+                    logger.warning("model_response.uncertainty is None, using default 0.5")
+                    uncertainty = 0.5
+                
+                multiplier = self._calculate_multiplier_from_uncertainty(uncertainty)
+                multiplier_uncertainty = self._calculate_multiplier_uncertainty(uncertainty)
+                
+                # Ensure multiplier_uncertainty is never None
+                if multiplier_uncertainty is None:
+                    logger.warning("multiplier_uncertainty is None, using default 0.5")
+                    multiplier_uncertainty = 0.5
+                
                 response_fields["multiplier"] = multiplier
                 response_fields["multiplier_uncertainty"] = multiplier_uncertainty
             
