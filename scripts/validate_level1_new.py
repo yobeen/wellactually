@@ -80,11 +80,11 @@ def main():
     # Initialize data collector with multiple models for voting
     print("\n2. Initializing data collector...")
     test_models = [
+            "openai/gpt-4o",
+            "meta-llama/llama-4-maverick",
+            "mistralai/mixtral-8x22b-instruct",
             "google/gemma-3-27b-it",
-        ] 
-    # test_models = [
-    #         #"deepseek/deepseek-r1-0528",
-    #     ] 
+            ] 
     
     try:
         collector = UncertaintyDataCollector(config, models_subset=test_models)
@@ -95,7 +95,7 @@ def main():
         return 1
     
     # Collect predictions
-    temperatures = [0.0, 0.2, 0.4, 0.6, 0.7]
+    temperatures = [0.4]
     print(f"\n4. Querying LLM predictions...")
     print(f"Models: {test_models}")
     print(f"Temperatures: {temperatures}")
@@ -120,11 +120,27 @@ def main():
         traceback.print_exc()
         return 1
     
-    # Run individual model analysis only
+    # Run analysis based on choice
     try:
-        print("\n5. Running individual model analysis...")
+        shared_results_dir = None
+        
+        print("\n5a. Running individual model analysis...")
         individual_results_dir = run_analysis(calibration_data_points)
+        shared_results_dir = individual_results_dir
         print(f"Individual analysis results saved to: {individual_results_dir}")
+        
+        print("\n5b. Running voting analysis...")
+        # Use default rejection rates
+        rejection_rates = None
+        
+        voting_results_dir = run_voting_analysis(
+            calibration_data_points, 
+            rejection_rates=rejection_rates,
+            base_save_dir=str(shared_results_dir)
+        )
+        print(f"Voting analysis results saved to: {voting_results_dir}")
+        if shared_results_dir is None:
+            shared_results_dir = voting_results_dir
         
     except Exception as e:
         print(f"Error during analysis: {e}")
@@ -137,21 +153,24 @@ def main():
     # Summary of what was done
     print("\nSummary:")
     print("✓ Individual model analysis completed")
+    print("✓ Voting analysis with per-model rejection completed")
     print(f"✓ Temperature sweep: {temperatures}")
-    print(f"✓ Model: {test_models[0]}")
+    print(f"✓ Models: {test_models}")
     print(f"✓ Samples: {len(l1_data)} (random subset with seed=42)")
     
-    if individual_results_dir:
-        print(f"\n📁 Results saved to: {individual_results_dir}")
-        print("   ├── accuracy_analysis.png")
-        print("   ├── precision_rejection_curves.png")
-        print("   └── uncertainty_distributions.png")
+    if shared_results_dir:
+        print(f"\n📁 All results saved to: {shared_results_dir}")
+        print("   ├── {model_dirs}/     # Individual model results")
+        print("   ├── comparison/      # Cross-model comparisons") 
+        print("   └── voting/          # Voting analysis results")
     
     print("\nGenerated outputs:")
     print("- Accuracy analysis plots")
     print("- Precision-rejection curves") 
     print("- Uncertainty distribution analysis")
-    print("- Temperature sweep analysis")
+    print("- Voting accuracy curves (dual-mode evaluation)")
+    print("- Voting efficiency analysis")
+    print("- Model contribution statistics")
     
     return 0
 

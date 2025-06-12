@@ -185,7 +185,8 @@ def save_multi_model_metadata(base_dir: Path, models_data: Dict,
         json.dump(analysis_summary, f, indent=2, default=str)
 
 def save_voting_metadata(base_dir: Path, models_data: Dict, timestamp: str, 
-                        voting_results: Dict, rejection_rates: List[float]):
+                        voting_results: Dict, rejection_rates: List[float],
+                        hierarchical_result: Dict = None):
     """Save metadata for voting analysis."""
     metadata = {
         "timestamp": timestamp,
@@ -196,7 +197,8 @@ def save_voting_metadata(base_dir: Path, models_data: Dict, timestamp: str,
         "rejection_rates_tested": rejection_rates,
         "voting_strategy": "majority_with_uncertainty_tiebreak",
         "evaluation_modes": ["penalize_missing", "exclude_missing"],
-        "model_count": len(models_data)
+        "model_count": len(models_data),
+        "hierarchical_analysis": hierarchical_result is not None
     }
     
     # Save run metadata
@@ -227,6 +229,16 @@ def save_voting_metadata(base_dir: Path, models_data: Dict, timestamp: str,
                 "samples_remaining": voting_results[0]['samples_remaining']
             }
         }
+        
+        # Add hierarchical results if available
+        if hierarchical_result:
+            voting_summary["hierarchical_performance"] = {
+                "overall_accuracy": hierarchical_result['overall_accuracy'],
+                "questions_decided": hierarchical_result['questions_decided'],
+                "total_questions": hierarchical_result['total_questions'],
+                "model_hierarchy": hierarchical_result['model_hierarchy'],
+                "stage_results": hierarchical_result['stage_results']
+            }
         
         with open(base_dir / "voting_summary.json", 'w') as f:
             json.dump(voting_summary, f, indent=2, default=str)

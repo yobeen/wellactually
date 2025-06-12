@@ -74,6 +74,12 @@ def run_voting_analysis(calibration_data_points, rejection_rates: Optional[List[
         calibration_data_points, rejection_rates, voting_dir
     )
     
+    # Run hierarchical voting analysis
+    print("\n" + "-"*60)
+    print("HIERARCHICAL VOTING ANALYSIS")
+    print("-"*60)
+    hierarchical_result = analyze_hierarchical_voting(calibration_data_points, voting_dir)
+    
     # Get individual model results for comparison
     individual_results = {}
     for model_id, model_data_points in models_data.items():
@@ -93,11 +99,12 @@ def run_voting_analysis(calibration_data_points, rejection_rates: Optional[List[
     create_voting_accuracy_curves(voting_results, voting_dir, individual_results)
     create_voting_detailed_analysis(voting_results, voting_dir)
     
-    # Save metadata
-    save_voting_metadata(base_dir, models_data, timestamp, voting_results, rejection_rates)
+    # Save metadata (include hierarchical result)
+    save_voting_metadata(base_dir, models_data, timestamp, voting_results, rejection_rates, hierarchical_result)
     
     # Print summary
     print_voting_summary(voting_results, individual_results)
+    print_hierarchical_summary(hierarchical_result)
     
     print(f"\nVoting analysis complete!")
     print(f"Results saved to: {base_dir}")
@@ -177,6 +184,270 @@ def analyze_voting_with_per_model_rejection(calibration_data_points: List,
     results_df.to_csv(save_dir / "voting_results_summary.csv", index=False)
     
     return results
+
+def analyze_hierarchical_voting(calibration_data_points: List, save_dir: Path) -> Dict:
+    """
+    Analyze hierarchical voting with chain-like rejection: GPT-4 -> Llama -> Gemma -> Mistral.
+    
+    Process:
+    1. GPT-4 50% rejection - take those decisions
+    2. Remaining: Llama 50% rejection - take those decisions  
+    3. Remaining: Gemma 50% rejection - take those decisions
+    4. Remaining: Mistral 50% rejection - take those decisions
+    5. Final remaining: majority vote
+    
+    Args:
+        calibration_data_points: List of CalibrationDataPoint objects
+        save_dir: Directory to save results
+        
+    Returns:
+        Dictionary with hierarchical voting results
+    """
+    print(f"Processing hierarchical voting...")
+    
+    # Group data by model
+    models_data = group_data_by_model(calibration_data_points)
+    
+    # Define model hierarchy (order matters)
+    model_hierarchy = [
+        "openai/gpt-4o",
+        "meta-llama/llama-4-maverick", 
+        "google/gemma-3-27b-it",
+        "mistralai/mixtral-8x22b-instruct"
+    ]
+    
+    # Filter to only include models we have data for
+    available_models = [m for m in model_hierarchy if m in models_data]
+    
+    if len(available_models) < 2:
+        print(f"Hierarchical voting requires at least 2 models. Available: {available_models}")
+        return {}
+    
+    print(f"Using hierarchical order: {available_models}")
+    
+    # Get all unique questions
+    all_questions = set()
+    for model_data in models_data.values():
+        for dp in model_data:
+            all_questions.add(dp.question_id)
+    
+    # Create human labels mapping
+    human_labels = {}
+    for dp in calibration_data_points:
+        if dp.human_multiplier <= 1.2:
+            human_label = "Equal"
+        elif dp.human_choice == 1.0:
+            human_label = "A"
+        elif dp.human_choice == 2.0:
+            human_label = "B"
+        else:
+            human_label = "Equal"
+        human_labels[dp.question_id] = human_label
+    
+    # Apply hierarchical voting
+    hierarchical_result = apply_hierarchical_voting(
+        models_data, available_models, all_questions, human_labels
+    )
+    
+    # Save detailed results
+    hierarchy_df = pd.DataFrame([
+        {
+            'stage': stage,
+            'model': data['model'],
+            'questions_decided': data['questions_decided'],
+            'questions_remaining': data['questions_remaining'],
+            'stage_accuracy': data['stage_accuracy'],
+            'cumulative_accuracy': data['cumulative_accuracy']
+        }
+        for stage, data in hierarchical_result['stage_results'].items()
+    ])
+    
+    hierarchy_df.to_csv(save_dir / "hierarchical_voting_results.csv", index=False)
+    
+    # Save final decisions
+    final_decisions = []
+    for question_id, decision_info in hierarchical_result['final_decisions'].items():
+        final_decisions.append({
+            'question_id': question_id,
+            'decision': decision_info['decision'],
+            'decided_by': decision_info['decided_by'],
+            'stage': decision_info['stage'],
+            'human_label': human_labels.get(question_id, 'Unknown'),
+            'correct': decision_info['decision'] == human_labels.get(question_id, 'Unknown')
+        })
+    
+    decisions_df = pd.DataFrame(final_decisions)
+    decisions_df.to_csv(save_dir / "hierarchical_decisions.csv", index=False)
+    
+    return hierarchical_result
+
+def apply_hierarchical_voting(models_data: Dict, model_hierarchy: List[str], 
+                            all_questions: set, human_labels: Dict) -> Dict:
+    """
+    Apply hierarchical voting with chain-like rejection.
+    
+    Args:
+        models_data: Dictionary mapping model_id to list of CalibrationDataPoint objects
+        model_hierarchy: List of model IDs in hierarchical order
+        all_questions: Set of all question IDs
+        human_labels: Dictionary mapping question_id to human labels
+        
+    Returns:
+        Dictionary with hierarchical voting results
+    """
+    remaining_questions = set(all_questions)
+    final_decisions = {}
+    stage_results = {}
+    rejection_rate = 50.0  # 50% rejection at each stage
+    
+    for stage_idx, model_id in enumerate(model_hierarchy):
+        if not remaining_questions:
+            break
+            
+        stage_name = f"stage_{stage_idx + 1}"
+        print(f"Stage {stage_idx + 1}: {model_id} processing {len(remaining_questions)} questions")
+        
+        # Get model data for remaining questions only
+        model_data_points = models_data.get(model_id, [])
+        relevant_data_points = [
+            dp for dp in model_data_points 
+            if dp.question_id in remaining_questions
+        ]
+        
+        if not relevant_data_points:
+            stage_results[stage_name] = {
+                'model': model_id,
+                'questions_decided': 0,
+                'questions_remaining': len(remaining_questions),
+                'stage_accuracy': 0.0,
+                'cumulative_accuracy': 0.0
+            }
+            continue
+        
+        # Apply 50% rejection to this model's predictions
+        uncertainties = [dp.raw_uncertainty for dp in relevant_data_points]
+        threshold = calculate_rejection_threshold(uncertainties, rejection_rate)
+        
+        # Select confident predictions (below threshold)
+        confident_predictions = []
+        for dp in relevant_data_points:
+            if dp.raw_uncertainty <= threshold:
+                confident_predictions.append(dp)
+        
+        # Make decisions for confident predictions
+        questions_decided_this_stage = set()
+        stage_correct = 0
+        
+        for dp in confident_predictions:
+            question_id = dp.question_id
+            decision = dp.model_prediction
+            
+            final_decisions[question_id] = {
+                'decision': decision,
+                'decided_by': model_id,
+                'stage': stage_idx + 1,
+                'uncertainty': dp.raw_uncertainty
+            }
+            
+            questions_decided_this_stage.add(question_id)
+            
+            # Check if correct
+            if question_id in human_labels and decision == human_labels[question_id]:
+                stage_correct += 1
+        
+        # Update remaining questions
+        remaining_questions -= questions_decided_this_stage
+        
+        # Calculate accuracies
+        stage_accuracy = stage_correct / len(questions_decided_this_stage) if questions_decided_this_stage else 0.0
+        
+        total_decided = len(final_decisions)
+        total_correct = sum(
+            1 for q_id, decision_info in final_decisions.items()
+            if q_id in human_labels and decision_info['decision'] == human_labels[q_id]
+        )
+        cumulative_accuracy = total_correct / total_decided if total_decided > 0 else 0.0
+        
+        stage_results[stage_name] = {
+            'model': model_id,
+            'questions_decided': len(questions_decided_this_stage),
+            'questions_remaining': len(remaining_questions),
+            'stage_accuracy': stage_accuracy,
+            'cumulative_accuracy': cumulative_accuracy
+        }
+        
+        print(f"  Decided {len(questions_decided_this_stage)} questions with {stage_accuracy:.3f} accuracy")
+        print(f"  {len(remaining_questions)} questions remaining")
+    
+    # Handle remaining questions with majority vote
+    if remaining_questions:
+        print(f"Final stage: Majority vote for {len(remaining_questions)} remaining questions")
+        
+        # Collect all available predictions for remaining questions
+        remaining_votes = {}
+        for question_id in remaining_questions:
+            votes = []
+            for model_id, model_data_points in models_data.items():
+                for dp in model_data_points:
+                    if dp.question_id == question_id:
+                        votes.append({
+                            'model_id': model_id,
+                            'prediction': dp.model_prediction,
+                            'uncertainty': dp.raw_uncertainty
+                        })
+            if votes:
+                remaining_votes[question_id] = votes
+        
+        # Apply majority voting to remaining questions
+        majority_correct = 0
+        for question_id, votes in remaining_votes.items():
+            if votes:
+                decision = majority_vote_with_uncertainty_tiebreak(votes)
+                final_decisions[question_id] = {
+                    'decision': decision,
+                    'decided_by': 'majority_vote',
+                    'stage': len(model_hierarchy) + 1,
+                    'uncertainty': np.mean([v['uncertainty'] for v in votes])
+                }
+                
+                if question_id in human_labels and decision == human_labels[question_id]:
+                    majority_correct += 1
+        
+        majority_accuracy = majority_correct / len(remaining_votes) if remaining_votes else 0.0
+        
+        # Add majority vote stage results
+        total_decided = len(final_decisions)
+        total_correct = sum(
+            1 for q_id, decision_info in final_decisions.items()
+            if q_id in human_labels and decision_info['decision'] == human_labels[q_id]
+        )
+        final_cumulative_accuracy = total_correct / total_decided if total_decided > 0 else 0.0
+        
+        stage_results[f'stage_{len(model_hierarchy) + 1}'] = {
+            'model': 'majority_vote',
+            'questions_decided': len(remaining_votes),
+            'questions_remaining': 0,
+            'stage_accuracy': majority_accuracy,
+            'cumulative_accuracy': final_cumulative_accuracy
+        }
+        
+        print(f"  Majority vote decided {len(remaining_votes)} questions with {majority_accuracy:.3f} accuracy")
+    
+    # Calculate overall performance
+    total_correct = sum(
+        1 for q_id, decision_info in final_decisions.items()
+        if q_id in human_labels and decision_info['decision'] == human_labels[q_id]
+    )
+    overall_accuracy = total_correct / len(all_questions) if all_questions else 0.0
+    
+    return {
+        'final_decisions': final_decisions,
+        'stage_results': stage_results,
+        'overall_accuracy': overall_accuracy,
+        'questions_decided': len(final_decisions),
+        'total_questions': len(all_questions),
+        'model_hierarchy': model_hierarchy
+    }
 
 def apply_per_model_rejection(models_data: Dict, rejection_rate: float) -> Dict:
     """
@@ -402,6 +673,45 @@ def print_voting_summary(voting_results: List[Dict], individual_results: Dict):
         print(f"  Voting advantage: +{voting_advantage:.3f}")
     else:
         print(f"  Individual advantage: +{-voting_advantage:.3f}")
+
+def print_hierarchical_summary(hierarchical_result: Dict):
+    """Print summary of hierarchical voting analysis results."""
+    
+    if not hierarchical_result:
+        print("\nNo hierarchical voting results to display.")
+        return
+    
+    print("\nHIERARCHICAL VOTING SUMMARY")
+    print("="*50)
+    
+    print(f"Overall Accuracy: {hierarchical_result['overall_accuracy']:.3f}")
+    print(f"Questions Decided: {hierarchical_result['questions_decided']}/{hierarchical_result['total_questions']}")
+    print(f"Model Hierarchy: {' → '.join(hierarchical_result['model_hierarchy'])}")
+    
+    print("\nStage-by-Stage Results:")
+    for stage, data in hierarchical_result['stage_results'].items():
+        stage_num = stage.replace('stage_', '')
+        print(f"  Stage {stage_num} ({data['model']}):")
+        print(f"    Questions decided: {data['questions_decided']}")
+        print(f"    Stage accuracy: {data['stage_accuracy']:.3f}")
+        print(f"    Cumulative accuracy: {data['cumulative_accuracy']:.3f}")
+        print(f"    Questions remaining: {data['questions_remaining']}")
+    
+    # Analyze decision distribution
+    decision_by_stage = {}
+    for q_id, decision_info in hierarchical_result['final_decisions'].items():
+        stage = decision_info['stage']
+        if stage not in decision_by_stage:
+            decision_by_stage[stage] = 0
+        decision_by_stage[stage] += 1
+    
+    print(f"\nDecision Distribution:")
+    total_decisions = sum(decision_by_stage.values())
+    for stage in sorted(decision_by_stage.keys()):
+        count = decision_by_stage[stage]
+        percentage = (count / total_decisions) * 100 if total_decisions > 0 else 0
+        stage_name = hierarchical_result['stage_results'].get(f'stage_{stage}', {}).get('model', f'stage_{stage}')
+        print(f"  Stage {stage} ({stage_name}): {count} questions ({percentage:.1f}%)")
 
 def analyze_voting_model_contributions(question_votes: Dict, save_dir: Path) -> Dict:
     """

@@ -87,7 +87,7 @@ class UncertaintyDataCollector:
                     try:
                         # Fixed: Remove the level parameter that doesn't exist in the method signature
                         response = self.engine.query_single_model_with_temperature(
-                            model_id, prompt, temperature
+                            model_id, prompt, temperature, max_tokens=20
                         )
 
                         if response.success:
