@@ -21,7 +21,7 @@ def test_criteria_endpoint():
         "repo": "https://github.com/ethereum/solidity",
         "parameters": {
             "model_id": "openai/gpt-4o",
-            "temperature": 0.0,
+            "temperature": 0.4,
             "include_model_metadata": True,
             "include_cost": True
         }

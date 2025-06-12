@@ -18,7 +18,7 @@ class CriteriaRequest(BaseModel):
     parameters: Optional[Dict[str, Any]] = Field(
         default_factory=dict,
         description="Optional parameters for the assessment",
-        example={"model_id": "openai/gpt-4o", "temperature": 0.0}
+        example={"model_id": "openai/gpt-4o", "temperature": 0.4}
     )
     
     @validator('repo')
@@ -56,7 +56,7 @@ class CriteriaRequest(BaseModel):
                 "repo": "https://github.com/ethereum/solidity",
                 "parameters": {
                     "model_id": "openai/gpt-4o",
-                    "temperature": 0.0,
+                    "temperature": 0.4,
                     "include_model_metadata": True
                 }
             }

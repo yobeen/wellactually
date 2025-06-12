@@ -28,7 +28,7 @@ class DependencyComparisonRequest(BaseModel):
     parameters: Optional[Dict[str, Any]] = Field(
         default_factory=dict,
         description="Optional parameters for the assessment",
-        example={"model_id": "openai/gpt-4o", "temperature": 0.0, "simplified": False}
+        example={"model_id": "openai/gpt-4o", "temperature": 0.4, "simplified": False}
     )
     
     @validator('parent_repo', 'dependency_a', 'dependency_b')
@@ -68,7 +68,7 @@ class DependencyComparisonRequest(BaseModel):
                 "dependency_b": "https://github.com/pydantic/pydantic",
                 "parameters": {
                     "model_id": "openai/gpt-4o",
-                    "temperature": 0.0,
+                    "temperature": 0.40,
                     "include_model_metadata": True,
                     "simplified": False
                 }

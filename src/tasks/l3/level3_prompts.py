@@ -72,6 +72,34 @@ class Level3PromptGenerator:
                 "scoring_guidance": "1=Surface-level usage, 3=Moderate integration, 5=Well-integrated component, 8=Architectural dependency, 10=Foundational architectural component"
             }
         }
+
+        self.simplified_framework = """
+###
+        
+Functional Necessity - How essential is a dependency for core parent functionality?
+Indicators: Core features that break without it, API surface area used by parent, Critical path involvement in main workflows, Frequency of usage in codebase, Impact on primary use cases.
+Scoring: Low - Optional enhancement, Less than average - Nice-to-have feature, Average =Important functionality, High - Core feature dependency, Critical - Parent breaks without it.
+
+###
+
+Performance Impact - How much does this dependency affect parent performance and resource usage?
+Indicators: CPU and memory overhead, I/O operations and latency, Startup time contribution, Runtime performance bottlenecks, Resource consumption patterns.
+Scoring: Low - Negligible performance impact, Less than average - Minor overhead, Average - Moderate performance consideration, High - Significant performance factor, Critical - Performance critical component.
+
+###
+
+Replacement Difficulty - How difficult would it be to replace, remove, or substitute this dependency?
+Indicators: Availability of alternative libraries, API complexity and coupling, Migration effort required, Vendor lock-in considerations, Community and ecosystem support.
+Scoring: Low - Easily replaceable with many alternatives, Less than average - Moderate replacement effort, Average - Limited alternatives available, High - Difficult to replace, Critical - Deeply integrated/irreplaceable.
+
+###
+
+Integration Depth - How deeply integrated is this dependency into parent architecture and design?
+Indicators: Number of import/usage points, Architectural coupling level, Configuration and setup complexity, Data format dependencies, Build and deployment integration.
+Scoring: Low - Surface-level usage, Less than average - Moderate integration, Average - Well-integrated component, High - Architectural dependency, Critical - Foundational architectural component.
+
+###
+"""
     
     def create_dependency_comparison_prompt(self, parent_context: Dict[str, Any], 
                                           dep_a_context: Dict[str, Any], 
@@ -102,9 +130,12 @@ class Level3PromptGenerator:
             
             if simplified:
                 # Simplified system message
-                system_content = """You are an expert software architect evaluating dependency relationships within software projects. You will assess which of two dependencies is more important for a specific parent repository.
+                system_content = f"""You are an expert software architect evaluating dependency relationships within software projects. You will assess which of two dependencies is more important for a specific parent repository.
 
 Your goal is to determine which dependency is more critical for the parent repository's success and functionality based on your expert judgment.
+
+You may use this framework for assessment:
+{self.simplified_framework}
 
 Provide your response in the exact JSON format specified with only the overall choice."""
                 

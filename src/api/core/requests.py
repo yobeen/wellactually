@@ -3,7 +3,7 @@
 Pydantic models for API request validation.
 """
 
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 from pydantic import BaseModel, Field, validator, HttpUrl
 import re
 
@@ -68,6 +68,61 @@ class ComparisonRequest(BaseModel):
         
         if not isinstance(v, dict):
             raise ValueError("Parameters must be a dictionary")
+        
+        return v
+
+class BatchComparisonRequest(BaseModel):
+    """Request model for confidence-based batch repository comparison."""
+    
+    pairs: List[Dict[str, str]] = Field(
+        ..., 
+        description="List of repository pairs to compare",
+        example=[
+            {"repo_a": "https://github.com/ethereum/go-ethereum", "repo_b": "https://github.com/ethereum/solidity"},
+            {"repo_a": "https://github.com/ethereum/solidity", "repo_b": "https://github.com/foundry-rs/foundry"}
+        ]
+    )
+    parent: str = Field(
+        ..., 
+        description="Parent repository or ecosystem context",
+        example="ethereum"
+    )
+    parameters: Optional[Dict[str, Any]] = Field(
+        default_factory=dict,
+        description="Optional parameters for the comparison",
+        example={"include_model_metadata": True}
+    )
+    
+    @validator('pairs')
+    def validate_pairs(cls, v):
+        """Validate pairs list."""
+        if not v or not isinstance(v, list):
+            raise ValueError("Pairs must be a non-empty list")
+        
+        if len(v) == 0:
+            raise ValueError("At least one repository pair is required")
+        
+        for i, pair in enumerate(v):
+            if not isinstance(pair, dict):
+                raise ValueError(f"Pair {i} must be a dictionary")
+            
+            if 'repo_a' not in pair or 'repo_b' not in pair:
+                raise ValueError(f"Pair {i} must contain 'repo_a' and 'repo_b' keys")
+            
+            # Validate repository URLs using same logic as ComparisonRequest
+            for key in ['repo_a', 'repo_b']:
+                repo_url = pair[key]
+                if not repo_url or not isinstance(repo_url, str):
+                    raise ValueError(f"Pair {i} {key} must be a non-empty string")
+                
+                repo_url = repo_url.strip()
+                if not repo_url:
+                    raise ValueError(f"Pair {i} {key} cannot be empty")
+                
+                # Basic GitHub URL validation
+                github_pattern = r'https://github\.com/[^/]+/[^/]+'
+                if not re.match(github_pattern, repo_url):
+                    raise ValueError(f"Pair {i} {key} must be a valid GitHub URL (https://github.com/owner/repo)")
         
         return v
 

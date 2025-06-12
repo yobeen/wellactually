@@ -3,7 +3,7 @@
 Pydantic models for API response validation.
 """
 
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 from pydantic import BaseModel, Field, validator
 
 class ComparisonResponse(BaseModel):
@@ -172,6 +172,84 @@ class OriginalityResponse(BaseModel):
                     "total_dependencies": 5,
                     "core_dependencies": 2,
                     "analysis_method": "static_analysis"
+                }
+            }
+        }
+
+class BatchComparisonResponse(BaseModel):
+    """Response model for confidence-based batch repository comparison."""
+    
+    successful_comparisons: List[Dict[str, Any]] = Field(
+        ...,
+        description="List of successful comparison results that passed uncertainty thresholds"
+    )
+    filtered_comparisons: List[Dict[str, Any]] = Field(
+        ...,
+        description="List of comparison pairs that were filtered out due to high uncertainty"
+    )
+    total_input_pairs: int = Field(
+        ...,
+        description="Total number of input pairs"
+    )
+    total_successful: int = Field(
+        ...,
+        description="Number of successful comparisons"
+    )
+    total_filtered: int = Field(
+        ...,
+        description="Number of filtered comparisons"
+    )
+    processing_summary: Dict[str, Any] = Field(
+        ...,
+        description="Summary of processing including model usage and timing"
+    )
+    
+    class Config:
+        """Pydantic configuration."""
+        schema_extra = {
+            "example": {
+                "successful_comparisons": [
+                    {
+                        "repo_a": "https://github.com/ethereum/go-ethereum",
+                        "repo_b": "https://github.com/ethereum/solidity",
+                        "choice": 1,
+                        "multiplier": 2.5,
+                        "choice_uncertainty": 0.0000003,
+                        "multiplier_uncertainty": 0.25,
+                        "explanation": "Repository A is more important...",
+                        "model_used": "meta-llama/llama-4-maverick"
+                    },
+                    {
+                        "repo_a": "https://github.com/example/repo1",
+                        "repo_b": "https://github.com/example/repo2",
+                        "choice": 2,
+                        "multiplier": None,
+                        "choice_uncertainty": 0.00001,
+                        "multiplier_uncertainty": None,
+                        "explanation": "Choice: B. (simplified mode)",
+                        "model_used": "openai/gpt-4o"
+                    }
+                ],
+                "filtered_comparisons": [
+                    {
+                        "repo_a": "https://github.com/repo1/example",
+                        "repo_b": "https://github.com/repo2/example", 
+                        "reason": "High uncertainty on both models",
+                        "llama_uncertainty": 0.001,
+                        "gpt4o_uncertainty": 0.002
+                    }
+                ],
+                "total_input_pairs": 20,
+                "total_successful": 18,
+                "total_filtered": 2,
+                "processing_summary": {
+                    "total_processing_time_ms": 45000,
+                    "llama_queries": 20,
+                    "gpt4o_queries": 5,
+                    "uncertainty_thresholds": {
+                        "llama-4-maverick": 0.00000034,
+                        "gpt-4o": 0.00077255
+                    }
                 }
             }
         }

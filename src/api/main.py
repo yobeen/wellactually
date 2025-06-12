@@ -18,8 +18,8 @@ from fastapi.exceptions import RequestValidationError
 from pydantic import ValidationError
 import uvicorn
 
-from src.api.core.requests import ComparisonRequest, OriginalityRequest
-from src.api.core.responses import ComparisonResponse, OriginalityResponse, ErrorResponse
+from src.api.core.requests import ComparisonRequest, OriginalityRequest, BatchComparisonRequest
+from src.api.core.responses import ComparisonResponse, OriginalityResponse, ErrorResponse, BatchComparisonResponse
 from src.api.criteria.criteria_models import CriteriaRequest, CriteriaResponse
 from src.api.core.llm_orchestrator import LLMOrchestrator
 from src.api.comparison.comparison_handler import ComparisonHandler
@@ -188,6 +188,7 @@ async def root():
         "endpoints": {
             "health": "/health",
             "comparison": "/compare",
+            "batch_comparison": "/compare/batch",
             "originality": "/assess",
             "criteria": "/criteria",
             "special_case_status": "/special-case/status",
@@ -290,6 +291,53 @@ async def assess_criteria(
     except Exception as e:
         logger.error(f"Error processing criteria assessment: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="Failed to process criteria assessment")
+
+@app.post("/compare/batch", response_model=BatchComparisonResponse)
+async def batch_compare_repositories(
+    request: BatchComparisonRequest,
+    handler: ComparisonHandler = Depends(get_comparison_handler)
+) -> BatchComparisonResponse:
+    """
+    Confidence-based batch repository comparison with uncertainty filtering.
+    
+    Processes multiple repository pairs using a two-model approach:
+    1. Query llama-4-maverick first for each pair
+    2. If uncertainty > 0.00000034, query gpt-4o 
+    3. If gpt-4o uncertainty > 0.00077255, filter out the pair
+    4. Return only results that pass uncertainty thresholds
+    
+    Args:
+        request: Batch comparison request with pairs, parent, and optional parameters
+        
+    Returns:
+        BatchComparisonResponse with successful and filtered comparisons
+    """
+    try:
+        logger.info(f"Processing batch comparison: {len(request.pairs)} pairs -> {request.parent}")
+        
+        # Validate parent is "ethereum" for L1 comparisons only
+        if request.parent.lower() != "ethereum":
+            raise HTTPException(status_code=400, detail="Batch comparison currently only supports L1 (parent='ethereum') comparisons")
+        
+        # Call the batch comparison handler
+        response_data = await handler.handle_batch_comparison(
+            pairs=request.pairs,
+            parent=request.parent,
+            parameters=request.parameters
+        )
+        
+        # Create response object
+        response = BatchComparisonResponse(**response_data)
+        
+        logger.info(f"Batch comparison complete: {response.total_successful} successful, {response.total_filtered} filtered")
+        return response
+        
+    except ValueError as e:
+        logger.warning(f"Validation error in batch comparison: {e}")
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.error(f"Error processing batch comparison: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Failed to process batch comparison request")
 
 @app.get("/special-case/status")
 async def get_special_case_status(

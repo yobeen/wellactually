@@ -123,7 +123,7 @@ class ComparisonHandler:
             
             # Determine actual model that will be used
             if simplified:
-                actual_model_id = "google/gemma-3-27b-it"
+                actual_model_id = model_id
                 logger.info(f"Using simplified mode: model={actual_model_id}, temperature={temperature}, max_tokens=20")
             else:
                 actual_model_id = model_id
@@ -668,3 +668,140 @@ class ComparisonHandler:
                 "total_comparisons": 0,
                 "comparisons": []
             }
+    
+    async def handle_batch_comparison(self, pairs, parent, parameters=None) -> Dict[str, Any]:
+        """
+        Handle confidence-based batch comparison with uncertainty filtering.
+        
+        Args:
+            pairs: List of dictionaries with repo_a and repo_b keys
+            parent: Parent context (usually "ethereum")
+            parameters: Optional parameters dictionary
+            
+        Returns:
+            Dictionary with successful and filtered comparisons
+        """
+        # Uncertainty thresholds for models
+        LLAMA_THRESHOLD = 0.00000034
+        GPT4O_THRESHOLD = 0.00077255
+        
+        successful_comparisons = []
+        filtered_comparisons = []
+        
+        llama_queries = 0
+        gpt4o_queries = 0
+        start_time = time.time()
+        
+        logger.info(f"Starting batch comparison processing for {len(pairs)} pairs")
+        
+        for i, pair in enumerate(pairs):
+            try:
+                logger.info(f"Processing pair {i+1}/{len(pairs)}: {pair['repo_a']} vs {pair['repo_b']}")
+                
+                # Create individual comparison request for llama-4-maverick first
+                from src.api.core.requests import ComparisonRequest
+                llama_request = ComparisonRequest(
+                    repo_a=pair['repo_a'],
+                    repo_b=pair['repo_b'],
+                    parent=parent,
+                    parameters={**(parameters or {}), "model_id": "meta-llama/llama-4-maverick", "temperature": 0.4, "simplified": True}
+                )
+                
+                # Query llama-4-maverick first using proper routing
+                if parent.lower() == "ethereum":
+                    llama_response = await self.handle_l1_comparison(llama_request)
+                else:
+                    llama_response = await self.handle_l3_comparison(llama_request)
+                
+                llama_queries += 1
+                logger.info(f"  Llama uncertainty: {llama_response.choice_uncertainty}")
+                
+                # Check if llama uncertainty is above threshold
+                if llama_response.choice_uncertainty > LLAMA_THRESHOLD:
+                    # Query gpt-4o next
+                    logger.info(f"  Llama uncertainty {llama_response.choice_uncertainty} > {LLAMA_THRESHOLD}, trying GPT-4o")
+                    
+                    gpt4o_request = ComparisonRequest(
+                        repo_a=pair['repo_a'],
+                        repo_b=pair['repo_b'],
+                        parent=parent,
+                        parameters={**(parameters or {}), "model_id": "openai/gpt-4o", "temperature": 0.4, "simplified": True}
+                    )
+                    
+                    # Query gpt-4o using proper routing
+                    if parent.lower() == "ethereum":
+                        gpt4o_response = await self.handle_l1_comparison(gpt4o_request)
+                    else:
+                        gpt4o_response = await self.handle_l3_comparison(gpt4o_request)
+                    
+                    gpt4o_queries += 1
+                    logger.info(f"  GPT-4o uncertainty: {gpt4o_response.choice_uncertainty}")
+                    
+                    # Check if gpt-4o uncertainty is above threshold
+                    if gpt4o_response.choice_uncertainty > GPT4O_THRESHOLD:
+                        # Filter out this pair
+                        logger.info(f"  Both models exceed thresholds, filtering out pair")
+                        filtered_comparisons.append({
+                            "repo_a": pair['repo_a'],
+                            "repo_b": pair['repo_b'],
+                            "reason": "High uncertainty on both models",
+                            "llama_uncertainty": llama_response.choice_uncertainty,
+                            "gpt4o_uncertainty": gpt4o_response.choice_uncertainty
+                        })
+                    else:
+                        # Use gpt-4o result
+                        logger.info(f"  GPT-4o uncertainty acceptable, using GPT-4o result")
+                        successful_comparisons.append({
+                            "repo_a": pair['repo_a'],
+                            "repo_b": pair['repo_b'],
+                            "choice": gpt4o_response.choice,
+                            "multiplier": gpt4o_response.multiplier,
+                            "choice_uncertainty": gpt4o_response.choice_uncertainty,
+                            "multiplier_uncertainty": gpt4o_response.multiplier_uncertainty,
+                            "explanation": gpt4o_response.explanation,
+                            "model_used": "openai/gpt-4o"
+                        })
+                else:
+                    # Use llama result
+                    logger.info(f"  Llama uncertainty acceptable, using Llama result")
+                    successful_comparisons.append({
+                        "repo_a": pair['repo_a'],
+                        "repo_b": pair['repo_b'],
+                        "choice": llama_response.choice,
+                        "multiplier": llama_response.multiplier,
+                        "choice_uncertainty": llama_response.choice_uncertainty,
+                        "multiplier_uncertainty": llama_response.multiplier_uncertainty,
+                        "explanation": llama_response.explanation,
+                        "model_used": "meta-llama/llama-4-maverick"
+                    })
+                    
+            except Exception as e:
+                logger.error(f"Error processing pair {i+1}: {e}")
+                filtered_comparisons.append({
+                    "repo_a": pair['repo_a'],
+                    "repo_b": pair['repo_b'],
+                    "reason": f"Processing error: {str(e)}",
+                    "error": str(e)
+                })
+        
+        total_processing_time = (time.time() - start_time) * 1000
+        
+        result = {
+            "successful_comparisons": successful_comparisons,
+            "filtered_comparisons": filtered_comparisons,
+            "total_input_pairs": len(pairs),
+            "total_successful": len(successful_comparisons),
+            "total_filtered": len(filtered_comparisons),
+            "processing_summary": {
+                "total_processing_time_ms": total_processing_time,
+                "llama_queries": llama_queries,
+                "gpt4o_queries": gpt4o_queries,
+                "uncertainty_thresholds": {
+                    "llama-4-maverick": LLAMA_THRESHOLD,
+                    "gpt-4o": GPT4O_THRESHOLD
+                }
+            }
+        }
+        
+        logger.info(f"Batch comparison completed: {len(successful_comparisons)} successful, {len(filtered_comparisons)} filtered")
+        return result
