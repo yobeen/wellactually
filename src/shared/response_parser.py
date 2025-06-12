@@ -344,8 +344,10 @@ class ResponseParser:
         parsed_logprobs, answer_token_info, full_content_logprobs = self._extract_logprobs_enhanced(
             logprobs_data, model_id, expected_answer_format
         )
-        # Calculate uncertainty from perplexity of all tokens
-        uncertainty = self._calculate_uncertainty_from_perplexity(full_content_logprobs)
+        # Calculate uncertainty from perplexity (answer token only for L1, all tokens for others)
+        uncertainty = self._calculate_uncertainty_from_perplexity(
+            full_content_logprobs, answer_token_info, expected_answer_format
+        )
         raw_choice = self._extract_raw_choice(parsed_logprobs, content, answer_token_info)
         
         # Extract normalized answer if available
@@ -493,12 +495,17 @@ class ResponseParser:
         
         return preprocessed_tokens
     
-    def _calculate_uncertainty_from_perplexity(self, full_content_logprobs: Optional[List[Dict]]) -> float:
+    def _calculate_uncertainty_from_perplexity(self, full_content_logprobs: Optional[List[Dict]], 
+                                             answer_token_info: Optional[Dict] = None, 
+                                             expected_format: str = "choice") -> float:
         """
-        Calculate uncertainty based on perplexity of all answer tokens.
+        Calculate uncertainty based on perplexity of answer tokens only for Level 1,
+        or all tokens for other levels.
         
         Args:
             full_content_logprobs: List of token logprob dictionaries
+            answer_token_info: Information about the extracted answer token
+            expected_format: Expected answer format ("choice" for L1/L3, "numeric" for L2)
             
         Returns:
             Uncertainty score between 0.0 and 1.0
@@ -507,7 +514,31 @@ class ResponseParser:
             return 1.0  # Maximum uncertainty if no logprobs available
         
         try:
-            # Extract logprobs for all tokens
+            # For Level 1 comparisons (choice format), use only answer token logprob
+            if expected_format == "choice" and answer_token_info and answer_token_info.get("token_index") is not None:
+                token_index = answer_token_info["token_index"]
+                
+                # Extract logprob from the answer token only
+                if 0 <= token_index < len(full_content_logprobs):
+                    answer_token_data = full_content_logprobs[token_index]
+                    if isinstance(answer_token_data, dict) and 'logprob' in answer_token_data:
+                        answer_logprob = answer_token_data['logprob']
+                        if answer_logprob is not None and not np.isnan(answer_logprob) and not np.isinf(answer_logprob):
+                            # Convert single token logprob to perplexity
+                            perplexity = 2 ** (-answer_logprob)
+                            
+                            # Clamp perplexity to reasonable range
+                            perplexity = max(1.0, min(100.0, perplexity))
+                            
+                            # Transform to uncertainty: higher perplexity = higher uncertainty
+                            uncertainty = np.log(perplexity) / np.log(100.0)
+                            
+                            # Ensure uncertainty is in [0, 1] range
+                            uncertainty = max(0.0, min(1.0, uncertainty))
+                            
+                            return uncertainty
+            
+            # Fallback: Extract logprobs for all tokens (original behavior)
             token_logprobs = []
             for token_data in full_content_logprobs:
                 if isinstance(token_data, dict) and 'logprob' in token_data:

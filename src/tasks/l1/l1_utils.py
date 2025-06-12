@@ -32,6 +32,30 @@ def group_data_by_model(calibration_data_points) -> Dict[str, List]:
     
     return dict(models_data)
 
+def group_data_by_model_and_temperature(calibration_data_points) -> Dict[str, Dict[float, List]]:
+    """
+    Group calibration data points by model ID and temperature.
+    
+    Args:
+        calibration_data_points: List of CalibrationDataPoint objects
+        
+    Returns:
+        Dictionary mapping model_id -> temperature -> list of data points
+    """
+    models_temps_data = defaultdict(lambda: defaultdict(list))
+    
+    for dp in calibration_data_points:
+        model_id = getattr(dp, 'model_id', 'unknown_model')
+        temperature = getattr(dp, 'temperature', 0.0)
+        models_temps_data[model_id][temperature].append(dp)
+    
+    # Convert to regular dict
+    result = {}
+    for model_id, temp_data in models_temps_data.items():
+        result[model_id] = dict(temp_data)
+    
+    return result
+
 def sanitize_model_name(model_id: str) -> str:
     """
     Convert model ID to filesystem-safe name.
@@ -78,6 +102,40 @@ def create_results_directory(timestamp: str, model_names: List[str],
     if len(model_names) > 1:
         comparison_dir = base_dir / "comparison"
         comparison_dir.mkdir(exist_ok=True)
+    
+    return base_dir
+
+def create_temperature_results_directory(timestamp: str, model_temps_data: Dict[str, Dict[float, List]], 
+                                        base_save_dir: Optional[str] = None) -> Path:
+    """
+    Create structured results directory organized by model and temperature.
+    
+    Args:
+        timestamp: Timestamp string
+        model_temps_data: Dictionary mapping model_id -> temperature -> data points
+        base_save_dir: Optional base directory override
+        
+    Returns:
+        Path to base results directory
+    """
+    if base_save_dir:
+        base_dir = Path(base_save_dir) / timestamp
+    else:
+        base_dir = Path("results") / timestamp
+    
+    base_dir.mkdir(parents=True, exist_ok=True)
+    
+    # Create model/temperature subdirectories
+    for model_id, temp_data in model_temps_data.items():
+        clean_model_name = sanitize_model_name(model_id)
+        model_dir = base_dir / clean_model_name
+        model_dir.mkdir(exist_ok=True)
+        
+        # Create temperature subdirectories
+        for temperature in temp_data.keys():
+            temp_str = f"temp_{temperature:.1f}".replace('.', '_')
+            temp_dir = model_dir / temp_str
+            temp_dir.mkdir(exist_ok=True)
     
     return base_dir
 

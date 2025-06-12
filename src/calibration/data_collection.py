@@ -49,7 +49,7 @@ class UncertaintyDataCollector:
         # Initialize prompt generators
         self.level1_generator = Level1PromptGenerator(config)
         self.level2_generator = Level2PromptGenerator(config)
-        self.level3_generator = Level3PromptGenerator(config)
+        self.level3_generator = Level3PromptGenerator()
 
         # Select models to use
         if models_subset:
