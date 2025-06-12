@@ -190,11 +190,14 @@ def analyze_hierarchical_voting(calibration_data_points: List, save_dir: Path) -
     Analyze hierarchical voting with chain-like rejection: GPT-4 -> Llama -> Gemma -> Mistral.
     
     Process:
-    1. GPT-4 50% rejection - take those decisions
-    2. Remaining: Llama 50% rejection - take those decisions  
-    3. Remaining: Gemma 50% rejection - take those decisions
-    4. Remaining: Mistral 50% rejection - take those decisions
+    1. GPT-4 50% rejection on full dataset - take decisions for all questions
+    2. Remaining: Llama 50% rejection on full dataset - take decisions for remaining questions  
+    3. Remaining: Gemma 50% rejection on full dataset - take decisions for remaining questions
+    4. Remaining: Mistral 50% rejection on full dataset - take decisions for remaining questions
     5. Final remaining: majority vote
+    
+    Each model performs rejection on the complete dataset but only makes decisions 
+    for questions not yet decided by previous models in the hierarchy.
     
     Args:
         calibration_data_points: List of CalibrationDataPoint objects
@@ -210,10 +213,9 @@ def analyze_hierarchical_voting(calibration_data_points: List, save_dir: Path) -
     
     # Define model hierarchy (order matters)
     model_hierarchy = [
-        "openai/gpt-4o",
-        "meta-llama/llama-4-maverick", 
-        "google/gemma-3-27b-it",
-        "mistralai/mixtral-8x22b-instruct"
+            "google/gemma-3-27b-it",
+            "openai/gpt-4o",
+            "meta-llama/llama-4-maverick",
     ]
     
     # Filter to only include models we have data for
@@ -305,16 +307,12 @@ def apply_hierarchical_voting(models_data: Dict, model_hierarchy: List[str],
             break
             
         stage_name = f"stage_{stage_idx + 1}"
-        print(f"Stage {stage_idx + 1}: {model_id} processing {len(remaining_questions)} questions")
+        print(f"Stage {stage_idx + 1}: {model_id} - rejection on full dataset, deciding {len(remaining_questions)} remaining questions")
         
-        # Get model data for remaining questions only
+        # Get ALL model data for full dataset rejection
         model_data_points = models_data.get(model_id, [])
-        relevant_data_points = [
-            dp for dp in model_data_points 
-            if dp.question_id in remaining_questions
-        ]
         
-        if not relevant_data_points:
+        if not model_data_points:
             stage_results[stage_name] = {
                 'model': model_id,
                 'questions_decided': 0,
@@ -324,15 +322,21 @@ def apply_hierarchical_voting(models_data: Dict, model_hierarchy: List[str],
             }
             continue
         
-        # Apply 50% rejection to this model's predictions
-        uncertainties = [dp.raw_uncertainty for dp in relevant_data_points]
+        # Apply 50% rejection to ALL model predictions (full dataset)
+        uncertainties = [dp.raw_uncertainty for dp in model_data_points]
         threshold = calculate_rejection_threshold(uncertainties, rejection_rate)
         
-        # Select confident predictions (below threshold)
-        confident_predictions = []
-        for dp in relevant_data_points:
+        # Select confident predictions (below threshold) from full dataset
+        all_confident_predictions = []
+        for dp in model_data_points:
             if dp.raw_uncertainty <= threshold:
-                confident_predictions.append(dp)
+                all_confident_predictions.append(dp)
+        
+        # Filter to only use confident predictions for remaining questions
+        confident_predictions = [
+            dp for dp in all_confident_predictions 
+            if dp.question_id in remaining_questions
+        ]
         
         # Make decisions for confident predictions
         questions_decided_this_stage = set()

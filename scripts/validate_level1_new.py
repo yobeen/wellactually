@@ -80,10 +80,12 @@ def main():
     # Initialize data collector with multiple models for voting
     print("\n2. Initializing data collector...")
     test_models = [
+            "openai/gpt-4.1",
             "openai/gpt-4o",
             "meta-llama/llama-4-maverick",
-            "mistralai/mixtral-8x22b-instruct",
+           # "mistralai/mixtral-8x22b-instruct",
             "google/gemma-3-27b-it",
+            "x-ai/grok-3-beta",
             ] 
     
     try:

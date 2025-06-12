@@ -10,6 +10,7 @@ from typing import Dict, Optional
 # Model parameter counts (in billions)
 MODEL_PARAMS = {
     # OpenAI models
+    "openai/gpt-4.1": 200.0,  # GPT-41
     "openai/gpt-4o": 200.0,  # GPT-4o
     
     # Meta LLaMA models
@@ -38,6 +39,7 @@ MODEL_PARAMS = {
 
 # Model organization/provider mapping
 MODEL_PROVIDERS = {
+    "openai/gpt-4.1": "openai",
     "openai/gpt-4o": "openai",
     "meta-llama/llama-4-maverick": "meta",
     "meta-llama/llama-3.1-405b-instruct": "meta", 
@@ -54,6 +56,7 @@ MODEL_PROVIDERS = {
 
 # Model architecture types
 MODEL_ARCHITECTURES = {
+    "openai/gpt-4.1": "transformer",
     "openai/gpt-4o": "transformer",
     "meta-llama/llama-4-maverick": "transformer",
     "meta-llama/llama-3.1-405b-instruct": "transformer",
