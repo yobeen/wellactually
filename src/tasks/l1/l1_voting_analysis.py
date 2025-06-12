@@ -213,9 +213,9 @@ def analyze_hierarchical_voting(calibration_data_points: List, save_dir: Path) -
     
     # Define model hierarchy (order matters)
     model_hierarchy = [
-            "google/gemma-3-27b-it",
-            "openai/gpt-4o",
             "meta-llama/llama-4-maverick",
+            "openai/gpt-4o",
+            "google/gemma-3-27b-it",
     ]
     
     # Filter to only include models we have data for

@@ -306,14 +306,14 @@ def analyze_accuracy(calibration_data_points, save_dir: Path) -> Tuple[float, Di
 
 def analyze_precision_rejection(calibration_data_points, save_dir: Path) -> pd.DataFrame:
     """
-    Generate precision-rejection curve data.
+    Generate precision-rejection curve data with uncertainty thresholds.
     
     Args:
         calibration_data_points: List of CalibrationDataPoint objects
         save_dir: Directory to save results
         
     Returns:
-        DataFrame with rejection_rate, accuracy, samples_remaining columns
+        DataFrame with rejection_rate, accuracy, samples_remaining, uncertainty_threshold columns
     """
     if not calibration_data_points:
         return pd.DataFrame()
@@ -324,6 +324,7 @@ def analyze_precision_rejection(calibration_data_points, save_dir: Path) -> pd.D
     
     rejection_rates = np.arange(0, 95, 5)  # 0%, 5%, 10%, ..., 90%
     precision_data = []
+    thresholds = {}
     
     for rate in rejection_rates:
         # Calculate number of samples to remove
@@ -338,13 +339,37 @@ def analyze_precision_rejection(calibration_data_points, save_dir: Path) -> pd.D
         else:
             accuracy = 0.0
         
+        # Calculate uncertainty threshold
+        if n_remove == 0:
+            threshold = float('inf')  # Keep all samples
+        elif n_remove >= n_total:
+            threshold = 0.0  # Reject all samples
+        else:
+            # Threshold is the uncertainty of the last rejected sample
+            threshold = sorted_df.iloc[n_remove - 1]['raw_uncertainty']
+        
         precision_data.append({
             'rejection_rate': rate,
             'accuracy': accuracy,
-            'samples_remaining': len(remaining_df)
+            'samples_remaining': len(remaining_df),
+            'uncertainty_threshold': threshold
         })
+        
+        thresholds[rate] = threshold
     
     precision_df = pd.DataFrame(precision_data)
+    
+    # Display thresholds during run
+    model_id = getattr(calibration_data_points[0], 'model_id', 'unknown_model') if calibration_data_points else 'unknown'
+    print(f"\nUncertainty Thresholds for {model_id}:")
+    print("-" * 50)
+    for rate in rejection_rates:
+        threshold = thresholds[rate]
+        if threshold == float('inf'):
+            threshold_str = "∞"
+        else:
+            threshold_str = f"{threshold:.8f}"
+        print(f"  {rate:2d}%: {threshold_str}")
     
     # Save results
     precision_df.to_csv(save_dir / "l1_precision_rejection.csv", index=False)

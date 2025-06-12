@@ -78,14 +78,34 @@ def create_single_model_plots(results_df: pd.DataFrame, precision_data: pd.DataF
     plt.savefig(save_dir / "l1_accuracy_analysis.png", dpi=300, bbox_inches='tight')
     plt.close()
     
-    # 2. Precision-Rejection Curve
-    plt.figure(figsize=(10, 6))
+    # 2. Precision-Rejection Curve with Uncertainty Thresholds
+    plt.figure(figsize=(12, 6))
     plt.plot(precision_data['rejection_rate'], precision_data['accuracy'], 
              marker='o', linewidth=3, markersize=8, color=PRIMARY_BLUE, markerfacecolor='white',
              markeredgecolor=PRIMARY_BLUE, markeredgewidth=2)
     plt.axhline(y=overall_acc, color=VIBRANT_RED, linestyle='--', linewidth=2, alpha=0.8, 
                 label=f'Baseline (no rejection): {overall_acc:.3f}')
-    plt.xlabel('Rejection Rate (%)', fontweight='bold')
+    
+    # Add threshold values as x-axis labels if available
+    if 'uncertainty_threshold' in precision_data.columns:
+        rejection_rates = precision_data['rejection_rate'].values
+        thresholds = precision_data['uncertainty_threshold'].values
+        
+        # Create custom x-axis labels with both % and threshold
+        x_labels = []
+        for rate, threshold in zip(rejection_rates, thresholds):
+            if threshold == float('inf'):
+                threshold_str = "∞"
+            else:
+                threshold_str = f"{threshold*10*1000:.1f}"
+            x_labels.append(f"{rate}%\n{threshold_str}")
+        
+        # Show every other label to avoid crowding
+        plt.xticks(rejection_rates[::2], x_labels[::2], rotation=45, ha='right')
+        plt.xlabel('Rejection Rate (%) + Uncertainty Threshold', fontweight='bold')
+    else:
+        plt.xlabel('Rejection Rate (%)', fontweight='bold')
+    
     plt.ylabel('Accuracy on Remaining Samples', fontweight='bold')
     plt.title(f'Precision-Rejection Curve - {model_name}\n(Higher uncertainty samples rejected first)', 
               fontweight='bold')
