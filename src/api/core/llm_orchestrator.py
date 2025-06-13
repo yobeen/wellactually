@@ -60,7 +60,7 @@ class LLMOrchestrator:
             raise
     
     async def query_l1_comparison(self, repo_a_info: Dict[str, Any], repo_b_info: Dict[str, Any],
-                                 model_id: Optional[str] = None, temperature: float = 0.7) -> ModelResponse:
+                                 model_id: Optional[str] = None, temperature: float = 0.4) -> ModelResponse:
         """
         Query LLM for Level 1 repository comparison.
         
@@ -107,7 +107,7 @@ class LLMOrchestrator:
     
     async def query_l3_comparison(self, dep_a_info: Dict[str, Any], dep_b_info: Dict[str, Any],
                                  parent_info: Dict[str, Any], model_id: Optional[str] = None,
-                                 temperature: float = 0.7, simplified: bool = False) -> ModelResponse:
+                                 temperature: float = 0.4, simplified: bool = False) -> ModelResponse:
         """
         Query LLM for Level 3 dependency comparison using real implementation.
         
@@ -232,7 +232,7 @@ class LLMOrchestrator:
     
     async def query_originality_assessment(self, repo_info: Dict[str, Any],
                                          model_id: Optional[str] = None,
-                                         temperature: float = 0.7) -> ModelResponse:
+                                         temperature: float = 0.4) -> ModelResponse:
         """
         Query LLM for repository originality assessment using MultiModelEngine interface.
         

@@ -28,7 +28,7 @@ class ComparisonRequest(BaseModel):
     parameters: Optional[Dict[str, Any]] = Field(
         default_factory=dict,
         description="Optional parameters for the comparison",
-        example={"include_model_metadata": True, "temperature": 0.7}
+        example={"include_model_metadata": True, "temperature": 0.4}
     )
     
     @validator('repo_a', 'repo_b')

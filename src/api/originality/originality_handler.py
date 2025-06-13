@@ -234,7 +234,7 @@ class OriginalityHandler:
         
         # Get model and temperature from parameters
         model_id = request.parameters.get('model_id')
-        temperature = request.parameters.get('temperature', 0.7)
+        temperature = request.parameters.get('temperature', 0.4)
         
         # Query LLM using orchestrator
         model_response = await self.llm_orchestrator.query_originality_assessment(

@@ -83,7 +83,7 @@ class ComparisonResponse(BaseModel):
                 "choice_uncertainty": 0.12,
                 "multiplier_uncertainty": 0.18,
                 "explanation": "Repository A (go-ethereum) is significantly more important to the Ethereum ecosystem as it serves as the primary execution client...",
-                "model_metadata": "gpt-4o_temp_0.7",
+                "model_metadata": "gpt-4o_temp_0.4",
                 "processing_time_ms": 1250.5,
                 "cache_hit": False
             }

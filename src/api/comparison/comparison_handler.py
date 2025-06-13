@@ -118,7 +118,7 @@ class ComparisonHandler:
             
             # Get model, temperature, and simplified option from parameters
             model_id = request.parameters.get('model_id')
-            temperature = request.parameters.get('temperature', 0.7)
+            temperature = request.parameters.get('temperature', 0.4)
             simplified = request.parameters.get('simplified', False)
             
             # Determine actual model that will be used
@@ -271,7 +271,7 @@ class ComparisonHandler:
         
         # Get model and temperature from parameters
         model_id = request.parameters.get('model_id')
-        temperature = request.parameters.get('temperature', 0.7)
+        temperature = request.parameters.get('temperature', 0.4)
         
         # Query LLM using orchestrator
         model_response = await self.llm_orchestrator.query_l1_comparison(
@@ -530,7 +530,7 @@ class ComparisonHandler:
         # Add model metadata if requested
         if parameters.get('include_model_metadata', False):
             model_id = getattr(model_response, 'model_id', 'unknown')
-            temperature = getattr(model_response, 'temperature', 0.7)
+            temperature = getattr(model_response, 'temperature', 0.4)
             additional_fields['model_metadata'] = self.llm_orchestrator.get_model_metadata_string(
                 model_id, temperature
             )
@@ -681,6 +681,8 @@ class ComparisonHandler:
         Returns:
             Dictionary with successful and filtered comparisons
         """
+        self._special_case_enabled_tmp = self._special_case_enabled
+        self._special_case_enabled = False
         # Uncertainty thresholds for models
         LLAMA_THRESHOLD = 0.00000034
         GPT4O_THRESHOLD = 0.00077255
@@ -804,4 +806,5 @@ class ComparisonHandler:
         }
         
         logger.info(f"Batch comparison completed: {len(successful_comparisons)} successful, {len(filtered_comparisons)} filtered")
+        self._special_case_enabled = self._special_case_enabled_tmp
         return result
