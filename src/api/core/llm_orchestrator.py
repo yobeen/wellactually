@@ -204,12 +204,10 @@ class LLMOrchestrator:
                 # Convert parsed response to match ModelResponse format
                 overall_assessment = parsed_response.overall_assessment
                 choice = overall_assessment.get('choice', 'Equal')
-                confidence = overall_assessment.get('confidence', 0.5)
                 reasoning = overall_assessment.get('reasoning', '')
                 
                 # Update ModelResponse with parsed data
                 model_response.raw_choice = choice
-                model_response.uncertainty = 1.0 - confidence
                 model_response.content = f"Choice: {choice}. Reasoning: {reasoning}"
                 
                 # Store parsed response in a custom field for API response
