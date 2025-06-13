@@ -315,10 +315,6 @@ async def batch_compare_repositories(
     try:
         logger.info(f"Processing batch comparison: {len(request.pairs)} pairs -> {request.parent}")
         
-        # Validate parent is "ethereum" for L1 comparisons only
-        if request.parent.lower() != "ethereum":
-            raise HTTPException(status_code=400, detail="Batch comparison currently only supports L1 (parent='ethereum') comparisons")
-        
         # Call the batch comparison handler
         response_data = await handler.handle_batch_comparison(
             pairs=request.pairs,

@@ -671,6 +671,30 @@ class ComparisonHandler:
                 "comparisons": []
             }
     
+    def _get_uncertainty_thresholds(self, parent: str) -> Dict[str, float]:
+        """
+        Get level-dependent uncertainty thresholds for models.
+        
+        Args:
+            parent: Parent context to determine level
+            
+        Returns:
+            Dictionary with model thresholds
+        """
+        # Determine level based on parent
+        if parent.lower() == "ethereum":
+            # Level 1 (L1) thresholds - original values
+            return {
+                "llama": 0.00000034,
+                "gpt4o": 0.00077255
+            }
+        else:
+            # Level 3 (L3) thresholds - provided values
+            return {
+                "llama": 0.012241,
+                "gpt4o": 0.014735
+            }
+    
     async def handle_batch_comparison(self, pairs, parent, parameters=None) -> Dict[str, Any]:
         """
         Handle confidence-based batch comparison with uncertainty filtering.
@@ -685,9 +709,11 @@ class ComparisonHandler:
         """
         self._special_case_enabled_tmp = self._special_case_enabled
         self._special_case_enabled = False
-        # Uncertainty thresholds for models
-        LLAMA_THRESHOLD = 0.00000034
-        GPT4O_THRESHOLD = 0.00077255
+        
+        # Get level-dependent uncertainty thresholds
+        thresholds = self._get_uncertainty_thresholds(parent)
+        LLAMA_THRESHOLD = thresholds["llama"]
+        GPT4O_THRESHOLD = thresholds["gpt4o"]
         
         successful_comparisons = []
         filtered_comparisons = []
@@ -802,7 +828,8 @@ class ComparisonHandler:
                 "gpt4o_queries": gpt4o_queries,
                 "uncertainty_thresholds": {
                     "llama-4-maverick": LLAMA_THRESHOLD,
-                    "gpt-4o": GPT4O_THRESHOLD
+                    "gpt-4o": GPT4O_THRESHOLD,
+                    "level": "L1" if parent.lower() == "ethereum" else "L3"
                 }
             }
         }
