@@ -60,7 +60,7 @@ class LLMOrchestrator:
             raise
     
     async def query_l1_comparison(self, repo_a_info: Dict[str, Any], repo_b_info: Dict[str, Any],
-                                 model_id: Optional[str] = None, temperature: float = 0.4) -> ModelResponse:
+                                 model_id: Optional[str] = None, temperature: float = 0.4, simplified: bool = False) -> ModelResponse:
         """
         Query LLM for Level 1 repository comparison.
         
@@ -69,6 +69,7 @@ class LLMOrchestrator:
             repo_b_info: Information about second repository
             model_id: Model to use (default from config)
             temperature: Sampling temperature
+            simplified: If True, returns only overall assessment choice without detailed reasoning (max_tokens=20)
             
         Returns:
             ModelResponse with parsed results
@@ -85,12 +86,23 @@ class LLMOrchestrator:
             
             logger.debug(f"Generated L1 prompt for {repo_a_info.get('name')} vs {repo_b_info.get('name')}")
             
+            # Use special model and token limit for simplified responses
+            if simplified:
+                actual_model_id = model_id
+                max_tokens = 20
+                logger.info(f"SIMPLIFIED MODE ACTIVATED: Using model={actual_model_id}, max_tokens={max_tokens}")
+            else:
+                actual_model_id = model_id
+                max_tokens = None
+                logger.info(f"FULL MODE: Using model={actual_model_id}, unlimited tokens")
+            
             # Query LLM with existing MultiModelEngine (includes caching)
             start_time = time.time()
             model_response = self.multi_model_engine.query_single_model_with_temperature(
-                model_id=model_id,
+                model_id=actual_model_id,
                 prompt=prompt_messages,
-                temperature=temperature
+                temperature=temperature,
+                max_tokens=max_tokens
             )
             processing_time = (time.time() - start_time) * 1000  # Convert to milliseconds
             

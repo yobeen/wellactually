@@ -269,16 +269,18 @@ class ComparisonHandler:
         
         logger.info(f"Processing standard L1 comparison: {repo_a_info['name']} vs {repo_b_info['name']}")
         
-        # Get model and temperature from parameters
+        # Get model, temperature, and simplified option from parameters
         model_id = request.parameters.get('model_id')
         temperature = request.parameters.get('temperature', 0.4)
+        simplified = request.parameters.get('simplified', False)
         
         # Query LLM using orchestrator
         model_response = await self.llm_orchestrator.query_l1_comparison(
             repo_a_info=repo_a_info,
             repo_b_info=repo_b_info,
             model_id=model_id,
-            temperature=temperature
+            temperature=temperature,
+            simplified=simplified
         )
         
         # Transform to API response format
