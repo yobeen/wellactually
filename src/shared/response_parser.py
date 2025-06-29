@@ -93,23 +93,29 @@ class AnswerTokenExtractor:
             extraction_info.update(info)
             extraction_info["method"] = "answer_indicator"
         else:
-            # Strategy 2: Look for bracketed answers [A], [B], etc.
-            answer_token, info = self._find_bracketed_answer(logprobs_content, expected_format)
+            # Strategy 2: Look for JSON field values like "choice": "A"
+            answer_token, info = self._find_json_field_answer(logprobs_content, expected_format)
             if answer_token:
                 extraction_info.update(info)
-                extraction_info["method"] = "bracketed_answer"
+                extraction_info["method"] = "json_field_answer"
             else:
-                # Strategy 3: Find direct answer tokens with meaningful alternatives
-                answer_token, info = self._find_direct_answer_token(logprobs_content, expected_format)
+                # Strategy 3: Look for bracketed answers [A], [B], etc.
+                answer_token, info = self._find_bracketed_answer(logprobs_content, expected_format)
                 if answer_token:
                     extraction_info.update(info)
-                    extraction_info["method"] = "direct_answer"
+                    extraction_info["method"] = "bracketed_answer"
                 else:
-                    # Strategy 4: Fallback - last resort heuristics
-                    answer_token, info = self._fallback_extraction(logprobs_content, expected_format)
-                    extraction_info.update(info)
-                    extraction_info["method"] = "fallback"
-                    extraction_info["fallback_used"] = True
+                    # Strategy 4: Find direct answer tokens with meaningful alternatives
+                    answer_token, info = self._find_direct_answer_token(logprobs_content, expected_format)
+                    if answer_token:
+                        extraction_info.update(info)
+                        extraction_info["method"] = "direct_answer"
+                    else:
+                        # Strategy 5: Fallback - last resort heuristics
+                        answer_token, info = self._fallback_extraction(logprobs_content, expected_format)
+                        extraction_info.update(info)
+                        extraction_info["method"] = "fallback"
+                        extraction_info["fallback_used"] = True
         
         # Apply final answer normalization rules if token found
         if answer_token:
@@ -184,6 +190,45 @@ class AnswerTokenExtractor:
                         info["pattern_found"] = f"bracketed_{pattern}"
                         info["token_index"] = i
                         info["extraction_confidence"] = self._calculate_confidence(token_obj)
+                        return token_obj, info
+        
+        return None, info
+    
+    def _find_json_field_answer(self, logprobs_content: List[Dict], 
+                              expected_format: str) -> Tuple[Optional[Dict], Dict]:
+        """Find answer token that follows JSON field patterns like 'choice': 'A'."""
+        info = {"pattern_found": None, "token_index": None}
+        
+        # Look for JSON field patterns
+        json_field_indicators = ['"choice":', '"choice"', 'choice:', 'choice']
+        
+        for i, token_obj in enumerate(logprobs_content):
+            token_text = token_obj.get('token', '').strip()
+            
+            # Check if this token indicates a choice field
+            for indicator in json_field_indicators:
+                if indicator.lower() in token_text.lower():
+                    info["pattern_found"] = f"json_field_{indicator}"
+                    
+                    # Look for answer in next few tokens (skip quotes, colons, whitespace)
+                    for j in range(i + 1, min(i + 6, len(logprobs_content))):
+                        next_token = logprobs_content[j]
+                        next_token_text = next_token.get('token', '').strip()
+                        
+                        # Skip structural tokens
+                        if next_token_text in [':', '"', "'", ' ', '']:
+                            continue
+                            
+                        # Check if this is a valid answer
+                        if self._is_potential_answer_token(next_token, expected_format):
+                            info["token_index"] = j
+                            info["extraction_confidence"] = 0.9  # High confidence for JSON field extraction
+                            return next_token, info
+                    
+                    # Also check if the answer is embedded in the same token (e.g., "choice":"A")
+                    if self._is_potential_answer_token(token_obj, expected_format):
+                        info["token_index"] = i
+                        info["extraction_confidence"] = 0.8
                         return token_obj, info
         
         return None, info

@@ -285,6 +285,15 @@ class DependencyResponseParser:
                     
                     return extracted, "regex_extraction"
             
+            # If no dimension assessments found, try simple choice extraction
+            choice_match = re.search(r'"?choice"?\s*:\s*"?([AB]|Equal|EQUAL)"?', response, re.IGNORECASE)
+            if choice_match:
+                choice = choice_match.group(1).upper()
+                if choice == "EQUAL":
+                    choice = "Equal"
+                extracted["overall_assessment"] = {"choice": choice}
+                return extracted, "regex_extraction"
+            
         except Exception as e:
             logger.debug(f"Regex extraction error: {e}")
         
@@ -345,6 +354,15 @@ class DependencyResponseParser:
             
             if dimension_assessments:
                 return {"dimension_assessments": dimension_assessments}, "line_parsing"
+            
+            # If no dimension assessments found, try simple choice extraction
+            for line in lines:
+                choice_match = re.search(r'choice[:\s]*([AB]|Equal|EQUAL)', line, re.IGNORECASE)
+                if choice_match:
+                    choice = choice_match.group(1).upper()
+                    if choice == "EQUAL":
+                        choice = "Equal"
+                    return {"overall_assessment": {"choice": choice}}, "line_parsing"
             
         except Exception as e:
             logger.debug(f"Line parsing error: {e}")
@@ -416,10 +434,18 @@ class DependencyResponseParser:
         dimension_assessments = extracted_data.get("dimension_assessments", {})
         overall_assessment = extracted_data.get("overall_assessment", {})
         
-        # Validate and fill missing dimensions
-        validated_dimensions = self._validate_and_fill_dimensions_enhanced(
-            dimension_assessments, warnings, logprobs_data
-        )
+        # Check if this is a simplified response (only choice, no dimensions)
+        is_simplified = not dimension_assessments and overall_assessment.get("choice")
+        
+        if is_simplified:
+            # Simplified response - no dimension validation needed
+            validated_dimensions = {}
+            warnings.append("Simplified response format detected - no dimension assessments")
+        else:
+            # Validate and fill missing dimensions
+            validated_dimensions = self._validate_and_fill_dimensions_enhanced(
+                dimension_assessments, warnings, logprobs_data
+            )
         
         # Calculate overall assessment if missing
         if not overall_assessment.get("choice"):

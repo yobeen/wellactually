@@ -689,10 +689,10 @@ class ComparisonHandler:
                 "gpt4o": 0.00077255
             }
         else:
-            # Level 3 (L3) thresholds - provided values
+            # Level 3 (L3) thresholds - updated for mini and gpt4o
             return {
-                "llama": 0.012241,
-                "gpt4o": 0.014735
+                "mini": 0.001,
+                "gpt4o": 0.001
             }
     
     async def handle_batch_comparison(self, pairs, parent, parameters=None) -> Dict[str, Any]:
@@ -712,13 +712,13 @@ class ComparisonHandler:
         
         # Get level-dependent uncertainty thresholds
         thresholds = self._get_uncertainty_thresholds(parent)
-        LLAMA_THRESHOLD = thresholds["llama"]
+        MINI_THRESHOLD = thresholds["mini"]
         GPT4O_THRESHOLD = thresholds["gpt4o"]
         
         successful_comparisons = []
         filtered_comparisons = []
         
-        llama_queries = 0
+        mini_queries = 0
         gpt4o_queries = 0
         start_time = time.time()
         
@@ -728,28 +728,25 @@ class ComparisonHandler:
             try:
                 logger.info(f"Processing pair {i+1}/{len(pairs)}: {pair['repo_a']} vs {pair['repo_b']}")
                 
-                # Create individual comparison request for llama-4-maverick first
+                # Create individual comparison request for gpt-4.1-mini first
                 from src.api.core.requests import ComparisonRequest
-                llama_request = ComparisonRequest(
+                mini_request = ComparisonRequest(
                     repo_a=pair['repo_a'],
                     repo_b=pair['repo_b'],
                     parent=parent,
-                    parameters={**(parameters or {}), "model_id": "meta-llama/llama-4-maverick", "temperature": 0.4, "simplified": True}
+                    parameters={**(parameters or {}), "model_id": "openai/gpt-4.1-mini", "temperature": 0.4, "simplified": True}
                 )
                 
-                # Query llama-4-maverick first using proper routing
-                if parent.lower() == "ethereum":
-                    llama_response = await self.handle_l1_comparison(llama_request)
-                else:
-                    llama_response = await self.handle_l3_comparison(llama_request)
+                # Query gpt-4.1-mini first (only L3 comparisons for this method)
+                mini_response = await self.handle_l3_comparison(mini_request)
                 
-                llama_queries += 1
-                logger.info(f"  Llama uncertainty: {llama_response.choice_uncertainty}")
+                mini_queries += 1
+                logger.info(f"  Mini uncertainty: {mini_response.choice_uncertainty}")
                 
-                # Check if llama uncertainty is above threshold
-                if llama_response.choice_uncertainty > LLAMA_THRESHOLD:
+                # Check if mini uncertainty is above threshold
+                if mini_response.choice_uncertainty > MINI_THRESHOLD:
                     # Query gpt-4o next
-                    logger.info(f"  Llama uncertainty {llama_response.choice_uncertainty} > {LLAMA_THRESHOLD}, trying GPT-4o")
+                    logger.info(f"  Mini uncertainty {mini_response.choice_uncertainty} > {MINI_THRESHOLD}, trying GPT-4o")
                     
                     gpt4o_request = ComparisonRequest(
                         repo_a=pair['repo_a'],
@@ -758,11 +755,8 @@ class ComparisonHandler:
                         parameters={**(parameters or {}), "model_id": "openai/gpt-4o", "temperature": 0.4, "simplified": True}
                     )
                     
-                    # Query gpt-4o using proper routing
-                    if parent.lower() == "ethereum":
-                        gpt4o_response = await self.handle_l1_comparison(gpt4o_request)
-                    else:
-                        gpt4o_response = await self.handle_l3_comparison(gpt4o_request)
+                    # Query gpt-4o (only L3 comparisons for this method)
+                    gpt4o_response = await self.handle_l3_comparison(gpt4o_request)
                     
                     gpt4o_queries += 1
                     logger.info(f"  GPT-4o uncertainty: {gpt4o_response.choice_uncertainty}")
@@ -775,7 +769,7 @@ class ComparisonHandler:
                             "repo_a": pair['repo_a'],
                             "repo_b": pair['repo_b'],
                             "reason": "High uncertainty on both models",
-                            "llama_uncertainty": llama_response.choice_uncertainty,
+                            "mini_uncertainty": mini_response.choice_uncertainty,
                             "gpt4o_uncertainty": gpt4o_response.choice_uncertainty
                         })
                     else:
@@ -792,17 +786,17 @@ class ComparisonHandler:
                             "model_used": "openai/gpt-4o"
                         })
                 else:
-                    # Use llama result
-                    logger.info(f"  Llama uncertainty acceptable, using Llama result")
+                    # Use mini result
+                    logger.info(f"  Mini uncertainty acceptable, using Mini result")
                     successful_comparisons.append({
                         "repo_a": pair['repo_a'],
                         "repo_b": pair['repo_b'],
-                        "choice": llama_response.choice,
-                        "multiplier": llama_response.multiplier,
-                        "choice_uncertainty": llama_response.choice_uncertainty,
-                        "multiplier_uncertainty": llama_response.multiplier_uncertainty,
-                        "explanation": llama_response.explanation,
-                        "model_used": "meta-llama/llama-4-maverick"
+                        "choice": mini_response.choice,
+                        "multiplier": mini_response.multiplier,
+                        "choice_uncertainty": mini_response.choice_uncertainty,
+                        "multiplier_uncertainty": mini_response.multiplier_uncertainty,
+                        "explanation": mini_response.explanation,
+                        "model_used": "openai/gpt-4.1-mini"
                     })
                     
             except Exception as e:
@@ -824,12 +818,12 @@ class ComparisonHandler:
             "total_filtered": len(filtered_comparisons),
             "processing_summary": {
                 "total_processing_time_ms": total_processing_time,
-                "llama_queries": llama_queries,
+                "mini_queries": mini_queries,
                 "gpt4o_queries": gpt4o_queries,
                 "uncertainty_thresholds": {
-                    "llama-4-maverick": LLAMA_THRESHOLD,
+                    "gpt-4.1-mini": MINI_THRESHOLD,
                     "gpt-4o": GPT4O_THRESHOLD,
-                    "level": "L1" if parent.lower() == "ethereum" else "L3"
+                    "level": "L3"
                 }
             }
         }

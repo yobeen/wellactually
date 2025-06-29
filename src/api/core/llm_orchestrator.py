@@ -89,8 +89,13 @@ class LLMOrchestrator:
             # Use special model and token limit for simplified responses
             if simplified:
                 actual_model_id = model_id
-                max_tokens = 20
-                logger.info(f"SIMPLIFIED MODE ACTIVATED: Using model={actual_model_id}, max_tokens={max_tokens}")
+                # Hack: remove token limit for llama-4-maverick
+                if "llama-4-maverick" in model_id or "qwen/qwen3-235b-a22b" in model_id:
+                    max_tokens = None
+                    logger.info(f"SIMPLIFIED MODE ACTIVATED (LLAMA HACK): Using model={actual_model_id}, max_tokens=None")
+                else:
+                    max_tokens = 20
+                    logger.info(f"SIMPLIFIED MODE ACTIVATED: Using model={actual_model_id}, max_tokens={max_tokens}")
             else:
                 actual_model_id = model_id
                 max_tokens = None
@@ -176,8 +181,13 @@ class LLMOrchestrator:
             # Use special model and token limit for simplified responses
             if simplified:
                 actual_model_id = model_id
-                max_tokens = 20
-                logger.info(f"SIMPLIFIED MODE ACTIVATED: Using model={actual_model_id}, max_tokens={max_tokens}")
+                # Hack: remove token limit for llama-4-maverick
+                if "llama-4-maverick" in model_id or "qwen/qwen3-235b-a22b" in model_id:
+                    max_tokens = None
+                    logger.info(f"SIMPLIFIED MODE ACTIVATED (LLAMA HACK): Using model={actual_model_id}, max_tokens=None")
+                else:
+                    max_tokens = 20
+                    logger.info(f"SIMPLIFIED MODE ACTIVATED: Using model={actual_model_id}, max_tokens={max_tokens}")
             else:
                 actual_model_id = model_id
                 max_tokens = None

@@ -22,8 +22,8 @@ seed_repositories:
     architecture_type: "Client-Server"
     key_functions: ["Transaction processing", "State management", "P2P networking", "Mining/validation", "RPC services"]
 
-  - url: "https://github.com/ledgerwatch/erigon"
-    repo_url: "https://github.com/ledgerwatch/erigon"
+  - url: "https://github.com/erigontech/erigon"
+    repo_url: "https://github.com/erigontech/erigon"
     name: "Erigon"
     category: "execution_client"
     originality_category: "A"
@@ -156,8 +156,8 @@ seed_repositories:
     architecture_type: "Client-Server"
     key_functions: ["TypeScript ecosystem", "Light client", "Browser compatibility", "Research implementation", "Spec compliance"]
 
-  - url: "https://github.com/ConsenSys/teku"
-    repo_url: "https://github.com/ConsenSys/teku"
+  - url: "https://github.com/consensys/teku"
+    repo_url: "https://github.com/consensys/teku"
     name: "Teku"
     category: "consensus_client"
     originality_category: "B"
@@ -310,9 +310,9 @@ seed_repositories:
     architecture_type: "Library"
     key_functions: ["Python integration", "Contract interaction", "Transaction management", "Provider interface", "Testing utilities"]
 
-  - url: "https://github.com/Nethereum/Nethereum"
-    repo_url: "https://github.com/Nethereum/Nethereum"
-    name: "Nethereum"
+  - url: "https://github.com/nethereum/nethereum"
+    repo_url: "https://github.com/nethereum/nethereum"
+    name: "nethereum"
     category: "library"
     originality_category: "D"
     originality_weights:
@@ -387,8 +387,8 @@ seed_repositories:
     architecture_type: "Toolchain"
     key_functions: ["Smart contract compilation", "Testing framework", "Deployment tools", "Fuzzing", "Gas optimization"]
 
-  - url: "https://github.com/nomiclabs/hardhat"
-    repo_url: "https://github.com/nomiclabs/hardhat"
+  - url: "https://github.com/nomicfoundation/hardhat"
+    repo_url: "https://github.com/nomicfoundation/hardhat"
     name: "Hardhat"
     category: "development_framework"
     originality_category: "E"
@@ -503,9 +503,9 @@ seed_repositories:
     key_functions: ["Memory safety", "Type safety", "Rust-inspired syntax", "Security by design", "Modern language features"]
 
   # Category G: Smart Contract Security/Standards
-  - url: "https://github.com/OpenZeppelin/openzeppelin-contracts"
-    repo_url: "https://github.com/OpenZeppelin/openzeppelin-contracts"
-    name: "OpenZeppelin Contracts"
+  - url: "https://github.com/openzeppelin/openzeppelin-contracts"
+    repo_url: "https://github.com/openzeppelin/openzeppelin-contracts"
+    name: "openzeppelin Contracts"
     category: "smart_contract_security"
     originality_category: "G"
     originality_weights:
@@ -516,7 +516,7 @@ seed_repositories:
       security_innovation: 0.30
       standards_leadership: 0.22
       cross_client_compatibility: 0.00
-    description: "OpenZeppelin Contracts is a library for secure smart contract development"
+    description: "openzeppelin Contracts is a library for secure smart contract development"
     primary_language: "Solidity"
     domain: "Smart Contract Security"
     architecture_type: "Library"

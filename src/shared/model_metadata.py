@@ -12,6 +12,7 @@ MODEL_PARAMS = {
     # OpenAI models
     "openai/gpt-4.1": 200.0,  # GPT-41
     "openai/gpt-4o": 200.0,  # GPT-4o
+    "openai/gpt-4.1-mini": 100.0,  # GPT-4o
     
     # Meta LLaMA models
     "meta-llama/llama-4-maverick": 405.0,  # Llama 4 Maverick
@@ -41,6 +42,7 @@ MODEL_PARAMS = {
 MODEL_PROVIDERS = {
     "openai/gpt-4.1": "openai",
     "openai/gpt-4o": "openai",
+    "openai/gpt-4.1-mini": "openai",
     "meta-llama/llama-4-maverick": "meta",
     "meta-llama/llama-3.1-405b-instruct": "meta", 
     "deepseek/deepseek-chat": "deepseek",
@@ -58,6 +60,7 @@ MODEL_PROVIDERS = {
 MODEL_ARCHITECTURES = {
     "openai/gpt-4.1": "transformer",
     "openai/gpt-4o": "transformer",
+    "openai/gpt-4.1-mini": "transformer",
     "meta-llama/llama-4-maverick": "transformer",
     "meta-llama/llama-3.1-405b-instruct": "transformer",
     "deepseek/deepseek-chat": "transformer", 

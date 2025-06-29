@@ -137,10 +137,10 @@ Your goal is to determine which dependency is more critical for the parent repos
 You may use this framework for assessment:
 {self.simplified_framework}
 
-Provide your response in the exact JSON format specified with only the overall choice."""
+Provide your response in the exact JSON format specified."""
                 
                 # Simplified user message
-                user_content = f"""Please assess which dependency is more important for the parent repository:
+                user_content = f"""Assess which dependency is more important for the parent repository:
 
 {parent_section}
 
@@ -148,7 +148,7 @@ Provide your response in the exact JSON format specified with only the overall c
 
 {response_format}
 
-Based on your expert analysis, determine which dependency is more critical overall and provide only the choice."""
+Based on your expert analysis, determine which dependency is more critical overall and provide only the choice. You are only allowed to provive valid json in a specified format as an answer."""
             else:
                 # Full system message with framework
                 system_content = f"""You are an expert software architect evaluating dependency relationships within software projects. You will assess which of two dependencies is more important for a specific parent repository using a structured 4-dimension framework.
@@ -269,7 +269,8 @@ Please respond in this exact JSON format:
 
 {{
   {{
-    "choice": "[A|B|Equal]"
+    "choice": "[A or B or Equal]",
+    "reasoning": "[Provide complete reasoning]"
   }}
 }}"""
         else:

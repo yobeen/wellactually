@@ -116,6 +116,10 @@ class MultiModelEngine:
             ModelResponse with parsed data and uncertainty
         """
         
+        # Log prompt being sent (before checking cache)
+        logger.info(f"Query request - Model: {model_id}, Temperature: {temperature}, Max tokens: {max_tokens}")
+        #logger.info(f"Prompt content: {prompt}")
+        
         # Check cache first (include max_tokens in cache key)
         cache_key_suffix = f"_mt{max_tokens}" if max_tokens is not None else ""
         cached_response = self.cache_manager.get_cached_response(model_id, prompt, temperature, cache_key_suffix)

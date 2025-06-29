@@ -119,9 +119,10 @@ class CacheManager:
         try:
             cache_key = self.generate_cache_key(model_id, prompt, temperature) + cache_key_suffix
             cache_file = self.get_cache_file_path(model_id, cache_key)
-            
             if not cache_file.exists():
                 return None
+            
+            logger.info(f"Cache file hit: {cache_file}")
             
             with open(cache_file, 'r', encoding='utf-8') as f:
                 cached_data = json.load(f)
