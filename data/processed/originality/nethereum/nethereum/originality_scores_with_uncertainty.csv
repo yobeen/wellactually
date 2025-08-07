@@ -1,0 +1,2 @@
+repository_url,repository_name,originality_category,originality_score,overall_reasoning_uncertainty,aggregate_uncertainty,assessment_confidence,parsing_success,parsing_method
+https://github.com/nethereum/nethereum,nethereum,D,0.4555555555555556,0.15923602959252517,0.15938402766824267,0.7,True,json

@@ -1,0 +1,2 @@
+repository_url,repository_name,originality_category,originality_score,overall_reasoning_uncertainty,aggregate_uncertainty,assessment_confidence,parsing_success,parsing_method
+https://github.com/scaffold-eth/scaffold-eth-2,Scaffold-ETH 2,H,0.47244444444444456,0.1596050384724006,0.1564296821245356,0.7,True,json

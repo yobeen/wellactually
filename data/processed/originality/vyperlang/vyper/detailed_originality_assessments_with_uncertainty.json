@@ -1,0 +1,68 @@
+[
+  {
+    "repository_url": "https://github.com/vyperlang/vyper",
+    "repository_name": "Vyper",
+    "originality_category": "F",
+    "final_originality_score": 0.6404444444444445,
+    "assessment_confidence": 0.7,
+    "overall_reasoning_uncertainty": 0.17818870327257447,
+    "aggregate_uncertainty": 0.17275672468891726,
+    "criteria_uncertainties": {
+      "protocol_implementation": 0.16856907983787994,
+      "algorithmic_innovation": 0.17907880845017593,
+      "developer_experience": 0.17332672518976744,
+      "architectural_innovation": 0.17553311320714984,
+      "security_innovation": 0.17144241257934584,
+      "standards_leadership": 0.16875727789362696,
+      "cross_client_compatibility": 0.1630326045871897
+    },
+    "criteria_scores": {
+      "protocol_implementation": {
+        "score": 7,
+        "weight": 0.15,
+        "reasoning": "Vyper implements a full compiler stack from scratch (lexer/parser to EVM bytecode generation) with novel optimizations like forced bounds checking and gas-efficient opcode selection. However, it relies on existing EVM specifications rather than redefining core protocol mechanics.",
+        "raw_uncertainty": 0.16856907983787994
+      },
+      "algorithmic_innovation": {
+        "score": 6,
+        "weight": 0.18,
+        "reasoning": "Introduced Pythonic static analysis for security invariants and novel overflow protection through forced type constraints. While compiler optimizations are competent, they don't fundamentally advance blockchain computational models beyond existing languages.",
+        "raw_uncertainty": 0.17907880845017593
+      },
+      "developer_experience": {
+        "score": 8,
+        "weight": 0.15,
+        "reasoning": "Pioneered Python-like syntax that significantly lowered barriers for new developers, with intentional readability trade-offs (e.g., no inheritance). While influential, its tooling ecosystem remains less mature than Solidity's, limiting broader adoption as a standard.",
+        "raw_uncertainty": 0.17332672518976744
+      },
+      "architectural_innovation": {
+        "score": 5,
+        "weight": 0.12,
+        "reasoning": "Modular compiler design with explicit phase separation (lexing \u2192 AST \u2192 IR \u2192 bytecode) enables formal verification hooks. This influenced later languages but didn't introduce groundbreaking architectural patterns for the category.",
+        "raw_uncertainty": 0.17553311320714984
+      },
+      "security_innovation": {
+        "score": 9,
+        "weight": 0.25,
+        "reasoning": "Revolutionary security-first design: intentional feature limitations (no recursion, modifiers), built-in overflow protection, and decidable reverts. These became de facto standards for secure language design, directly influencing FEVM and later languages. Formal verification integration was pioneering for EVM languages.",
+        "raw_uncertainty": 0.17144241257934584
+      },
+      "standards_leadership": {
+        "score": 6,
+        "weight": 0.15,
+        "reasoning": "Co-authored critical EIPs (e.g., EIP-2929 gas changes) and established security patterns adopted in ERC standards. However, leadership is concentrated in security domains rather than broad protocol evolution.",
+        "raw_uncertainty": 0.16875727789362696
+      },
+      "cross_client_compatibility": {
+        "score": 5,
+        "weight": 0.0,
+        "reasoning": "Achieves full EVM compatibility through rigorous specification adherence, but doesn't pioneer new interoperability mechanisms beyond standard tooling.",
+        "raw_uncertainty": 0.1630326045871897
+      }
+    },
+    "overall_reasoning": "Vyper represents a paradigm shift in smart contract security through radical simplicity constraints, making it one of Ethereum's most original technical contributions. Its security innovations (intentional feature limitations, formal verification focus) became industry benchmarks that reshaped language design philosophy. While less revolutionary in performance or tooling, its security-first approach created lasting ecosystem impact by proving that reduced expressiveness enhances verifiability. The Pythonic syntax lowered onboarding barriers but didn't achieve Solidity-level ecosystem dominance. Groundbreaking in security philosophy yet pragmatic in implementation.",
+    "parsing_method": "json",
+    "parsing_success": true,
+    "parsing_warnings": []
+  }
+]

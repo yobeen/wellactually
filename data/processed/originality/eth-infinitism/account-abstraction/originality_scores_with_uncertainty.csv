@@ -1,0 +1,2 @@
+repository_url,repository_name,originality_category,originality_score,overall_reasoning_uncertainty,aggregate_uncertainty,assessment_confidence,parsing_success,parsing_method
+https://github.com/eth-infinitism/account-abstraction,Account Abstraction,G,0.7782222222222221,0.1702927477512116,0.16658249994099114,0.7,True,json

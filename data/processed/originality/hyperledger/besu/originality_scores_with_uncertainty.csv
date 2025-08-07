@@ -1,0 +1,2 @@
+repository_url,repository_name,originality_category,originality_score,overall_reasoning_uncertainty,aggregate_uncertainty,assessment_confidence,parsing_success,parsing_method
+https://github.com/hyperledger/besu,Besu,A,0.5560000000000002,0.18736390700529523,0.1836409047025479,0.7,True,json

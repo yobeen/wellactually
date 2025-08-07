@@ -1,0 +1,2 @@
+repository_url,repository_name,originality_category,originality_score,overall_reasoning_uncertainty,aggregate_uncertainty,assessment_confidence,parsing_success,parsing_method
+https://github.com/ethereumjs/ethereumjs-monorepo,EthereumJS,C,0.5808888888888889,0.17433494254019738,0.16875490083068323,0.7,True,json

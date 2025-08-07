@@ -1,0 +1,68 @@
+[
+  {
+    "repository_url": "https://github.com/eth-infinitism/account-abstraction",
+    "repository_name": "Account Abstraction",
+    "originality_category": "G",
+    "final_originality_score": 0.7782222222222221,
+    "assessment_confidence": 0.7,
+    "overall_reasoning_uncertainty": 0.1702927477512116,
+    "aggregate_uncertainty": 0.16658249994099114,
+    "criteria_uncertainties": {
+      "protocol_implementation": 0.1657435665611415,
+      "algorithmic_innovation": 0.16775136239306948,
+      "developer_experience": 0.16843916837389197,
+      "architectural_innovation": 0.16619352380914595,
+      "security_innovation": 0.16861923065622206,
+      "standards_leadership": 0.16276073304140518,
+      "cross_client_compatibility": 0.16772941119237872
+    },
+    "criteria_scores": {
+      "protocol_implementation": {
+        "score": 7,
+        "weight": 0.1,
+        "reasoning": "The repository implements EIP-4337 from scratch without relying on existing protocol implementations. It introduces novel concepts like UserOperations, Bundlers, and Paymasters that operate at the application layer rather than modifying core protocol. However, it builds upon existing EVM capabilities rather than creating new protocol-level infrastructure.",
+        "raw_uncertainty": 0.1657435665611415
+      },
+      "algorithmic_innovation": {
+        "score": 6,
+        "weight": 0.08,
+        "reasoning": "Introduces innovative data structures like UserOperation mempool and signature aggregation mechanisms. The bundler's transaction packaging algorithm optimizes for gas efficiency and censorship resistance. While clever, these are specific to the account abstraction problem rather than broadly applicable algorithmic breakthroughs.",
+        "raw_uncertainty": 0.16775136239306948
+      },
+      "developer_experience": {
+        "score": 8,
+        "weight": 0.15,
+        "reasoning": "Provides foundational interfaces (IAccount, IPaymaster) that became standard templates for wallet developers. The reference implementation enabled new wallet design patterns but requires significant integration effort. Later developer tooling (like SDKs) built upon these foundations provide better DX.",
+        "raw_uncertainty": 0.16843916837389197
+      },
+      "architectural_innovation": {
+        "score": 9,
+        "weight": 0.15,
+        "reasoning": "Pioneered a modular architecture separating concerns (Accounts, Paymasters, Bundlers) with clear interfaces. The EntryPoint contract serves as a novel coordination layer. This architecture became the de facto standard for all ERC-4337 implementations, demonstrating significant ecosystem influence.",
+        "raw_uncertainty": 0.16619352380914595
+      },
+      "security_innovation": {
+        "score": 9,
+        "weight": 0.3,
+        "reasoning": "Introduced groundbreaking security patterns like signature aggregation and gas abstraction without consensus-layer changes. Formal verification wasn't initially included but the design enables secure wallet recovery mechanisms. The security model itself (with reputation systems for paymasters) is a major innovation that became an ecosystem standard.",
+        "raw_uncertainty": 0.16861923065622206
+      },
+      "standards_leadership": {
+        "score": 10,
+        "weight": 0.22,
+        "reasoning": "The repository IS the reference implementation for ERC-4337 - arguably the most significant Ethereum standard since ERC-20. It defined the entire account abstraction landscape, with Vitalik Buterin and others authoring the EIP. Directly shaped how millions of wallets now operate.",
+        "raw_uncertainty": 0.16276073304140518
+      },
+      "cross_client_compatibility": {
+        "score": 8,
+        "weight": 0.0,
+        "reasoning": "Designed as a protocol-agnostic solution compatible with any EVM chain. The implementation has been deployed across multiple L2s and testnets. While not focused on client interoperability specifically, its design ensures broad compatibility.",
+        "raw_uncertainty": 0.16772941119237872
+      }
+    },
+    "overall_reasoning": "This repository represents groundbreaking innovation in Ethereum standards. As the reference implementation for ERC-4337, it fundamentally redefined how accounts operate on Ethereum without requiring consensus-layer changes. The architectural separation of concerns (Accounts, Bundlers, Paymasters) created a new design paradigm adopted across the ecosystem. Its security model introduced novel mechanisms like signature aggregation and gas abstraction that became industry standards. While building on existing EVM capabilities, the implementation was entirely original when created, solving long-standing UX and security challenges. The standard has enabled smart contract wallets, social recovery, and session keys - fundamentally expanding Ethereum's capabilities. Later projects have built upon this foundation, but the core innovations remain foundational.",
+    "parsing_method": "json",
+    "parsing_success": true,
+    "parsing_warnings": []
+  }
+]

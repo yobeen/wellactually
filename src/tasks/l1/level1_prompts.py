@@ -48,7 +48,7 @@ class Level1PromptGenerator:
             {"url": "https://github.com/ethereum/solidity", "name": "solidity", "category": "language"},
             {"url": "https://github.com/vyperlang/vyper", "name": "vyper", "category": "language"},
             {"url": "https://github.com/ethers-io/ethers.js", "name": "ethers.js", "category": "library"},
-            {"url": "https://github.com/web3/web3.js", "name": "web3.js", "category": "library"},
+            {"url": "https://github.com/chainsafe/web3.js", "name": "web3.js", "category": "library"},
         ]
         
         self.seed_repos_cache = basic_repos

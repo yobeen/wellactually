@@ -1,0 +1,2 @@
+repository_url,repository_name,originality_category,originality_score,overall_reasoning_uncertainty,aggregate_uncertainty,assessment_confidence,parsing_success,parsing_method
+https://github.com/foundry-rs/foundry,Foundry,E,0.7417777777777776,0.17337039317938369,0.17057232200193306,0.7,True,json

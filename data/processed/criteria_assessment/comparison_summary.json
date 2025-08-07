@@ -1,0 +1,28 @@
+{
+  "total_comparisons": 141,
+  "directional_accuracy": 0.5673758865248227,
+  "mean_ratio_error": 1.7129899172787264,
+  "median_ratio_error": 1.3700996751999104,
+  "correlation_coefficient": 0.1728160701245418,
+  "agreement_by_preference": {
+    "A": {
+      "count": 62,
+      "agreements": 41,
+      "accuracy": 0.6612903225806451,
+      "average_ratio_error": 1.83692125051456
+    },
+    "B": {
+      "count": 71,
+      "agreements": 36,
+      "accuracy": 0.5070422535211268,
+      "average_ratio_error": 1.7667516383426134
+    },
+    "Equal": {
+      "count": 8,
+      "agreements": 3,
+      "accuracy": 0.375,
+      "average_ratio_error": 0.2753868102590199
+    }
+  },
+  "analysis_warnings": []
+}

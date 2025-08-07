@@ -1,0 +1,2 @@
+repository_url,repository_name,originality_category,originality_score,overall_reasoning_uncertainty,aggregate_uncertainty,assessment_confidence,parsing_success,parsing_method
+https://github.com/vyperlang/titanoboa,Titanoboa,H,0.4475555555555557,0.1557285132388202,0.15505599183161664,0.7,True,json

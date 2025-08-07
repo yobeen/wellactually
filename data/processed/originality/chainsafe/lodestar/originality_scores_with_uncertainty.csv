@@ -1,0 +1,2 @@
+repository_url,repository_name,originality_category,originality_score,overall_reasoning_uncertainty,aggregate_uncertainty,assessment_confidence,parsing_success,parsing_method
+https://github.com/chainsafe/lodestar,Lodestar,B,0.5942222222222222,0.17277719900593683,0.1722659383254292,0.7,True,json

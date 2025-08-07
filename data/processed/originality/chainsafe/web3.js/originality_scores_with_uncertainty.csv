@@ -1,0 +1,2 @@
+repository_url,repository_name,originality_category,originality_score,overall_reasoning_uncertainty,aggregate_uncertainty,assessment_confidence,parsing_success,parsing_method
+https://github.com/chainsafe/web3.js,Web3.js,C,0.524,0.1635922603276473,0.16334619021764807,0.7,True,json

@@ -1,0 +1,2 @@
+repository_url,repository_name,originality_category,originality_score,overall_reasoning_uncertainty,aggregate_uncertainty,assessment_confidence,parsing_success,parsing_method
+https://github.com/paradigmxyz/reth,Reth,A,0.7453333333333335,0.1692381141845198,0.17117973761385438,0.7,True,json

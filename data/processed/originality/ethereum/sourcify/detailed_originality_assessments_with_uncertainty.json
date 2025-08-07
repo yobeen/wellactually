@@ -1,0 +1,68 @@
+[
+  {
+    "repository_url": "https://github.com/ethereum/sourcify",
+    "repository_name": "Sourcify",
+    "originality_category": "H",
+    "final_originality_score": 0.5257777777777779,
+    "assessment_confidence": 0.7,
+    "overall_reasoning_uncertainty": 0.15952318289455028,
+    "aggregate_uncertainty": 0.15610093268449443,
+    "criteria_uncertainties": {
+      "protocol_implementation": 0.15758612140127556,
+      "algorithmic_innovation": 0.16005902772440936,
+      "developer_experience": 0.15295250097816518,
+      "architectural_innovation": 0.15300929477180714,
+      "security_innovation": 0.16647770044669408,
+      "standards_leadership": 0.1525889783306974,
+      "cross_client_compatibility": 0.15495277776474217
+    },
+    "criteria_scores": {
+      "protocol_implementation": {
+        "score": 3,
+        "weight": 0.12,
+        "reasoning": "Sourcify doesn't implement core Ethereum protocols from scratch. It relies on existing compilers (Solidity/Vyper) and EVM execution environments for bytecode verification. While it innovates in verification methodology, it's not a protocol-level implementation.",
+        "raw_uncertainty": 0.15758612140127556
+      },
+      "algorithmic_innovation": {
+        "score": 5,
+        "weight": 0.15,
+        "reasoning": "Sourcify's bytecode matching algorithm is methodologically sound but not novel. The core innovation is in decentralized metadata handling via IPFS/Swarm, not algorithmic breakthroughs. Performance optimizations are practical but not ecosystem-changing.",
+        "raw_uncertainty": 0.16005902772440936
+      },
+      "developer_experience": {
+        "score": 8,
+        "weight": 0.25,
+        "reasoning": "Revolutionized verification workflow by introducing: 1) Decentralized verification storage (IPFS/Swarm), 2) One-click verification across 20+ EVM chains, 3) Seamless Hardhat/Truffle integrations, and 4) Human-readable error mapping. Became the verification standard adopted by Etherscan, Blockscout, and Tenderly.",
+        "raw_uncertainty": 0.15295250097816518
+      },
+      "architectural_innovation": {
+        "score": 6,
+        "weight": 0.18,
+        "reasoning": "Pioneered decentralized verification architecture with: 1) Stateless verification servers, 2) Immutable metadata storage via content-addressing, 3) Chain-agnostic verification core. This influenced later verification systems but didn't introduce fundamentally new software patterns.",
+        "raw_uncertainty": 0.15300929477180714
+      },
+      "security_innovation": {
+        "score": 4,
+        "weight": 0.1,
+        "reasoning": "Introduced trust minimization through decentralized metadata storage, reducing reliance on central authorities. However, it didn't create novel cryptographic methods or formal verification approaches beyond existing compiler capabilities.",
+        "raw_uncertainty": 0.16647770044669408
+      },
+      "standards_leadership": {
+        "score": 5,
+        "weight": 0.1,
+        "reasoning": "Drove adoption of contract metadata standards (EIP-3541) and influenced verification best practices. Actively participates in tooling standards discussions but hasn't authored foundational EIPs.",
+        "raw_uncertainty": 0.1525889783306974
+      },
+      "cross_client_compatibility": {
+        "score": 7,
+        "weight": 0.1,
+        "reasoning": "Works consistently across all EVM clients by relying on bytecode-level verification. Supports 20+ EVM chains through chain-agnostic design, though focused exclusively on EVM ecosystems.",
+        "raw_uncertainty": 0.15495277776474217
+      }
+    },
+    "overall_reasoning": "Sourcify demonstrates significant innovation in developer experience by decentralizing smart contract verification \u2013 a paradigm shift from centralized services like Etherscan. Its core originality lies in: 1) IPFS/Swarm-based metadata storage creating verifiable authenticity, 2) Chain-agnostic verification workflow, and 3) Standardization of decentralized verification processes. While not algorithmically groundbreaking, it solved critical trust problems in contract verification at a time when centralized services dominated. The ecosystem impact is substantial, with its approach becoming the de facto standard adopted by major explorers and tooling. However, it builds upon existing compilers and EVM standards rather than creating fundamental new protocols.",
+    "parsing_method": "json",
+    "parsing_success": true,
+    "parsing_warnings": []
+  }
+]

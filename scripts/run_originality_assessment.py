@@ -10,6 +10,10 @@ import json
 import logging
 from pathlib import Path
 from datetime import datetime
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 # Add src to path for imports
 sys.path.append(str(Path(__file__).parent.parent))

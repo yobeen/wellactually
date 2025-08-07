@@ -1,0 +1,2 @@
+repository_url,repository_name,originality_category,originality_score,overall_reasoning_uncertainty,aggregate_uncertainty,assessment_confidence,parsing_success,parsing_method
+https://github.com/prysmaticlabs/prysm,Prysm,B,0.6271111111111111,0.1626503265667382,0.16008791194298533,0.7,True,json

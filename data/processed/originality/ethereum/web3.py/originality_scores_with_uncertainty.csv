@@ -1,0 +1,2 @@
+repository_url,repository_name,originality_category,originality_score,overall_reasoning_uncertainty,aggregate_uncertainty,assessment_confidence,parsing_success,parsing_method
+https://github.com/ethereum/web3.py,Web3.py,D,0.46444444444444444,0.16615920202406478,0.1661883606594436,0.7,True,json

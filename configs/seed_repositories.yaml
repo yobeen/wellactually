@@ -2,679 +2,755 @@
 # Enhanced with Updated Originality Assessment Framework Weights
 
 seed_repositories:
-  # Category A: Execution Clients
-  - url: "https://github.com/ethereum/go-ethereum"
-    repo_url: "https://github.com/ethereum/go-ethereum"
-    name: "Geth"
-    category: "execution_client"
-    originality_category: "A"
-    originality_weights:
-      protocol_implementation: 0.25
-      algorithmic_innovation: 0.22
-      developer_experience: 0.10
-      architectural_innovation: 0.15
-      security_innovation: 0.12
-      standards_leadership: 0.08
-      cross_client_compatibility: 0.08
-    description: "Official Go implementation of the Ethereum protocol"
-    primary_language: "Go"
-    domain: "Ethereum Client"
-    architecture_type: "Client-Server"
-    key_functions: ["Transaction processing", "State management", "P2P networking", "Mining/validation", "RPC services"]
+# Category A: Execution Clients
+- url: "https://github.com/ethereum/go-ethereum"
+  repo_url: "https://github.com/ethereum/go-ethereum"
+  name: "Geth"
+  category: "execution_client"
+  originality_category: "A"
+  originality_weights:
+    protocol_implementation: 0.25
+    algorithmic_innovation: 0.22
+    developer_experience: 0.10
+    architectural_innovation: 0.15
+    security_innovation: 0.12
+    standards_leadership: 0.08
+    cross_client_compatibility: 0.08
+  description: "Official Go implementation of the Ethereum protocol"
+  primary_language: "Go"
+  domain: "Ethereum Client"
+  architecture_type: "Client-Server"
+  key_functions: ["Transaction processing", "State management", "P2P networking", "Mining/validation", "RPC services"]
 
-  - url: "https://github.com/erigontech/erigon"
-    repo_url: "https://github.com/erigontech/erigon"
-    name: "Erigon"
-    category: "execution_client"
-    originality_category: "A"
-    originality_weights:
-      protocol_implementation: 0.25
-      algorithmic_innovation: 0.22
-      developer_experience: 0.10
-      architectural_innovation: 0.15
-      security_innovation: 0.12
-      standards_leadership: 0.08
-      cross_client_compatibility: 0.08
-    description: "Ethereum implementation on the efficiency frontier"
-    primary_language: "Go"
-    domain: "Ethereum Client"
-    architecture_type: "Client-Server"
-    key_functions: ["Staged sync", "Flat state storage", "Performance optimization", "Archive node capabilities", "Modular architecture"]
+- url: "https://github.com/erigontech/erigon"
+  repo_url: "https://github.com/erigontech/erigon"
+  name: "Erigon"
+  category: "execution_client"
+  originality_category: "A"
+  originality_weights:
+    protocol_implementation: 0.25
+    algorithmic_innovation: 0.22
+    developer_experience: 0.10
+    architectural_innovation: 0.15
+    security_innovation: 0.12
+    standards_leadership: 0.08
+    cross_client_compatibility: 0.08
+  description: "Ethereum implementation on the efficiency frontier"
+  primary_language: "Go"
+  domain: "Ethereum Client"
+  architecture_type: "Client-Server"
+  key_functions: ["Staged sync", "Flat state storage", "Performance optimization", "Archive node capabilities", "Modular architecture"]
 
-  - url: "https://github.com/nethermindeth/nethermind"
-    repo_url: "https://github.com/nethermindeth/nethermind"
-    name: "Nethermind"
-    category: "execution_client"
-    originality_category: "A"
-    originality_weights:
-      protocol_implementation: 0.25
-      algorithmic_innovation: 0.22
-      developer_experience: 0.10
-      architectural_innovation: 0.15
-      security_innovation: 0.12
-      standards_leadership: 0.08
-      cross_client_compatibility: 0.08
-    description: ".NET Ethereum client implementation"
-    primary_language: "C#"
-    domain: "Ethereum Client"
-    architecture_type: "Client-Server"
-    key_functions: [".NET ecosystem", "Enterprise features", "Fast sync", "MEV integration", "Staking support"]
+- url: "https://github.com/nethermindeth/nethermind"
+  repo_url: "https://github.com/nethermindeth/nethermind"
+  name: "Nethermind"
+  category: "execution_client"
+  originality_category: "A"
+  originality_weights:
+    protocol_implementation: 0.25
+    algorithmic_innovation: 0.22
+    developer_experience: 0.10
+    architectural_innovation: 0.15
+    security_innovation: 0.12
+    standards_leadership: 0.08
+    cross_client_compatibility: 0.08
+  description: ".NET Ethereum client implementation"
+  primary_language: "C#"
+  domain: "Ethereum Client"
+  architecture_type: "Client-Server"
+  key_functions: [".NET ecosystem", "Enterprise features", "Fast sync", "MEV integration", "Staking support"]
 
-  - url: "https://github.com/hyperledger/besu"
-    repo_url: "https://github.com/hyperledger/besu"
-    name: "Besu"
-    category: "execution_client"
-    originality_category: "A"
-    originality_weights:
-      protocol_implementation: 0.25
-      algorithmic_innovation: 0.22
-      developer_experience: 0.10
-      architectural_innovation: 0.15
-      security_innovation: 0.12
-      standards_leadership: 0.08
-      cross_client_compatibility: 0.08
-    description: "Hyperledger Ethereum client implementation"
-    primary_language: "Java"
-    domain: "Ethereum Client"
-    architecture_type: "Client-Server"
-    key_functions: ["Enterprise features", "Privacy networks", "Consensus algorithms", "Permissioning", "Java ecosystem"]
+- url: "https://github.com/hyperledger/besu"
+  repo_url: "https://github.com/hyperledger/besu"
+  name: "Besu"
+  category: "execution_client"
+  originality_category: "A"
+  originality_weights:
+    protocol_implementation: 0.25
+    algorithmic_innovation: 0.22
+    developer_experience: 0.10
+    architectural_innovation: 0.15
+    security_innovation: 0.12
+    standards_leadership: 0.08
+    cross_client_compatibility: 0.08
+  description: "Hyperledger Ethereum client implementation"
+  primary_language: "Java"
+  domain: "Ethereum Client"
+  architecture_type: "Client-Server"
+  key_functions: ["Enterprise features", "Privacy networks", "Consensus algorithms", "Permissioning", "Java ecosystem"]
 
-  - url: "https://github.com/paradigmxyz/reth"
-    repo_url: "https://github.com/paradigmxyz/reth"
-    name: "Reth"
-    category: "execution_client"
-    originality_category: "A"
-    originality_weights:
-      protocol_implementation: 0.25
-      algorithmic_innovation: 0.22
-      developer_experience: 0.10
-      architectural_innovation: 0.15
-      security_innovation: 0.12
-      standards_leadership: 0.08
-      cross_client_compatibility: 0.08
-    description: "Rust Ethereum execution layer implementation"
-    primary_language: "Rust"
-    domain: "Ethereum Client"
-    architecture_type: "Client-Server"
-    key_functions: ["Rust performance", "Modular architecture", "Type safety", "Memory efficiency", "Developer tooling"]
+- url: "https://github.com/paradigmxyz/reth"
+  repo_url: "https://github.com/paradigmxyz/reth"
+  name: "Reth"
+  category: "execution_client"
+  originality_category: "A"
+  originality_weights:
+    protocol_implementation: 0.25
+    algorithmic_innovation: 0.22
+    developer_experience: 0.10
+    architectural_innovation: 0.15
+    security_innovation: 0.12
+    standards_leadership: 0.08
+    cross_client_compatibility: 0.08
+  description: "Rust Ethereum execution layer implementation"
+  primary_language: "Rust"
+  domain: "Ethereum Client"
+  architecture_type: "Client-Server"
+  key_functions: ["Rust performance", "Modular architecture", "Type safety", "Memory efficiency", "Developer tooling"]
 
-  # Category B: Consensus Clients
-  - url: "https://github.com/prysmaticlabs/prysm"
-    repo_url: "https://github.com/prysmaticlabs/prysm"
-    name: "Prysm"
-    category: "consensus_client"
-    originality_category: "B"
-    originality_weights:
-      protocol_implementation: 0.28
-      algorithmic_innovation: 0.20
-      developer_experience: 0.08
-      architectural_innovation: 0.12
-      security_innovation: 0.15
-      standards_leadership: 0.09
-      cross_client_compatibility: 0.08
-    description: "Go implementation of Ethereum proof-of-stake consensus client"
-    primary_language: "Go"
-    domain: "Consensus Client"
-    architecture_type: "Client-Server"
-    key_functions: ["Beacon chain", "Validator duties", "Attestation processing", "Slashing protection", "Sync committee"]
+# Category B: Consensus Clients
+- url: "https://github.com/prysmaticlabs/prysm"
+  repo_url: "https://github.com/prysmaticlabs/prysm"
+  name: "Prysm"
+  category: "consensus_client"
+  originality_category: "B"
+  originality_weights:
+    protocol_implementation: 0.28
+    algorithmic_innovation: 0.20
+    developer_experience: 0.08
+    architectural_innovation: 0.12
+    security_innovation: 0.15
+    standards_leadership: 0.09
+    cross_client_compatibility: 0.08
+  description: "Go implementation of Ethereum proof-of-stake consensus client"
+  primary_language: "Go"
+  domain: "Consensus Client"
+  architecture_type: "Client-Server"
+  key_functions: ["Beacon chain", "Validator duties", "Attestation processing", "Slashing protection", "Sync committee"]
 
-  - url: "https://github.com/sigp/lighthouse"
-    repo_url: "https://github.com/sigp/lighthouse"
-    name: "Lighthouse"
-    category: "consensus_client"
-    originality_category: "B"
-    originality_weights:
-      protocol_implementation: 0.28
-      algorithmic_innovation: 0.20
-      developer_experience: 0.08
-      architectural_innovation: 0.12
-      security_innovation: 0.15
-      standards_leadership: 0.09
-      cross_client_compatibility: 0.08
-    description: "Rust Ethereum consensus client"
-    primary_language: "Rust"
-    domain: "Consensus Client"
-    architecture_type: "Client-Server"
-    key_functions: ["Rust performance", "Security focus", "Validator client", "Slashing protection", "API server"]
+- url: "https://github.com/sigp/lighthouse"
+  repo_url: "https://github.com/sigp/lighthouse"
+  name: "Lighthouse"
+  category: "consensus_client"
+  originality_category: "B"
+  originality_weights:
+    protocol_implementation: 0.28
+    algorithmic_innovation: 0.20
+    developer_experience: 0.08
+    architectural_innovation: 0.12
+    security_innovation: 0.15
+    standards_leadership: 0.09
+    cross_client_compatibility: 0.08
+  description: "Rust Ethereum consensus client"
+  primary_language: "Rust"
+  domain: "Consensus Client"
+  architecture_type: "Client-Server"
+  key_functions: ["Rust performance", "Security focus", "Validator client", "Slashing protection", "API server"]
 
-  - url: "https://github.com/chainsafe/lodestar"
-    repo_url: "https://github.com/chainsafe/lodestar"
-    name: "Lodestar"
-    category: "consensus_client"
-    originality_category: "B"
-    originality_weights:
-      protocol_implementation: 0.28
-      algorithmic_innovation: 0.20
-      developer_experience: 0.08
-      architectural_innovation: 0.12
-      security_innovation: 0.15
-      standards_leadership: 0.09
-      cross_client_compatibility: 0.08
-    description: "TypeScript implementation of the Ethereum consensus client"
-    primary_language: "TypeScript"
-    domain: "Consensus Client"
-    architecture_type: "Client-Server"
-    key_functions: ["TypeScript ecosystem", "Light client", "Browser compatibility", "Research implementation", "Spec compliance"]
+- url: "https://github.com/chainsafe/lodestar"
+  repo_url: "https://github.com/chainsafe/lodestar"
+  name: "Lodestar"
+  category: "consensus_client"
+  originality_category: "B"
+  originality_weights:
+    protocol_implementation: 0.28
+    algorithmic_innovation: 0.20
+    developer_experience: 0.08
+    architectural_innovation: 0.12
+    security_innovation: 0.15
+    standards_leadership: 0.09
+    cross_client_compatibility: 0.08
+  description: "TypeScript implementation of the Ethereum consensus client"
+  primary_language: "TypeScript"
+  domain: "Consensus Client"
+  architecture_type: "Client-Server"
+  key_functions: ["TypeScript ecosystem", "Light client", "Browser compatibility", "Research implementation", "Spec compliance"]
 
-  - url: "https://github.com/consensys/teku"
-    repo_url: "https://github.com/consensys/teku"
-    name: "Teku"
-    category: "consensus_client"
-    originality_category: "B"
-    originality_weights:
-      protocol_implementation: 0.28
-      algorithmic_innovation: 0.20
-      developer_experience: 0.08
-      architectural_innovation: 0.12
-      security_innovation: 0.15
-      standards_leadership: 0.09
-      cross_client_compatibility: 0.08
-    description: "Java implementation of the Ethereum 2.0 Beacon Chain"
-    primary_language: "Java"
-    domain: "Consensus Client"
-    architecture_type: "Client-Server"
-    key_functions: ["Java ecosystem", "Enterprise support", "REST API", "Validator client", "Metrics and monitoring"]
+- url: "https://github.com/consensys/teku"
+  repo_url: "https://github.com/consensys/teku"
+  name: "Teku"
+  category: "consensus_client"
+  originality_category: "B"
+  originality_weights:
+    protocol_implementation: 0.28
+    algorithmic_innovation: 0.20
+    developer_experience: 0.08
+    architectural_innovation: 0.12
+    security_innovation: 0.15
+    standards_leadership: 0.09
+    cross_client_compatibility: 0.08
+  description: "Java implementation of the Ethereum 2.0 Beacon Chain"
+  primary_language: "Java"
+  domain: "Consensus Client"
+  architecture_type: "Client-Server"
+  key_functions: ["Java ecosystem", "Enterprise support", "REST API", "Validator client", "Metrics and monitoring"]
 
-  - url: "https://github.com/grandinetech/grandine"
-    repo_url: "https://github.com/grandinetech/grandine"
-    name: "Grandine"
-    category: "consensus_client"
-    originality_category: "B"
-    originality_weights:
-      protocol_implementation: 0.28
-      algorithmic_innovation: 0.20
-      developer_experience: 0.08
-      architectural_innovation: 0.12
-      security_innovation: 0.15
-      standards_leadership: 0.09
-      cross_client_compatibility: 0.08
-    description: "Rust Ethereum consensus client focused on efficiency"
-    primary_language: "Rust"
-    domain: "Consensus Client"
-    architecture_type: "Client-Server"
-    key_functions: ["Performance optimization", "Memory efficiency", "Rust safety", "Minimal dependencies", "Fast sync"]
+- url: "https://github.com/grandinetech/grandine"
+  repo_url: "https://github.com/grandinetech/grandine"
+  name: "Grandine"
+  category: "consensus_client"
+  originality_category: "B"
+  originality_weights:
+    protocol_implementation: 0.28
+    algorithmic_innovation: 0.20
+    developer_experience: 0.08
+    architectural_innovation: 0.12
+    security_innovation: 0.15
+    standards_leadership: 0.09
+    cross_client_compatibility: 0.08
+  description: "Rust Ethereum consensus client focused on efficiency"
+  primary_language: "Rust"
+  domain: "Consensus Client"
+  architecture_type: "Client-Server"
+  key_functions: ["Performance optimization", "Memory efficiency", "Rust safety", "Minimal dependencies", "Fast sync"]
 
-  - url: "https://github.com/status-im/nimbus-eth2"
-    repo_url: "https://github.com/status-im/nimbus-eth2"
-    name: "Nimbus"
-    category: "consensus_client"
-    originality_category: "B"
-    originality_weights:
-      protocol_implementation: 0.28
-      algorithmic_innovation: 0.20
-      developer_experience: 0.08
-      architectural_innovation: 0.12
-      security_innovation: 0.15
-      standards_leadership: 0.09
-      cross_client_compatibility: 0.08
-    description: "Nim implementation of Ethereum consensus client"
-    primary_language: "Nim"
-    domain: "Consensus Client"
-    architecture_type: "Client-Server"
-    key_functions: ["Nim language", "Resource efficiency", "Embedded systems", "Mobile support", "Research implementation"]
+- url: "https://github.com/status-im/nimbus-eth2"
+  repo_url: "https://github.com/status-im/nimbus-eth2"
+  name: "Nimbus"
+  category: "consensus_client"
+  originality_category: "B"
+  originality_weights:
+    protocol_implementation: 0.28
+    algorithmic_innovation: 0.20
+    developer_experience: 0.08
+    architectural_innovation: 0.12
+    security_innovation: 0.15
+    standards_leadership: 0.09
+    cross_client_compatibility: 0.08
+  description: "Nim implementation of Ethereum consensus client"
+  primary_language: "Nim"
+  domain: "Consensus Client"
+  architecture_type: "Client-Server"
+  key_functions: ["Nim language", "Resource efficiency", "Embedded systems", "Mobile support", "Research implementation"]
 
-  # Category C: JavaScript/TypeScript Libraries
-  - url: "https://github.com/web3/web3.js"
-    repo_url: "https://github.com/web3/web3.js"
-    name: "Web3.js"
-    category: "library"
-    originality_category: "C"
-    originality_weights:
-      protocol_implementation: 0.12
-      algorithmic_innovation: 0.10
-      developer_experience: 0.30
-      architectural_innovation: 0.15
-      security_innovation: 0.08
-      standards_leadership: 0.15
-      cross_client_compatibility: 0.10
-    description: "Ethereum JavaScript API"
-    primary_language: "JavaScript"
-    domain: "Ethereum Library"
-    architecture_type: "Library"
-    key_functions: ["Ethereum integration", "Smart contract interaction", "Transaction management", "Event handling", "Provider abstraction"]
+# Category C: JavaScript/TypeScript Libraries
+- url: "https://github.com/chainsafe/web3.js"
+  repo_url: "https://github.com/chainsafe/web3.js"
+  name: "Web3.js"
+  category: "library"
+  originality_category: "C"
+  originality_weights:
+    protocol_implementation: 0.12
+    algorithmic_innovation: 0.10
+    developer_experience: 0.30
+    architectural_innovation: 0.15
+    security_innovation: 0.08
+    standards_leadership: 0.15
+    cross_client_compatibility: 0.10
+  description: "Ethereum JavaScript API"
+  primary_language: "JavaScript"
+  domain: "Ethereum Library"
+  architecture_type: "Library"
+  key_functions: ["Ethereum integration", "Smart contract interaction", "Transaction management", "Event handling", "Provider abstraction"]
 
-  - url: "https://github.com/ethers-io/ethers.js"
-    repo_url: "https://github.com/ethers-io/ethers.js"
-    name: "Ethers.js"
-    category: "library"
-    originality_category: "C"
-    originality_weights:
-      protocol_implementation: 0.12
-      algorithmic_innovation: 0.10
-      developer_experience: 0.30
-      architectural_innovation: 0.15
-      security_innovation: 0.08
-      standards_leadership: 0.15
-      cross_client_compatibility: 0.10
-    description: "Complete Ethereum library and wallet implementation"
-    primary_language: "TypeScript"
-    domain: "Ethereum Library"
-    architecture_type: "Library"
-    key_functions: ["Wallet management", "Provider interface", "Contract interaction", "ENS support", "Type safety"]
+- url: "https://github.com/ethers-io/ethers.js"
+  repo_url: "https://github.com/ethers-io/ethers.js"
+  name: "Ethers.js"
+  category: "library"
+  originality_category: "C"
+  originality_weights:
+    protocol_implementation: 0.12
+    algorithmic_innovation: 0.10
+    developer_experience: 0.30
+    architectural_innovation: 0.15
+    security_innovation: 0.08
+    standards_leadership: 0.15
+    cross_client_compatibility: 0.10
+  description: "Complete Ethereum library and wallet implementation"
+  primary_language: "TypeScript"
+  domain: "Ethereum Library"
+  architecture_type: "Library"
+  key_functions: ["Wallet management", "Provider interface", "Contract interaction", "ENS support", "Type safety"]
 
-  - url: "https://github.com/wevm/viem"
-    repo_url: "https://github.com/wevm/viem"
-    name: "Viem"
-    category: "library"
-    originality_category: "C"
-    originality_weights:
-      protocol_implementation: 0.12
-      algorithmic_innovation: 0.10
-      developer_experience: 0.30
-      architectural_innovation: 0.15
-      security_innovation: 0.08
-      standards_leadership: 0.15
-      cross_client_compatibility: 0.10
-    description: "TypeScript interface for Ethereum"
-    primary_language: "TypeScript"
-    domain: "Ethereum Library"
-    architecture_type: "Library"
-    key_functions: ["TypeScript-first", "Tree-shaking", "Type safety", "Performance optimization", "Modern API design"]
+- url: "https://github.com/wevm/viem"
+  repo_url: "https://github.com/wevm/viem"
+  name: "Viem"
+  category: "library"
+  originality_category: "C"
+  originality_weights:
+    protocol_implementation: 0.12
+    algorithmic_innovation: 0.10
+    developer_experience: 0.30
+    architectural_innovation: 0.15
+    security_innovation: 0.08
+    standards_leadership: 0.15
+    cross_client_compatibility: 0.10
+  description: "TypeScript interface for Ethereum"
+  primary_language: "TypeScript"
+  domain: "Ethereum Library"
+  architecture_type: "Library"
+  key_functions: ["TypeScript-first", "Tree-shaking", "Type safety", "Performance optimization", "Modern API design"]
 
-  - url: "https://github.com/ethereumjs/ethereumjs-monorepo"
-    repo_url: "https://github.com/ethereumjs/ethereumjs-monorepo"
-    name: "EthereumJS"
-    category: "library"
-    originality_category: "C"
-    originality_weights:
-      protocol_implementation: 0.12
-      algorithmic_innovation: 0.10
-      developer_experience: 0.30
-      architectural_innovation: 0.15
-      security_innovation: 0.08
-      standards_leadership: 0.15
-      cross_client_compatibility: 0.10
-    description: "Collection of TypeScript/JavaScript libraries for Ethereum"
-    primary_language: "TypeScript"
-    domain: "Ethereum Library Collection"
-    architecture_type: "Monorepo"
-    key_functions: ["Protocol implementation", "VM implementation", "Client libraries", "Cryptographic utilities", "Reference implementations"]
+- url: "https://github.com/ethereumjs/ethereumjs-monorepo"
+  repo_url: "https://github.com/ethereumjs/ethereumjs-monorepo"
+  name: "EthereumJS"
+  category: "library"
+  originality_category: "C"
+  originality_weights:
+    protocol_implementation: 0.12
+    algorithmic_innovation: 0.10
+    developer_experience: 0.30
+    architectural_innovation: 0.15
+    security_innovation: 0.08
+    standards_leadership: 0.15
+    cross_client_compatibility: 0.10
+  description: "Collection of TypeScript/JavaScript libraries for Ethereum"
+  primary_language: "TypeScript"
+  domain: "Ethereum Library Collection"
+  architecture_type: "Monorepo"
+  key_functions: ["Protocol implementation", "VM implementation", "Client libraries", "Cryptographic utilities", "Reference implementations"]
 
-  # Category D: Other Language Libraries
-  - url: "https://github.com/ethereum/web3.py"
-    repo_url: "https://github.com/ethereum/web3.py"
-    name: "Web3.py"
-    category: "library"
-    originality_category: "D"
-    originality_weights:
-      protocol_implementation: 0.15
-      algorithmic_innovation: 0.12
-      developer_experience: 0.25
-      architectural_innovation: 0.15
-      security_innovation: 0.10
-      standards_leadership: 0.13
-      cross_client_compatibility: 0.10
-    description: "Python library for interacting with Ethereum"
-    primary_language: "Python"
-    domain: "Ethereum Library"
-    architecture_type: "Library"
-    key_functions: ["Python integration", "Contract interaction", "Transaction management", "Provider interface", "Testing utilities"]
+# Category D: Other Language Libraries
+- url: "https://github.com/ethereum/web3.py"
+  repo_url: "https://github.com/ethereum/web3.py"
+  name: "Web3.py"
+  category: "library"
+  originality_category: "D"
+  originality_weights:
+    protocol_implementation: 0.15
+    algorithmic_innovation: 0.12
+    developer_experience: 0.25
+    architectural_innovation: 0.15
+    security_innovation: 0.10
+    standards_leadership: 0.13
+    cross_client_compatibility: 0.10
+  description: "Python library for interacting with Ethereum"
+  primary_language: "Python"
+  domain: "Ethereum Library"
+  architecture_type: "Library"
+  key_functions: ["Python integration", "Contract interaction", "Transaction management", "Provider interface", "Testing utilities"]
 
-  - url: "https://github.com/nethereum/nethereum"
-    repo_url: "https://github.com/nethereum/nethereum"
-    name: "nethereum"
-    category: "library"
-    originality_category: "D"
-    originality_weights:
-      protocol_implementation: 0.15
-      algorithmic_innovation: 0.12
-      developer_experience: 0.25
-      architectural_innovation: 0.15
-      security_innovation: 0.10
-      standards_leadership: 0.13
-      cross_client_compatibility: 0.10
-    description: ".NET integration library for Ethereum"
-    primary_language: "C#"
-    domain: "Ethereum Library"
-    architecture_type: "Library"
-    key_functions: [".NET integration", "Smart contract wrappers", "Code generation", "Enterprise features", "Azure integration"]
+- url: "https://github.com/nethereum/nethereum"
+  repo_url: "https://github.com/nethereum/nethereum"
+  name: "nethereum"
+  category: "library"
+  originality_category: "D"
+  originality_weights:
+    protocol_implementation: 0.15
+    algorithmic_innovation: 0.12
+    developer_experience: 0.25
+    architectural_innovation: 0.15
+    security_innovation: 0.10
+    standards_leadership: 0.13
+    cross_client_compatibility: 0.10
+  description: ".NET integration library for Ethereum"
+  primary_language: "C#"
+  domain: "Ethereum Library"
+  architecture_type: "Library"
+  key_functions: [".NET integration", "Smart contract wrappers", "Code generation", "Enterprise features", "Azure integration"]
 
-  - url: "https://github.com/hyperledger-web3j/web3j"
-    repo_url: "https://github.com/hyperledger-web3j/web3j"
-    name: "Web3j"
-    category: "library"
-    originality_category: "D"
-    originality_weights:
-      protocol_implementation: 0.15
-      algorithmic_innovation: 0.12
-      developer_experience: 0.25
-      architectural_innovation: 0.15
-      security_innovation: 0.10
-      standards_leadership: 0.13
-      cross_client_compatibility: 0.10
-    description: "Java and Android library for integration with Ethereum clients"
-    primary_language: "Java"
-    domain: "Ethereum Library"
-    architecture_type: "Library"
-    key_functions: ["Java integration", "Android support", "Reactive programming", "Smart contract wrappers", "Enterprise features"]
+- url: "https://github.com/hyperledger-web3j/web3j"
+  repo_url: "https://github.com/hyperledger-web3j/web3j"
+  name: "Web3j"
+  category: "library"
+  originality_category: "D"
+  originality_weights:
+    protocol_implementation: 0.15
+    algorithmic_innovation: 0.12
+    developer_experience: 0.25
+    architectural_innovation: 0.15
+    security_innovation: 0.10
+    standards_leadership: 0.13
+    cross_client_compatibility: 0.10
+  description: "Java and Android library for integration with Ethereum clients"
+  primary_language: "Java"
+  domain: "Ethereum Library"
+  architecture_type: "Library"
+  key_functions: ["Java integration", "Android support", "Reactive programming", "Smart contract wrappers", "Enterprise features"]
 
-  - url: "https://github.com/alloy-rs/alloy"
-    repo_url: "https://github.com/alloy-rs/alloy"
-    name: "Alloy"
-    category: "development_framework"
-    originality_category: "D"
-    originality_weights:
-      protocol_implementation: 0.15
-      algorithmic_innovation: 0.12
-      developer_experience: 0.25
-      architectural_innovation: 0.15
-      security_innovation: 0.10
-      standards_leadership: 0.13
-      cross_client_compatibility: 0.10
-    description: "Comprehensive Rust library for Ethereum development"
-    primary_language: "Rust"
-    domain: "Development Framework"
-    architecture_type: "Library Collection"
-    key_functions: ["Rust ecosystem", "Type safety", "Performance", "Protocol implementation", "Developer tooling"]
+- url: "https://github.com/alloy-rs/alloy"
+  repo_url: "https://github.com/alloy-rs/alloy"
+  name: "Alloy"
+  category: "development_framework"
+  originality_category: "D"
+  originality_weights:
+    protocol_implementation: 0.15
+    algorithmic_innovation: 0.12
+    developer_experience: 0.25
+    architectural_innovation: 0.15
+    security_innovation: 0.10
+    standards_leadership: 0.13
+    cross_client_compatibility: 0.10
+  description: "Comprehensive Rust library for Ethereum development"
+  primary_language: "Rust"
+  domain: "Development Framework"
+  architecture_type: "Library Collection"
+  key_functions: ["Rust ecosystem", "Type safety", "Performance", "Protocol implementation", "Developer tooling"]
 
-  # Category E: Development Frameworks
-  - url: "https://github.com/foundry-rs/foundry"
-    repo_url: "https://github.com/foundry-rs/foundry"
-    name: "Foundry"
-    category: "development_framework"
-    originality_category: "E"
-    originality_weights:
-      protocol_implementation: 0.08
-      algorithmic_innovation: 0.15
-      developer_experience: 0.35
-      architectural_innovation: 0.20
-      security_innovation: 0.12
-      standards_leadership: 0.05
-      cross_client_compatibility: 0.05
-    description: "Blazing fast, portable and modular toolkit for Ethereum application development"
-    primary_language: "Rust"
-    domain: "Development Framework"
-    architecture_type: "Toolchain"
-    key_functions: ["Smart contract compilation", "Testing framework", "Deployment tools", "Fuzzing", "Gas optimization"]
+# Category E: Development Frameworks
+- url: "https://github.com/foundry-rs/foundry"
+  repo_url: "https://github.com/foundry-rs/foundry"
+  name: "Foundry"
+  category: "development_framework"
+  originality_category: "E"
+  originality_weights:
+    protocol_implementation: 0.08
+    algorithmic_innovation: 0.15
+    developer_experience: 0.35
+    architectural_innovation: 0.20
+    security_innovation: 0.12
+    standards_leadership: 0.05
+    cross_client_compatibility: 0.05
+  description: "Blazing fast, portable and modular toolkit for Ethereum application development"
+  primary_language: "Rust"
+  domain: "Development Framework"
+  architecture_type: "Toolchain"
+  key_functions: ["Smart contract compilation", "Testing framework", "Deployment tools", "Fuzzing", "Gas optimization"]
 
-  - url: "https://github.com/nomicfoundation/hardhat"
-    repo_url: "https://github.com/nomicfoundation/hardhat"
-    name: "Hardhat"
-    category: "development_framework"
-    originality_category: "E"
-    originality_weights:
-      protocol_implementation: 0.08
-      algorithmic_innovation: 0.15
-      developer_experience: 0.35
-      architectural_innovation: 0.20
-      security_innovation: 0.12
-      standards_leadership: 0.05
-      cross_client_compatibility: 0.05
-    description: "Ethereum development environment for professionals"
-    primary_language: "TypeScript"
-    domain: "Development Framework"
-    architecture_type: "Development Environment"
-    key_functions: ["Smart contract compilation", "Testing framework", "Debugging tools", "Plugin ecosystem", "Local blockchain"]
+- url: "https://github.com/nomicfoundation/hardhat"
+  repo_url: "https://github.com/nomicfoundation/hardhat"
+  name: "Hardhat"
+  category: "development_framework"
+  originality_category: "E"
+  originality_weights:
+    protocol_implementation: 0.08
+    algorithmic_innovation: 0.15
+    developer_experience: 0.35
+    architectural_innovation: 0.20
+    security_innovation: 0.12
+    standards_leadership: 0.05
+    cross_client_compatibility: 0.05
+  description: "Ethereum development environment for professionals"
+  primary_language: "TypeScript"
+  domain: "Development Framework"
+  architecture_type: "Development Environment"
+  key_functions: ["Smart contract compilation", "Testing framework", "Debugging tools", "Plugin ecosystem", "Local blockchain"]
 
-  - url: "https://github.com/apeworx/ape"
-    repo_url: "https://github.com/apeworx/ape"
-    name: "Ape"
-    category: "development_framework"
-    originality_category: "E"
-    originality_weights:
-      protocol_implementation: 0.08
-      algorithmic_innovation: 0.15
-      developer_experience: 0.35
-      architectural_innovation: 0.20
-      security_innovation: 0.12
-      standards_leadership: 0.05
-      cross_client_compatibility: 0.05
-    description: "Smart contract development framework for Pythonistas, Data Scientists, and Security Professionals"
-    primary_language: "Python"
-    domain: "Development Framework"
-    architecture_type: "Framework"
-    key_functions: ["Python integration", "Data science tools", "Security testing", "Contract interaction", "Plugin system"]
+- url: "https://github.com/apeworx/ape"
+  repo_url: "https://github.com/apeworx/ape"
+  name: "Ape"
+  category: "development_framework"
+  originality_category: "E"
+  originality_weights:
+    protocol_implementation: 0.08
+    algorithmic_innovation: 0.15
+    developer_experience: 0.35
+    architectural_innovation: 0.20
+    security_innovation: 0.12
+    standards_leadership: 0.05
+    cross_client_compatibility: 0.05
+  description: "Smart contract development framework for Pythonistas, Data Scientists, and Security Professionals"
+  primary_language: "Python"
+  domain: "Development Framework"
+  architecture_type: "Framework"
+  key_functions: ["Python integration", "Data science tools", "Security testing", "Contract interaction", "Plugin system"]
 
-  - url: "https://github.com/ethereum/remix-project"
-    repo_url: "https://github.com/ethereum/remix-project"
-    name: "Remix"
-    category: "development_framework"
-    originality_category: "E"
-    originality_weights:
-      protocol_implementation: 0.08
-      algorithmic_innovation: 0.15
-      developer_experience: 0.35
-      architectural_innovation: 0.20
-      security_innovation: 0.12
-      standards_leadership: 0.05
-      cross_client_compatibility: 0.05
-    description: "Browser-based IDE for smart contract development"
-    primary_language: "TypeScript"
-    domain: "Development Environment"
-    architecture_type: "IDE"
-    key_functions: ["Browser-based development", "Smart contract compilation", "Debugging tools", "Static analysis", "Educational tools"]
+- url: "https://github.com/ethereum/remix-project"
+  repo_url: "https://github.com/ethereum/remix-project"
+  name: "Remix"
+  category: "development_framework"
+  originality_category: "E"
+  originality_weights:
+    protocol_implementation: 0.08
+    algorithmic_innovation: 0.15
+    developer_experience: 0.35
+    architectural_innovation: 0.20
+    security_innovation: 0.12
+    standards_leadership: 0.05
+    cross_client_compatibility: 0.05
+  description: "Browser-based IDE for smart contract development"
+  primary_language: "TypeScript"
+  domain: "Development Environment"
+  architecture_type: "IDE"
+  key_functions: ["Browser-based development", "Smart contract compilation", "Debugging tools", "Static analysis", "Educational tools"]
 
-  # Category F: Smart Contract Languages
-  - url: "https://github.com/ethereum/solidity"
-    repo_url: "https://github.com/ethereum/solidity"
-    name: "Solidity"
-    category: "smart_contract_language"
-    originality_category: "F"
-    originality_weights:
-      protocol_implementation: 0.15
-      algorithmic_innovation: 0.18
-      developer_experience: 0.15
-      architectural_innovation: 0.12
-      security_innovation: 0.25
-      standards_leadership: 0.15
-      cross_client_compatibility: 0.00
-    description: "Statically-typed programming language designed for developing smart contracts"
-    primary_language: "C++"
-    domain: "Smart Contract Language"
-    architecture_type: "Compiler"
-    key_functions: ["Smart contract compilation", "Static typing", "EVM targeting", "Security features", "Language design"]
+# Category F: Smart Contract Languages
+- url: "https://github.com/ethereum/solidity"
+  repo_url: "https://github.com/ethereum/solidity"
+  name: "Solidity"
+  category: "smart_contract_language"
+  originality_category: "F"
+  originality_weights:
+    protocol_implementation: 0.15
+    algorithmic_innovation: 0.18
+    developer_experience: 0.15
+    architectural_innovation: 0.12
+    security_innovation: 0.25
+    standards_leadership: 0.15
+    cross_client_compatibility: 0.00
+  description: "Statically-typed programming language designed for developing smart contracts"
+  primary_language: "C++"
+  domain: "Smart Contract Language"
+  architecture_type: "Compiler"
+  key_functions: ["Smart contract compilation", "Static typing", "EVM targeting", "Security features", "Language design"]
 
-  - url: "https://github.com/vyperlang/vyper"
-    repo_url: "https://github.com/vyperlang/vyper"
-    name: "Vyper"
-    category: "smart_contract_language"
-    originality_category: "F"
-    originality_weights:
-      protocol_implementation: 0.15
-      algorithmic_innovation: 0.18
-      developer_experience: 0.15
-      architectural_innovation: 0.12
-      security_innovation: 0.25
-      standards_leadership: 0.15
-      cross_client_compatibility: 0.00
-    description: "Pythonic Smart Contract Language for the EVM"
-    primary_language: "Python"
-    domain: "Smart Contract Language"
-    architecture_type: "Compiler"
-    key_functions: ["Python-like syntax", "Security focus", "Auditability", "Simplicity", "EVM compilation"]
+- url: "https://github.com/vyperlang/vyper"
+  repo_url: "https://github.com/vyperlang/vyper"
+  name: "Vyper"
+  category: "smart_contract_language"
+  originality_category: "F"
+  originality_weights:
+    protocol_implementation: 0.15
+    algorithmic_innovation: 0.18
+    developer_experience: 0.15
+    architectural_innovation: 0.12
+    security_innovation: 0.25
+    standards_leadership: 0.15
+    cross_client_compatibility: 0.00
+  description: "Pythonic Smart Contract Language for the EVM"
+  primary_language: "Python"
+  domain: "Smart Contract Language"
+  architecture_type: "Compiler"
+  key_functions: ["Python-like syntax", "Security focus", "Auditability", "Simplicity", "EVM compilation"]
 
-  - url: "https://github.com/ethereum/fe"
-    repo_url: "https://github.com/ethereum/fe"
-    name: "Fe"
-    category: "smart_contract_language"
-    originality_category: "F"
-    originality_weights:
-      protocol_implementation: 0.15
-      algorithmic_innovation: 0.18
-      developer_experience: 0.15
-      architectural_innovation: 0.12
-      security_innovation: 0.25
-      standards_leadership: 0.15
-      cross_client_compatibility: 0.00
-    description: "Emerging smart contract language for the Ethereum blockchain"
-    primary_language: "Rust"
-    domain: "Smart Contract Language"
-    architecture_type: "Compiler"
-    key_functions: ["Memory safety", "Type safety", "Rust-inspired syntax", "Security by design", "Modern language features"]
+- url: "https://github.com/ethereum/fe"
+  repo_url: "https://github.com/ethereum/fe"
+  name: "Fe"
+  category: "smart_contract_language"
+  originality_category: "F"
+  originality_weights:
+    protocol_implementation: 0.15
+    algorithmic_innovation: 0.18
+    developer_experience: 0.15
+    architectural_innovation: 0.12
+    security_innovation: 0.25
+    standards_leadership: 0.15
+    cross_client_compatibility: 0.00
+  description: "Emerging smart contract language for the Ethereum blockchain"
+  primary_language: "Rust"
+  domain: "Smart Contract Language"
+  architecture_type: "Compiler"
+  key_functions: ["Memory safety", "Type safety", "Rust-inspired syntax", "Security by design", "Modern language features"]
 
-  # Category G: Smart Contract Security/Standards
-  - url: "https://github.com/openzeppelin/openzeppelin-contracts"
-    repo_url: "https://github.com/openzeppelin/openzeppelin-contracts"
-    name: "openzeppelin Contracts"
-    category: "smart_contract_security"
-    originality_category: "G"
-    originality_weights:
-      protocol_implementation: 0.10
-      algorithmic_innovation: 0.08
-      developer_experience: 0.15
-      architectural_innovation: 0.15
-      security_innovation: 0.30
-      standards_leadership: 0.22
-      cross_client_compatibility: 0.00
-    description: "openzeppelin Contracts is a library for secure smart contract development"
-    primary_language: "Solidity"
-    domain: "Smart Contract Security"
-    architecture_type: "Library"
-    key_functions: ["Security patterns", "Standard implementations", "Access control", "Token standards", "Upgradeability"]
+# Category G: Smart Contract Security/Standards
+- url: "https://github.com/openzeppelin/openzeppelin-contracts"
+  repo_url: "https://github.com/openzeppelin/openzeppelin-contracts"
+  name: "openzeppelin Contracts"
+  category: "smart_contract_security"
+  originality_category: "G"
+  originality_weights:
+    protocol_implementation: 0.10
+    algorithmic_innovation: 0.08
+    developer_experience: 0.15
+    architectural_innovation: 0.15
+    security_innovation: 0.30
+    standards_leadership: 0.22
+    cross_client_compatibility: 0.00
+  description: "openzeppelin Contracts is a library for secure smart contract development"
+  primary_language: "Solidity"
+  domain: "Smart Contract Security"
+  architecture_type: "Library"
+  key_functions: ["Security patterns", "Standard implementations", "Access control", "Token standards", "Upgradeability"]
 
-  - url: "https://github.com/safe-global/safe-smart-account"
-    repo_url: "https://github.com/safe-global/safe-smart-account"
-    name: "Safe Smart Account"
-    category: "smart_contract_security"
-    originality_category: "G"
-    originality_weights:
-      protocol_implementation: 0.10
-      algorithmic_innovation: 0.08
-      developer_experience: 0.15
-      architectural_innovation: 0.15
-      security_innovation: 0.30
-      standards_leadership: 0.22
-      cross_client_compatibility: 0.00
-    description: "Smart contract wallet for Ethereum"
-    primary_language: "Solidity"
-    domain: "Smart Contract Security"
-    architecture_type: "Smart Contract"
-    key_functions: ["Multi-signature wallet", "Modular security", "Transaction batching", "Social recovery", "Hardware wallet support"]
+- url: "https://github.com/safe-global/safe-smart-account"
+  repo_url: "https://github.com/safe-global/safe-smart-account"
+  name: "Safe Smart Account"
+  category: "smart_contract_security"
+  originality_category: "G"
+  originality_weights:
+    protocol_implementation: 0.10
+    algorithmic_innovation: 0.08
+    developer_experience: 0.15
+    architectural_innovation: 0.15
+    security_innovation: 0.30
+    standards_leadership: 0.22
+    cross_client_compatibility: 0.00
+  description: "Smart contract wallet for Ethereum"
+  primary_language: "Solidity"
+  domain: "Smart Contract Security"
+  architecture_type: "Smart Contract"
+  key_functions: ["Multi-signature wallet", "Modular security", "Transaction batching", "Social recovery", "Hardware wallet support"]
 
-  - url: "https://github.com/eth-infinitism/account-abstraction"
-    repo_url: "https://github.com/eth-infinitism/account-abstraction"
-    name: "Account Abstraction"
-    category: "smart_contract_security"
-    originality_category: "G"
-    originality_weights:
-      protocol_implementation: 0.10
-      algorithmic_innovation: 0.08
-      developer_experience: 0.15
-      architectural_innovation: 0.15
-      security_innovation: 0.30
-      standards_leadership: 0.22
-      cross_client_compatibility: 0.00
-    description: "Reference implementation of EIP-4337 account abstraction"
-    primary_language: "Solidity"
-    domain: "Protocol Extension"
-    architecture_type: "Protocol Implementation"
-    key_functions: ["Account abstraction", "EIP-4337 implementation", "UserOperation handling", "Bundler integration", "Paymaster support"]
+- url: "https://github.com/eth-infinitism/account-abstraction"
+  repo_url: "https://github.com/eth-infinitism/account-abstraction"
+  name: "Account Abstraction"
+  category: "smart_contract_security"
+  originality_category: "G"
+  originality_weights:
+    protocol_implementation: 0.10
+    algorithmic_innovation: 0.08
+    developer_experience: 0.15
+    architectural_innovation: 0.15
+    security_innovation: 0.30
+    standards_leadership: 0.22
+    cross_client_compatibility: 0.00
+  description: "Reference implementation of EIP-4337 account abstraction"
+  primary_language: "Solidity"
+  domain: "Protocol Extension"
+  architecture_type: "Protocol Implementation"
+  key_functions: ["Account abstraction", "EIP-4337 implementation", "UserOperation handling", "Bundler integration", "Paymaster support"]
 
-  # Category H: Specialized Tools
-  - url: "https://github.com/ethereum/sourcify"
-    repo_url: "https://github.com/ethereum/sourcify"
-    name: "Sourcify"
-    category: "specialized_tool"
-    originality_category: "H"
-    originality_weights:
-      protocol_implementation: 0.12
-      algorithmic_innovation: 0.15
-      developer_experience: 0.25
-      architectural_innovation: 0.18
-      security_innovation: 0.10
-      standards_leadership: 0.10
-      cross_client_compatibility: 0.10
-    description: "Decentralized smart contract verification service"
-    primary_language: "TypeScript"
-    domain: "Verification Service"
-    architecture_type: "Service"
-    key_functions: ["Source code verification", "Metadata matching", "IPFS integration", "Multi-chain support", "Public verification"]
+# Category H: Specialized Tools
+- url: "https://github.com/ethereum/sourcify"
+  repo_url: "https://github.com/ethereum/sourcify"
+  name: "Sourcify"
+  category: "specialized_tool"
+  originality_category: "H"
+  originality_weights:
+    protocol_implementation: 0.12
+    algorithmic_innovation: 0.15
+    developer_experience: 0.25
+    architectural_innovation: 0.18
+    security_innovation: 0.10
+    standards_leadership: 0.10
+    cross_client_compatibility: 0.10
+  description: "Decentralized smart contract verification service"
+  primary_language: "TypeScript"
+  domain: "Verification Service"
+  architecture_type: "Service"
+  key_functions: ["Source code verification", "Metadata matching", "IPFS integration", "Multi-chain support", "Public verification"]
 
-  - url: "https://github.com/vyperlang/titanoboa"
-    repo_url: "https://github.com/vyperlang/titanoboa"
-    name: "Titanoboa"
-    category: "specialized_tool"
-    originality_category: "H"
-    originality_weights:
-      protocol_implementation: 0.12
-      algorithmic_innovation: 0.15
-      developer_experience: 0.25
-      architectural_innovation: 0.18
-      security_innovation: 0.10
-      standards_leadership: 0.10
-      cross_client_compatibility: 0.10
-    description: "Vyper interpreter for running and testing contracts"
-    primary_language: "Python"
-    domain: "Testing Framework"
-    architecture_type: "Interpreter"
-    key_functions: ["Vyper interpretation", "Contract testing", "Interactive debugging", "Python integration", "Educational tool"]
+- url: "https://github.com/vyperlang/titanoboa"
+  repo_url: "https://github.com/vyperlang/titanoboa"
+  name: "Titanoboa"
+  category: "specialized_tool"
+  originality_category: "H"
+  originality_weights:
+    protocol_implementation: 0.12
+    algorithmic_innovation: 0.15
+    developer_experience: 0.25
+    architectural_innovation: 0.18
+    security_innovation: 0.10
+    standards_leadership: 0.10
+    cross_client_compatibility: 0.10
+  description: "Vyper interpreter for running and testing contracts"
+  primary_language: "Python"
+  domain: "Testing Framework"
+  architecture_type: "Interpreter"
+  key_functions: ["Vyper interpretation", "Contract testing", "Interactive debugging", "Python integration", "Educational tool"]
 
-  - url: "https://github.com/scaffold-eth/scaffold-eth-2"
-    repo_url: "https://github.com/scaffold-eth/scaffold-eth-2"
-    name: "Scaffold-ETH 2"
-    category: "specialized_tool"
-    originality_category: "H"
-    originality_weights:
-      protocol_implementation: 0.12
-      algorithmic_innovation: 0.15
-      developer_experience: 0.25
-      architectural_innovation: 0.18
-      security_innovation: 0.10
-      standards_leadership: 0.10
-      cross_client_compatibility: 0.10
-    description: "Open-source toolkit for building decentralized applications"
-    primary_language: "TypeScript"
-    domain: "Development Toolkit"
-    architecture_type: "Scaffolding"
-    key_functions: ["DApp boilerplate", "Smart contract templates", "Frontend integration", "Development workflow", "Educational tools"]
+- url: "https://github.com/scaffold-eth/scaffold-eth-2"
+  repo_url: "https://github.com/scaffold-eth/scaffold-eth-2"
+  name: "Scaffold-ETH 2"
+  category: "specialized_tool"
+  originality_category: "H"
+  originality_weights:
+    protocol_implementation: 0.12
+    algorithmic_innovation: 0.15
+    developer_experience: 0.25
+    architectural_innovation: 0.18
+    security_innovation: 0.10
+    standards_leadership: 0.10
+    cross_client_compatibility: 0.10
+  description: "Open-source toolkit for building decentralized applications"
+  primary_language: "TypeScript"
+  domain: "Development Toolkit"
+  architecture_type: "Scaffolding"
+  key_functions: ["DApp boilerplate", "Smart contract templates", "Frontend integration", "Development workflow", "Educational tools"]
 
-  - url: "https://github.com/a16z/helios"
-    repo_url: "https://github.com/a16z/helios"
-    name: "Helios"
-    category: "light_client"
-    originality_category: "H"
-    originality_weights:
-      protocol_implementation: 0.12
-      algorithmic_innovation: 0.15
-      developer_experience: 0.25
-      architectural_innovation: 0.18
-      security_innovation: 0.10
-      standards_leadership: 0.10
-      cross_client_compatibility: 0.10
-    description: "Fast, secure, and portable light client for Ethereum"
-    primary_language: "Rust"
-    domain: "Light Client"
-    architecture_type: "Client"
-    key_functions: ["Light client protocol", "Fast synchronization", "Trust minimization", "Mobile compatibility", "Resource efficiency"]
+- url: "https://github.com/a16z/helios"
+  repo_url: "https://github.com/a16z/helios"
+  name: "Helios"
+  category: "light_client"
+  originality_category: "H"
+  originality_weights:
+    protocol_implementation: 0.12
+    algorithmic_innovation: 0.15
+    developer_experience: 0.25
+    architectural_innovation: 0.18
+    security_innovation: 0.10
+    standards_leadership: 0.10
+    cross_client_compatibility: 0.10
+  description: "Fast, secure, and portable light client for Ethereum"
+  primary_language: "Rust"
+  domain: "Light Client"
+  architecture_type: "Client"
+  key_functions: ["Light client protocol", "Fast synchronization", "Trust minimization", "Mobile compatibility", "Resource efficiency"]
 
-  # Category I: Data/Infrastructure
-  - url: "https://github.com/ethereum-lists/chains"
-    repo_url: "https://github.com/ethereum-lists/chains"
-    name: "Ethereum Chains"
-    category: "infrastructure"
-    originality_category: "I"
-    originality_weights:
-      protocol_implementation: 0.20
-      algorithmic_innovation: 0.10
-      developer_experience: 0.15
-      architectural_innovation: 0.10
-      security_innovation: 0.05
-      standards_leadership: 0.20
-      cross_client_compatibility: 0.20
-    description: "Comprehensive list of Ethereum chain configurations and metadata"
-    primary_language: "JSON"
-    domain: "Chain Registry"
-    architecture_type: "Data Repository"
-    key_functions: ["Chain configurations", "Network metadata", "RPC endpoints", "Explorer links", "Community maintenance"]
+# Category I: Data/Infrastructure
+- url: "https://github.com/ethereum-lists/chains"
+  repo_url: "https://github.com/ethereum-lists/chains"
+  name: "Ethereum Chains"
+  category: "infrastructure"
+  originality_category: "I"
+  originality_weights:
+    protocol_implementation: 0.20
+    algorithmic_innovation: 0.10
+    developer_experience: 0.15
+    architectural_innovation: 0.10
+    security_innovation: 0.05
+    standards_leadership: 0.20
+    cross_client_compatibility: 0.20
+  description: "Comprehensive list of Ethereum chain configurations and metadata"
+  primary_language: "JSON"
+  domain: "Chain Registry"
+  architecture_type: "Data Repository"
+  key_functions: ["Chain configurations", "Network metadata", "RPC endpoints", "Explorer links", "Community maintenance"]
 
-  - url: "https://github.com/ethereum/py-evm"
-    repo_url: "https://github.com/ethereum/py-evm"
-    name: "Py-EVM"
-    category: "virtual_machine"
-    originality_category: "I"
-    originality_weights:
-      protocol_implementation: 0.20
-      algorithmic_innovation: 0.10
-      developer_experience: 0.15
-      architectural_innovation: 0.10
-      security_innovation: 0.05
-      standards_leadership: 0.20
-      cross_client_compatibility: 0.20
-    description: "Python implementation of the Ethereum Virtual Machine"
-    primary_language: "Python"
-    domain: "Virtual Machine"
-    architecture_type: "Runtime"
-    key_functions: ["EVM implementation", "State execution", "Protocol testing", "Research platform", "Educational tool"]
+- url: "https://github.com/ethereum/py-evm"
+  repo_url: "https://github.com/ethereum/py-evm"
+  name: "Py-EVM"
+  category: "virtual_machine"
+  originality_category: "I"
+  originality_weights:
+    protocol_implementation: 0.20
+    algorithmic_innovation: 0.10
+    developer_experience: 0.15
+    architectural_innovation: 0.10
+    security_innovation: 0.05
+    standards_leadership: 0.20
+    cross_client_compatibility: 0.20
+  description: "Python implementation of the Ethereum Virtual Machine"
+  primary_language: "Python"
+  domain: "Virtual Machine"
+  architecture_type: "Runtime"
+  key_functions: ["EVM implementation", "State execution", "Protocol testing", "Research platform", "Educational tool"]
+
+- url: "https://github.com/ethereum/consensus-specs"
+  repo_url: "https://github.com/ethereum/consensus-specs"
+  name: "Consensus Specs"
+  category: "infrastructure"
+  originality_category: "I"
+  originality_weights:
+    protocol_implementation: 0.20
+    algorithmic_innovation: 0.10
+    developer_experience: 0.15
+    architectural_innovation: 0.10
+    security_innovation: 0.05
+    standards_leadership: 0.20
+    cross_client_compatibility: 0.20
+  description: "Ethereum consensus specifications"
+  primary_language: "Python"
+  domain: "Protocol Specification"
+  architecture_type: "Specification"
+  key_functions: ["Beacon chain specification", "Fork choice specification", "Validator specification", "P2P networking specification", "Consensus-layer testing"]
+
+- url: "https://github.com/ethereum/eips"
+  repo_url: "https://github.com/ethereum/eips"
+  name: "EIPs"
+  category: "infrastructure"
+  originality_category: "I"
+  originality_weights:
+    protocol_implementation: 0.20
+    algorithmic_innovation: 0.10
+    developer_experience: 0.15
+    architectural_innovation: 0.10
+    security_innovation: 0.05
+    standards_leadership: 0.20
+    cross_client_compatibility: 0.20
+  description: "Ethereum Improvement Proposals"
+  primary_language: "Markdown"
+  domain: "Standards"
+  architecture_type: "Data Repository"
+  key_functions: ["EIP standardization process", "Core EIPs", "ERCs (application-level standards)", "Networking EIPs", "Interface EIPs"]
+
+- url: "https://github.com/ethereum/evmone"
+  repo_url: "https://github.com/ethereum/evmone"
+  name: "evmone"
+  category: "virtual_machine"
+  originality_category: "I"
+  originality_weights:
+    protocol_implementation: 0.20
+    algorithmic_innovation: 0.10
+    developer_experience: 0.15
+    architectural_innovation: 0.10
+    security_innovation: 0.05
+    standards_leadership: 0.20
+    cross_client_compatibility: 0.20
+  description: "Fast C++ implementation of the Ethereum Virtual Machine"
+  primary_language: "C++"
+  domain: "Virtual Machine"
+  architecture_type: "Library"
+  key_functions: ["EVM implementation", "High-performance execution", "Opcodes implementation", "EVM testing", "Client integration"]
+
+- url: "https://github.com/ethereum/execution-apis"
+  repo_url: "https://github.com/ethereum/execution-apis"
+  name: "Execution APIs"
+  category: "infrastructure"
+  originality_category: "I"
+  originality_weights:
+    protocol_implementation: 0.20
+    algorithmic_innovation: 0.10
+    developer_experience: 0.15
+    architectural_innovation: 0.10
+    security_innovation: 0.05
+    standards_leadership: 0.20
+    cross_client_compatibility: 0.20
+  description: "Specifications for Ethereum execution client APIs"
+  primary_language: "JSON"
+  domain: "API Specification"
+  architecture_type: "Specification"
+  key_functions: ["JSON-RPC specification", "Engine API specification", "Client interoperability standards", "API testing", "Community consensus on interfaces"]
 
 # Originality Assessment Framework Configuration
 originality_framework:

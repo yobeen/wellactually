@@ -1,0 +1,2 @@
+repository_url,repository_name,originality_category,originality_score,overall_reasoning_uncertainty,aggregate_uncertainty,assessment_confidence,parsing_success,parsing_method
+https://github.com/ethereum/remix-project,Remix,E,0.5942222222222222,0.16894082911917335,0.16373739939550946,0.7,True,json

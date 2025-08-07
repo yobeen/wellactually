@@ -1,0 +1,2 @@
+repository_url,repository_name,originality_category,originality_score,overall_reasoning_uncertainty,aggregate_uncertainty,assessment_confidence,parsing_success,parsing_method
+https://github.com/ethereum/sourcify,Sourcify,H,0.5257777777777779,0.15952318289455028,0.15610093268449443,0.7,True,json

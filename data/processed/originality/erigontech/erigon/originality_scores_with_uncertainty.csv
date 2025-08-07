@@ -1,0 +1,2 @@
+repository_url,repository_name,originality_category,originality_score,overall_reasoning_uncertainty,aggregate_uncertainty,assessment_confidence,parsing_success,parsing_method
+https://github.com/erigontech/erigon,Erigon,A,0.7124444444444447,0.17760014748899938,0.17731121917356085,0.7,True,json

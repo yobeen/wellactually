@@ -1,0 +1,2 @@
+repository_url,repository_name,originality_category,originality_score,overall_reasoning_uncertainty,aggregate_uncertainty,assessment_confidence,parsing_success,parsing_method
+https://github.com/ethers-io/ethers.js,Ethers.js,C,0.6839999999999999,0.1610387598809696,0.1600736794552786,0.7,True,json

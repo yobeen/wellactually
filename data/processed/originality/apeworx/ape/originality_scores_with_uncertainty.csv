@@ -1,0 +1,2 @@
+repository_url,repository_name,originality_category,originality_score,overall_reasoning_uncertainty,aggregate_uncertainty,assessment_confidence,parsing_success,parsing_method
+https://github.com/apeworx/ape,Ape,E,0.5373333333333333,0.16899781702505862,0.16719149428908608,0.7,True,json

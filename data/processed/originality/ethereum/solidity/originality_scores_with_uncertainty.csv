@@ -1,0 +1,2 @@
+repository_url,repository_name,originality_category,originality_score,overall_reasoning_uncertainty,aggregate_uncertainty,assessment_confidence,parsing_success,parsing_method
+https://github.com/ethereum/solidity,Solidity,F,0.7364444444444445,0.17249186072747122,0.16969415129671636,0.7,True,json

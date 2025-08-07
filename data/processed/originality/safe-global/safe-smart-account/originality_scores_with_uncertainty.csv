@@ -1,0 +1,2 @@
+repository_url,repository_name,originality_category,originality_score,overall_reasoning_uncertainty,aggregate_uncertainty,assessment_confidence,parsing_success,parsing_method
+https://github.com/safe-global/safe-smart-account,Safe Smart Account,G,0.7711111111111112,0.17124277043695993,0.17284648960481666,0.7,True,json

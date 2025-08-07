@@ -1,0 +1,2 @@
+repository_url,repository_name,originality_category,originality_score,overall_reasoning_uncertainty,aggregate_uncertainty,assessment_confidence,parsing_success,parsing_method
+https://github.com/vyperlang/vyper,Vyper,F,0.6404444444444445,0.17818870327257447,0.17275672468891726,0.7,True,json

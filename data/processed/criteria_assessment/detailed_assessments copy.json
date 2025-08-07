@@ -1,0 +1,2888 @@
+[
+  {
+    "repository_url": "https://github.com/a16z/helios",
+    "repository_name": "helios",
+    "target_score": 3.63,
+    "total_weight": 1.0,
+    "parsing_method": "perfect_json",
+    "parsing_success": true,
+    "parsing_warnings": [],
+    "criteria_scores": {
+      "core_protocol": {
+        "score": 6,
+        "weight": 0.25,
+        "reasoning": "Helios is an alternative Ethereum execution client written in Rust. It implements core protocol functionality but is not an official EF client or dominant implementation. Scores as a functional alternative client.",
+        "raw_uncertainty": 0.5
+      },
+      "market_adoption": {
+        "score": 2,
+        "weight": 0.2,
+        "reasoning": "Low current adoption; primarily used experimentally. Not integrated into major projects or validators. GitHub stars (~2.3k) indicate interest but minimal network effects.",
+        "raw_uncertainty": 0.5
+      },
+      "developer_ecosystem": {
+        "score": 4,
+        "weight": 0.15,
+        "reasoning": "Provides a lightweight client library for embedding in wallets/dApps, accelerating development. Not a core framework but a specialized tool for Rust developers.",
+        "raw_uncertainty": 0.5
+      },
+      "general_purpose_tools": {
+        "score": 1,
+        "weight": 0.1,
+        "reasoning": "Blockchain-specific tool with no general-purpose utility outside Ethereum ecosystem.",
+        "raw_uncertainty": 0.5
+      },
+      "security_infrastructure": {
+        "score": 5,
+        "weight": 0.1,
+        "reasoning": "As an execution client, it handles critical data verification. Rust implementation enhances security, but low adoption limits real-world impact. Not a dedicated security tool.",
+        "raw_uncertainty": 0.5
+      },
+      "defi_infrastructure": {
+        "score": 1,
+        "weight": 0.05,
+        "reasoning": "Not a DeFi protocol, oracle, or financial primitive. Indirectly supports DeFi through client functionality but no direct contribution.",
+        "raw_uncertainty": 0.5
+      },
+      "data_analytics": {
+        "score": 2,
+        "weight": 0.05,
+        "reasoning": "Enables light-client data access but isn't a dedicated analytics tool. Minimal contribution to data indexing or exploration.",
+        "raw_uncertainty": 0.5
+      },
+      "innovation_research": {
+        "score": 7,
+        "weight": 0.03,
+        "reasoning": "Introduces novel light-client architecture with fast sync and verification. Significant technical improvement for embedded use cases.",
+        "raw_uncertainty": 0.5
+      },
+      "ecosystem_coordination": {
+        "score": 1,
+        "weight": 0.03,
+        "reasoning": "Implements existing standards but doesn't drive new EIPs or governance frameworks. No coordination role.",
+        "raw_uncertainty": 0.5
+      },
+      "community_trust": {
+        "score": 4,
+        "weight": 0.02,
+        "reasoning": "Backed by a16z (credibility) but launched in 2022. Active maintenance but limited production history. Not battle-tested.",
+        "raw_uncertainty": 0.5
+      },
+      "user_applications": {
+        "score": 3,
+        "weight": 0.02,
+        "reasoning": "Library for embedding in wallets/dApps (indirect user impact). Not a direct user application like a wallet or marketplace.",
+        "raw_uncertainty": 0.5
+      }
+    },
+    "overall_reasoning": "Helios is a promising lightweight Ethereum client with strong technical innovation (Rust implementation, fast sync) but limited current adoption. Its primary value is as an alternative execution client for embedded use cases, though it lacks the network effects of dominant clients. Scores highest in core protocol and innovation, but low adoption and maturity constrain broader impact."
+  },
+  {
+    "repository_url": "https://github.com/alloy-rs/alloy",
+    "repository_name": "alloy",
+    "target_score": 3.1500000000000004,
+    "total_weight": 1.0,
+    "parsing_method": "perfect_json",
+    "parsing_success": true,
+    "parsing_warnings": [],
+    "criteria_scores": {
+      "core_protocol": {
+        "score": 1,
+        "weight": 0.25,
+        "reasoning": "Alloy provides Rust libraries for Ethereum development but does not implement core protocol features like clients or layer-2 solutions. It's a supporting tool rather than foundational infrastructure.",
+        "raw_uncertainty": 0.5
+      },
+      "market_adoption": {
+        "score": 3,
+        "weight": 0.2,
+        "reasoning": "As a relatively new project (launched 2023), adoption is emerging but not widespread. Backed by Paradigm, it shows promise but lacks significant production usage or network effects compared to established libraries.",
+        "raw_uncertainty": 0.5
+      },
+      "developer_ecosystem": {
+        "score": 7,
+        "weight": 0.15,
+        "reasoning": "Provides essential Rust libraries for ABI encoding, RPC clients, and Ethereum primitives. Accelerates smart contract and dApp development, positioning it as a valuable but not yet dominant tool in the Rust ecosystem.",
+        "raw_uncertainty": 0.5
+      },
+      "general_purpose_tools": {
+        "score": 2,
+        "weight": 0.1,
+        "reasoning": "Specialized for Ethereum development in Rust. Not a universal tool like programming languages or databases, limiting its applicability outside blockchain contexts.",
+        "raw_uncertainty": 0.5
+      },
+      "security_infrastructure": {
+        "score": 5,
+        "weight": 0.1,
+        "reasoning": "Includes cryptographic primitives and ABI tools critical for secure contract development. However, it's not a security audit tool or battle-tested infrastructure component.",
+        "raw_uncertainty": 0.5
+      },
+      "defi_infrastructure": {
+        "score": 2,
+        "weight": 0.05,
+        "reasoning": "Indirectly supports DeFi through development libraries but isn't a protocol, oracle, or financial primitive itself. No direct DeFi integration or TVL dependence.",
+        "raw_uncertainty": 0.5
+      },
+      "data_analytics": {
+        "score": 3,
+        "weight": 0.05,
+        "reasoning": "RPC providers and serialization tools aid data access, but it's not a dedicated analytics platform, indexer, or explorer. Limited to foundational data handling.",
+        "raw_uncertainty": 0.5
+      },
+      "innovation_research": {
+        "score": 4,
+        "weight": 0.03,
+        "reasoning": "Focuses on practical improvements (performance, ergonomics) rather than novel research. Modular design offers engineering refinements but no cryptographic breakthroughs.",
+        "raw_uncertainty": 0.5
+      },
+      "ecosystem_coordination": {
+        "score": 2,
+        "weight": 0.03,
+        "reasoning": "Implements existing standards (EIPs, ABI specs) but doesn't drive new ones. Not involved in governance or DAO tooling.",
+        "raw_uncertainty": 0.5
+      },
+      "community_trust": {
+        "score": 5,
+        "weight": 0.02,
+        "reasoning": "Backed by Paradigm with active development, but launched in 2023. Lacks long-term production use. Growing community engagement but not yet battle-tested.",
+        "raw_uncertainty": 0.5
+      },
+      "user_applications": {
+        "score": 1,
+        "weight": 0.02,
+        "reasoning": "Purely a developer library. No direct user-facing components like wallets or dApps. Impact is indirect through applications built with it.",
+        "raw_uncertainty": 0.5
+      }
+    },
+    "overall_reasoning": "Alloy is a promising Rust toolkit accelerating Ethereum development with strong potential in the developer ecosystem. Its core value lies in providing modular, high-performance libraries for foundational tasks (ABI, RPC, primitives). However, as a new project, it lacks widespread adoption and doesn't directly impact core protocol, DeFi, or user-facing layers. Paradigm backing suggests future growth, but current ecosystem contribution is focused on developer tooling."
+  },
+  {
+    "repository_url": "https://github.com/chainsafe/lodestar",
+    "repository_name": "lodestar",
+    "target_score": 5.069999999999999,
+    "total_weight": 1.0,
+    "parsing_method": "perfect_json",
+    "parsing_success": true,
+    "parsing_warnings": [],
+    "criteria_scores": {
+      "core_protocol": {
+        "score": 8,
+        "weight": 0.25,
+        "reasoning": "Lodestar is a production-ready Ethereum consensus client implementing the Beacon Chain specification. As a critical component of Ethereum's core infrastructure, it enables node operation and validation. While not the official EF implementation, it's a major alternative client.",
+        "raw_uncertainty": 0.5
+      },
+      "market_adoption": {
+        "score": 4,
+        "weight": 0.2,
+        "reasoning": "Holds ~1-2% of Ethereum validator market share (per clientdiversity.org). Used by solo stakers and institutions like Rocket Pool, but significantly trails dominant clients like Prysm/Lighthouse.",
+        "raw_uncertainty": 0.5
+      },
+      "developer_ecosystem": {
+        "score": 6,
+        "weight": 0.15,
+        "reasoning": "Provides TypeScript/JavaScript tooling for node operators and light clients, lowering entry barriers for web3 developers. Not a primary smart contract development tool.",
+        "raw_uncertainty": 0.5
+      },
+      "general_purpose_tools": {
+        "score": 1,
+        "weight": 0.1,
+        "reasoning": "Specialized blockchain client with no significant use outside Ethereum ecosystem. Does not provide general-purpose utilities.",
+        "raw_uncertainty": 0.5
+      },
+      "security_infrastructure": {
+        "score": 7,
+        "weight": 0.1,
+        "reasoning": "As a consensus client, critical for network security and slashing prevention. Lower systemic risk than dominant clients due to market share, but still security-sensitive infrastructure.",
+        "raw_uncertainty": 0.5
+      },
+      "defi_infrastructure": {
+        "score": 1,
+        "weight": 0.05,
+        "reasoning": "No direct DeFi functionality. Indirectly supports staking services but not core to financial protocols.",
+        "raw_uncertainty": 0.5
+      },
+      "data_analytics": {
+        "score": 3,
+        "weight": 0.05,
+        "reasoning": "Provides beacon node APIs for chain data access, but not primarily an analytics tool. Minimal direct impact compared to dedicated indexing/explorer projects.",
+        "raw_uncertainty": 0.5
+      },
+      "innovation_research": {
+        "score": 5,
+        "weight": 0.03,
+        "reasoning": "Pioneered TypeScript consensus implementation and light client protocols. Contributes to client diversity research but not breakthrough cryptographic innovation.",
+        "raw_uncertainty": 0.5
+      },
+      "ecosystem_coordination": {
+        "score": 2,
+        "weight": 0.03,
+        "reasoning": "Implements but doesn't define standards (e.g., EIPs). Participates in client interoperability efforts without leading standardization.",
+        "raw_uncertainty": 0.5
+      },
+      "community_trust": {
+        "score": 7,
+        "weight": 0.02,
+        "reasoning": "Maintained since 2018 by reputable ChainSafe team. Used in production with active development, though less battle-tested than older clients.",
+        "raw_uncertainty": 0.5
+      },
+      "user_applications": {
+        "score": 1,
+        "weight": 0.02,
+        "reasoning": "Infrastructure-focused (node/validator client). No direct end-user applications like wallets or dApps.",
+        "raw_uncertainty": 0.5
+      }
+    },
+    "overall_reasoning": "Lodestar is a strategically important consensus client enhancing Ethereum's client diversity and TypeScript accessibility. Its core protocol role drives high impact, though limited market adoption reduces network effects. Critical for infrastructure security but minimally involved in DeFi, analytics, or end-user applications."
+  },
+  {
+    "repository_url": "https://github.com/consensys/teku",
+    "repository_name": "teku",
+    "target_score": 6.3599999999999985,
+    "total_weight": 1.0,
+    "parsing_method": "perfect_json",
+    "parsing_success": true,
+    "parsing_warnings": [],
+    "criteria_scores": {
+      "core_protocol": {
+        "score": 10,
+        "weight": 0.25,
+        "reasoning": "Teku is a major Ethereum consensus client developed by ConsenSys, directly implementing the Beacon Chain protocol. As one of the five primary clients powering Ethereum's proof-of-stake consensus, it qualifies as a major implementation critical to network operation.",
+        "raw_uncertainty": 0.5
+      },
+      "market_adoption": {
+        "score": 8,
+        "weight": 0.2,
+        "reasoning": "Teku holds significant market share among Ethereum validators (consistently 10-20% of the network), with strong adoption by institutional stakers and infrastructure providers like Coinbase Cloud. It demonstrates substantial network effects but isn't the dominant client.",
+        "raw_uncertainty": 0.5
+      },
+      "developer_ecosystem": {
+        "score": 4,
+        "weight": 0.15,
+        "reasoning": "As a consensus layer client, Teku primarily serves node operators rather than application developers. It provides essential infrastructure but doesn't directly accelerate dApp development like frameworks or smart contract tools.",
+        "raw_uncertainty": 0.5
+      },
+      "general_purpose_tools": {
+        "score": 1,
+        "weight": 0.1,
+        "reasoning": "Teku is a specialized blockchain component with no role as a general-purpose tool (e.g., database, runtime, or web framework). It relies on Java but doesn't contribute to this category.",
+        "raw_uncertainty": 0.5
+      },
+      "security_infrastructure": {
+        "score": 9,
+        "weight": 0.1,
+        "reasoning": "As a core consensus client, Teku is security-critical infrastructure. Bugs could cause chain splits or network instability. Its codebase undergoes rigorous audits, and it provides secure validator services for stakers.",
+        "raw_uncertainty": 0.5
+      },
+      "defi_infrastructure": {
+        "score": 2,
+        "weight": 0.05,
+        "reasoning": "Teku secures the base layer for DeFi but isn't a DeFi protocol itself. It doesn't handle oracles, stablecoins, or financial logic, limiting direct relevance to this category.",
+        "raw_uncertainty": 0.5
+      },
+      "data_analytics": {
+        "score": 3,
+        "weight": 0.05,
+        "reasoning": "While Teku provides Beacon Chain APIs for data access, it isn't primarily an analytics tool. Its role in data infrastructure is indirect compared to explorers or indexing protocols.",
+        "raw_uncertainty": 0.5
+      },
+      "innovation_research": {
+        "score": 4,
+        "weight": 0.03,
+        "reasoning": "Teku focuses on reliable implementation of existing specs rather than novel research. Contributions like Java optimizations are incremental; it doesn't drive cryptographic breakthroughs or new consensus models.",
+        "raw_uncertainty": 0.5
+      },
+      "ecosystem_coordination": {
+        "score": 3,
+        "weight": 0.03,
+        "reasoning": "Teku implements standards (e.g., Ethereum consensus specs) but doesn't define them. It participates in client diversity efforts but isn't a primary standards repository like EIPs.",
+        "raw_uncertainty": 0.5
+      },
+      "community_trust": {
+        "score": 9,
+        "weight": 0.02,
+        "reasoning": "Backed by ConsenSys since 2020, Teku is battle-tested in production. It maintains active development, high responsiveness, and trust among institutional validators, reflecting strong maturity.",
+        "raw_uncertainty": 0.5
+      },
+      "user_applications": {
+        "score": 1,
+        "weight": 0.02,
+        "reasoning": "Teku is backend infrastructure for validators, not a user-facing application. End-users interact through staking services or wallets built atop it, not directly.",
+        "raw_uncertainty": 0.5
+      }
+    },
+    "overall_reasoning": "Tekku is a foundational consensus client with high scores in core protocol and security due to its critical role in Ethereum's proof-of-stake operation. Its market adoption is strong but not dominant. Lower scores in developer tools, DeFi, and user applications reflect its infrastructure-focused nature. Maturity and corporate backing bolster trust."
+  },
+  {
+    "repository_url": "https://github.com/erigontech/erigon",
+    "repository_name": "erigon",
+    "target_score": 6.46,
+    "total_weight": 1.0,
+    "parsing_method": "perfect_json",
+    "parsing_success": true,
+    "parsing_warnings": [],
+    "criteria_scores": {
+      "core_protocol": {
+        "score": 9,
+        "weight": 0.25,
+        "reasoning": "Erigon is a major Ethereum execution client implementing core protocol specifications. As a production-grade client with significant network usage, it qualifies as a major implementation (3-5x multiplier).",
+        "raw_uncertainty": 0.5
+      },
+      "market_adoption": {
+        "score": 8,
+        "weight": 0.2,
+        "reasoning": "Erigon holds ~10-15% of execution client market share among Ethereum validators and nodes. It's widely adopted by infrastructure providers but not dominant like Geth, placing it in the significant adoption tier (2-5x multiplier).",
+        "raw_uncertainty": 0.5
+      },
+      "developer_ecosystem": {
+        "score": 4,
+        "weight": 0.15,
+        "reasoning": "Primarily an execution layer client rather than a development tool. While it provides RPC endpoints used by developers, it doesn't directly offer frameworks or libraries for smart contract development.",
+        "raw_uncertainty": 0.5
+      },
+      "general_purpose_tools": {
+        "score": 1,
+        "weight": 0.1,
+        "reasoning": "Not a general-purpose tool. Erigon is blockchain-specific infrastructure with no direct relevance to non-blockchain development workflows.",
+        "raw_uncertainty": 0.5
+      },
+      "security_infrastructure": {
+        "score": 9,
+        "weight": 0.1,
+        "reasoning": "As a core execution client, bugs could cause chain splits or network instability. Its security directly impacts Ethereum's overall security posture, qualifying as security-critical infrastructure (5-10x multiplier).",
+        "raw_uncertainty": 0.5
+      },
+      "defi_infrastructure": {
+        "score": 3,
+        "weight": 0.05,
+        "reasoning": "Provides foundational infrastructure for DeFi but isn't a DeFi protocol itself. Its role is indirect through transaction processing and state management.",
+        "raw_uncertainty": 0.5
+      },
+      "data_analytics": {
+        "score": 7,
+        "weight": 0.05,
+        "reasoning": "Known for efficient historical data access and archive node performance. Its state storage optimizations make it valuable for blockchain analytics and indexing services.",
+        "raw_uncertainty": 0.5
+      },
+      "innovation_research": {
+        "score": 7,
+        "weight": 0.03,
+        "reasoning": "Pioneered state storage optimizations and modular architecture. Introduced significant performance improvements influencing client development, though not breakthrough cryptography.",
+        "raw_uncertainty": 0.5
+      },
+      "ecosystem_coordination": {
+        "score": 4,
+        "weight": 0.03,
+        "reasoning": "Implements EIPs and protocol standards but doesn't drive new standards. Contributes to client diversity discussions rather than standardization efforts.",
+        "raw_uncertainty": 0.5
+      },
+      "community_trust": {
+        "score": 8,
+        "weight": 0.02,
+        "reasoning": "Actively maintained since 2020 (as Turbo-Geth), with strong team backing. Widely trusted in production environments but lacks Ethereum Foundation endorsement.",
+        "raw_uncertainty": 0.5
+      },
+      "user_applications": {
+        "score": 1,
+        "weight": 0.02,
+        "reasoning": "Backend infrastructure without direct user interfaces. End-users interact through wallets and dApps that leverage its RPC services.",
+        "raw_uncertainty": 0.5
+      }
+    },
+    "overall_reasoning": "Erigon is a critical Ethereum execution client with strong adoption and security importance. It excels in core protocol implementation and data efficiency but has limited direct impact on developer tools or end-user applications. Its innovations in client performance contribute significantly to network health."
+  },
+  {
+    "repository_url": "https://github.com/eth-infinitism/account-abstraction",
+    "repository_name": "account-abstraction",
+    "target_score": 6.719999999999999,
+    "total_weight": 1.0,
+    "parsing_method": "perfect_json",
+    "parsing_success": true,
+    "parsing_warnings": [],
+    "criteria_scores": {
+      "core_protocol": {
+        "score": 8,
+        "weight": 0.25,
+        "reasoning": "Reference implementation for ERC-4337 account abstraction standard, enabling smart contract wallets as primary accounts. Critical protocol upgrade but not a base-layer client implementation.",
+        "raw_uncertainty": 0.5
+      },
+      "market_adoption": {
+        "score": 6,
+        "weight": 0.2,
+        "reasoning": "Growing adoption in wallets (e.g., Safe, Argent) and dApps, with emerging user base. Not yet dominant but accelerating through EIP-4337 bundler network.",
+        "raw_uncertainty": 0.5
+      },
+      "developer_ecosystem": {
+        "score": 9,
+        "weight": 0.15,
+        "reasoning": "Provides essential smart contract libraries and tooling for AA implementation. Enables gas abstraction, batched transactions, and wallet recovery features.",
+        "raw_uncertainty": 0.5
+      },
+      "general_purpose_tools": {
+        "score": 1,
+        "weight": 0.1,
+        "reasoning": "Specialized Ethereum infrastructure with no general-purpose utility outside blockchain context.",
+        "raw_uncertainty": 0.5
+      },
+      "security_infrastructure": {
+        "score": 9,
+        "weight": 0.1,
+        "reasoning": "Core to wallet security architecture. Audited reference implementation used industry-wide for secure account management.",
+        "raw_uncertainty": 0.5
+      },
+      "defi_infrastructure": {
+        "score": 5,
+        "weight": 0.05,
+        "reasoning": "Enables gasless DeFi interactions and sponsored transactions. Indirectly supports DeFi UX but not a direct financial protocol.",
+        "raw_uncertainty": 0.5
+      },
+      "data_analytics": {
+        "score": 1,
+        "weight": 0.05,
+        "reasoning": "No inherent data indexing, analytics, or explorer functionality. Focused on transaction flow rather than data processing.",
+        "raw_uncertainty": 0.5
+      },
+      "innovation_research": {
+        "score": 9,
+        "weight": 0.03,
+        "reasoning": "Pioneering implementation of ERC-4337 standard, solving UX/security challenges through decentralized transaction bundling.",
+        "raw_uncertainty": 0.5
+      },
+      "ecosystem_coordination": {
+        "score": 10,
+        "weight": 0.03,
+        "reasoning": "Home of ERC-4337 standard implementation. Critical coordination point for AA development and wallet interoperability.",
+        "raw_uncertainty": 0.5
+      },
+      "community_trust": {
+        "score": 8,
+        "weight": 0.02,
+        "reasoning": "Maintained by Ethereum Foundation researchers, with strong audits and production use since 2023. High trust but still evolving.",
+        "raw_uncertainty": 0.5
+      },
+      "user_applications": {
+        "score": 7,
+        "weight": 0.02,
+        "reasoning": "Enables next-gen wallet experiences (social recovery, session keys) but isn't a direct end-user application.",
+        "raw_uncertainty": 0.5
+      }
+    },
+    "overall_reasoning": "Critical infrastructure for Ethereum's account abstraction transition, providing standardized implementation with high security and developer impact. Adoption growing but not yet dominant."
+  },
+  {
+    "repository_url": "https://github.com/ethereum-lists/chains",
+    "repository_name": "chains",
+    "target_score": 5.000000000000001,
+    "total_weight": 1.0,
+    "parsing_method": "perfect_json",
+    "parsing_success": true,
+    "parsing_warnings": [],
+    "criteria_scores": {
+      "core_protocol": {
+        "score": 1,
+        "weight": 0.25,
+        "reasoning": "Not a protocol implementation; provides metadata rather than core blockchain functionality.",
+        "raw_uncertainty": 0.5
+      },
+      "market_adoption": {
+        "score": 8,
+        "weight": 0.2,
+        "reasoning": "Widely integrated in wallets, explorers, and tools; essential infrastructure but not dominant market share.",
+        "raw_uncertainty": 0.5
+      },
+      "developer_ecosystem": {
+        "score": 9,
+        "weight": 0.15,
+        "reasoning": "Critical for multi-chain development; standardized chain data accelerates dApp integration.",
+        "raw_uncertainty": 0.5
+      },
+      "general_purpose_tools": {
+        "score": 1,
+        "weight": 0.1,
+        "reasoning": "Blockchain-specific metadata repository, not a general-purpose tool.",
+        "raw_uncertainty": 0.5
+      },
+      "security_infrastructure": {
+        "score": 6,
+        "weight": 0.1,
+        "reasoning": "Ensures accurate chain metadata to prevent misconfigurations; indirectly supports security.",
+        "raw_uncertainty": 0.5
+      },
+      "defi_infrastructure": {
+        "score": 3,
+        "weight": 0.05,
+        "reasoning": "Indirectly supports DeFi through chain interoperability but not core to financial protocols.",
+        "raw_uncertainty": 0.5
+      },
+      "data_analytics": {
+        "score": 8,
+        "weight": 0.05,
+        "reasoning": "Foundational for explorers and analytics tools to interpret chain data accurately.",
+        "raw_uncertainty": 0.5
+      },
+      "innovation_research": {
+        "score": 1,
+        "weight": 0.03,
+        "reasoning": "Standardization utility without novel research or cryptographic advancements.",
+        "raw_uncertainty": 0.5
+      },
+      "ecosystem_coordination": {
+        "score": 10,
+        "weight": 0.03,
+        "reasoning": "De facto standard for chain metadata; critical for EIP-155 and cross-ecosystem coordination.",
+        "raw_uncertainty": 0.5
+      },
+      "community_trust": {
+        "score": 9,
+        "weight": 0.02,
+        "reasoning": "Community-maintained since 2016; high trust and adoption with active contributors.",
+        "raw_uncertainty": 0.5
+      },
+      "user_applications": {
+        "score": 2,
+        "weight": 0.02,
+        "reasoning": "Backend resource powering wallets/explorers; no direct user interaction.",
+        "raw_uncertainty": 0.5
+      }
+    },
+    "overall_reasoning": "Essential infrastructure for chain metadata standardization, widely adopted by developers and tools. High impact on interoperability and ecosystem coordination but minimal core protocol or innovation contribution."
+  },
+  {
+    "repository_url": "https://github.com/ethereum/fe",
+    "repository_name": "fe",
+    "target_score": 3.78,
+    "total_weight": 1.0,
+    "parsing_method": "perfect_json",
+    "parsing_success": true,
+    "parsing_warnings": [],
+    "criteria_scores": {
+      "core_protocol": {
+        "score": 8,
+        "weight": 0.25,
+        "reasoning": "Official Ethereum Foundation project for a smart contract language. While not a core client, it's a foundational language implementation with potential to become a standard. Falls under alternative implementation category.",
+        "raw_uncertainty": 0.5
+      },
+      "market_adoption": {
+        "score": 1,
+        "weight": 0.2,
+        "reasoning": "Experimental stage with minimal production usage. No significant adoption metrics, TVL, or network share yet.",
+        "raw_uncertainty": 0.5
+      },
+      "developer_ecosystem": {
+        "score": 4,
+        "weight": 0.15,
+        "reasoning": "Emerging smart contract language offering safer alternatives to Solidity. Potential to become essential but currently niche with limited tooling integration.",
+        "raw_uncertainty": 0.5
+      },
+      "general_purpose_tools": {
+        "score": 1,
+        "weight": 0.1,
+        "reasoning": "Domain-specific language for Ethereum contracts, not a general-purpose tool. No dependency outside blockchain context.",
+        "raw_uncertainty": 0.5
+      },
+      "security_infrastructure": {
+        "score": 3,
+        "weight": 0.1,
+        "reasoning": "Designed with security-first principles to prevent common vulnerabilities, but not yet battle-tested in production. Potential future impact.",
+        "raw_uncertainty": 0.5
+      },
+      "defi_infrastructure": {
+        "score": 1,
+        "weight": 0.05,
+        "reasoning": "Not a DeFi protocol, oracle, or financial tool. Language could eventually underpin DeFi projects but currently no direct contribution.",
+        "raw_uncertainty": 0.5
+      },
+      "data_analytics": {
+        "score": 1,
+        "weight": 0.05,
+        "reasoning": "No relation to data indexing, analytics, or blockchain explorers. Purely a contract development tool.",
+        "raw_uncertainty": 0.5
+      },
+      "innovation_research": {
+        "score": 9,
+        "weight": 0.03,
+        "reasoning": "Represents significant innovation in smart contract language design with Pythonic syntax and formal verification goals. Advances Ethereum's programming model.",
+        "raw_uncertainty": 0.5
+      },
+      "ecosystem_coordination": {
+        "score": 3,
+        "weight": 0.03,
+        "reasoning": "Could influence future language standards but not currently governing EIPs or token standards. EF backing gives standardization potential.",
+        "raw_uncertainty": 0.5
+      },
+      "community_trust": {
+        "score": 5,
+        "weight": 0.02,
+        "reasoning": "Ethereum Foundation backing ensures credibility, but still in alpha stage (v0.24.0). Limited production use reduces maturity score.",
+        "raw_uncertainty": 0.5
+      },
+      "user_applications": {
+        "score": 1,
+        "weight": 0.02,
+        "reasoning": "Compiler and language tooling, not an end-user application. No direct user interface or consumer-facing component.",
+        "raw_uncertainty": 0.5
+      }
+    },
+    "overall_reasoning": "Fe is a promising but early-stage smart contract language from the Ethereum Foundation. Its primary value lies in core protocol innovation and future developer impact, offset by minimal current adoption. Scores highly in innovation and core implementation due to EF backing and technical ambition, but low elsewhere due to immaturity."
+  },
+  {
+    "repository_url": "https://github.com/ethereum/go-ethereum",
+    "repository_name": "go-ethereum",
+    "target_score": 8.02,
+    "total_weight": 1.0,
+    "parsing_method": "perfect_json",
+    "parsing_success": true,
+    "parsing_warnings": [],
+    "criteria_scores": {
+      "core_protocol": {
+        "score": 10,
+        "weight": 0.25,
+        "reasoning": "Official Ethereum Foundation execution client serving as the reference implementation for Ethereum's protocol. Powers a majority of mainnet nodes.",
+        "raw_uncertainty": 0.5
+      },
+      "market_adoption": {
+        "score": 10,
+        "weight": 0.2,
+        "reasoning": "Dominant execution client with >60% historical network share among Ethereum validators and nodes. Critical network effects from widespread infrastructure dependency.",
+        "raw_uncertainty": 0.5
+      },
+      "developer_ecosystem": {
+        "score": 9,
+        "weight": 0.15,
+        "reasoning": "Essential for local node deployment and testing. Provides foundational RPC interfaces and EVM tooling used by most Ethereum developers.",
+        "raw_uncertainty": 0.5
+      },
+      "general_purpose_tools": {
+        "score": 1,
+        "weight": 0.1,
+        "reasoning": "Specialized blockchain implementation without significant use outside Ethereum-specific contexts. Not a general-purpose tool.",
+        "raw_uncertainty": 0.5
+      },
+      "security_infrastructure": {
+        "score": 10,
+        "weight": 0.1,
+        "reasoning": "Security-critical infrastructure where bugs could compromise network integrity. Audited implementation for core cryptographic operations and consensus.",
+        "raw_uncertainty": 0.5
+      },
+      "defi_infrastructure": {
+        "score": 1,
+        "weight": 0.05,
+        "reasoning": "Indirect enabler of DeFi through network operation but not a direct DeFi protocol or financial primitive.",
+        "raw_uncertainty": 0.5
+      },
+      "data_analytics": {
+        "score": 7,
+        "weight": 0.05,
+        "reasoning": "Primary source of blockchain data via RPC endpoints. Foundational for explorers and analytics tools, though not an analytics tool itself.",
+        "raw_uncertainty": 0.5
+      },
+      "innovation_research": {
+        "score": 8,
+        "weight": 0.03,
+        "reasoning": "Key implementer of protocol upgrades (e.g., The Merge) but primarily an execution layer rather than research originator.",
+        "raw_uncertainty": 0.5
+      },
+      "ecosystem_coordination": {
+        "score": 7,
+        "weight": 0.03,
+        "reasoning": "Critical for EIP implementation and network upgrades, though not primarily a standards repository.",
+        "raw_uncertainty": 0.5
+      },
+      "community_trust": {
+        "score": 10,
+        "weight": 0.02,
+        "reasoning": "Battle-tested since Frontier launch (2015). Ethereum Foundation-backed with high maintenance activity and community trust.",
+        "raw_uncertainty": 0.5
+      },
+      "user_applications": {
+        "score": 1,
+        "weight": 0.02,
+        "reasoning": "Infrastructure component without direct end-user interfaces. Wallets/explorers build atop it but aren't part of this repository.",
+        "raw_uncertainty": 0.5
+      }
+    },
+    "overall_reasoning": "Geth is Ethereum's reference execution client and most critical infrastructure component. Its dominance in network operations and protocol implementation outweighs lower scores in non-core categories. The backbone of Ethereum's security and functionality."
+  },
+  {
+    "repository_url": "https://github.com/ethereum/py-evm",
+    "repository_name": "py-evm",
+    "target_score": 6.109999999999999,
+    "total_weight": 1.0,
+    "parsing_method": "perfect_json",
+    "parsing_success": true,
+    "parsing_warnings": [],
+    "criteria_scores": {
+      "core_protocol": {
+        "score": 9,
+        "weight": 0.25,
+        "reasoning": "Official Ethereum Foundation repository providing a Python implementation of the Ethereum Virtual Machine (EVM). Serves as a critical reference implementation for execution layer standards, though not a primary mainnet client.",
+        "raw_uncertainty": 0.5
+      },
+      "market_adoption": {
+        "score": 6,
+        "weight": 0.2,
+        "reasoning": "Widely used in development/testing environments and research contexts but has minimal mainnet node adoption. Significant developer adoption in Python-based tooling.",
+        "raw_uncertainty": 0.5
+      },
+      "developer_ecosystem": {
+        "score": 8,
+        "weight": 0.15,
+        "reasoning": "Foundational library for Python Ethereum development, enabling frameworks like web3.py. Essential for testing, debugging, and educational purposes in the Python ecosystem.",
+        "raw_uncertainty": 0.5
+      },
+      "general_purpose_tools": {
+        "score": 1,
+        "weight": 0.1,
+        "reasoning": "Specialized blockchain implementation, not a general-purpose tool. No significant dependency outside Ethereum-specific contexts.",
+        "raw_uncertainty": 0.5
+      },
+      "security_infrastructure": {
+        "score": 7,
+        "weight": 0.1,
+        "reasoning": "Reference implementation for EVM standards, indirectly supporting security audits and testing. Critical for protocol correctness research but not directly used in production security tooling.",
+        "raw_uncertainty": 0.5
+      },
+      "defi_infrastructure": {
+        "score": 1,
+        "weight": 0.05,
+        "reasoning": "Low-level EVM implementation not directly involved in DeFi protocols, oracles, or financial infrastructure.",
+        "raw_uncertainty": 0.5
+      },
+      "data_analytics": {
+        "score": 2,
+        "weight": 0.05,
+        "reasoning": "Occasionally used in analytical tools for EVM simulation but not a primary data indexing or analytics solution.",
+        "raw_uncertainty": 0.5
+      },
+      "innovation_research": {
+        "score": 8,
+        "weight": 0.03,
+        "reasoning": "Key platform for EVM research, experimentation, and prototyping new EIPs. Enables rapid iteration in academic and development settings.",
+        "raw_uncertainty": 0.5
+      },
+      "ecosystem_coordination": {
+        "score": 3,
+        "weight": 0.03,
+        "reasoning": "Implements but does not define standards. Used to validate EIP compatibility, contributing indirectly to standardization efforts.",
+        "raw_uncertainty": 0.5
+      },
+      "community_trust": {
+        "score": 8,
+        "weight": 0.02,
+        "reasoning": "Maintained by Ethereum Foundation since 2017, with consistent updates and high community trust. Not battle-tested on mainnet but mature in development contexts.",
+        "raw_uncertainty": 0.5
+      },
+      "user_applications": {
+        "score": 1,
+        "weight": 0.02,
+        "reasoning": "Backend EVM implementation, not a user-facing application. No direct end-user interaction.",
+        "raw_uncertainty": 0.5
+      }
+    },
+    "overall_reasoning": "py-evm is a critical reference implementation for Ethereum's execution layer, maintained by the Ethereum Foundation. It excels in core protocol development, developer tooling, and research innovation but has limited production deployment or end-user impact. Its Python foundation makes it accessible for prototyping and education."
+  },
+  {
+    "repository_url": "https://github.com/ethereum/remix-project",
+    "repository_name": "remix-project",
+    "target_score": 4.9799999999999995,
+    "total_weight": 1.0,
+    "parsing_method": "perfect_json",
+    "parsing_success": true,
+    "parsing_warnings": [],
+    "criteria_scores": {
+      "core_protocol": {
+        "score": 1,
+        "weight": 0.25,
+        "reasoning": "Remix is an IDE, not a core protocol client or layer-2 implementation. It doesn't handle consensus, execution, or protocol-level operations.",
+        "raw_uncertainty": 0.5
+      },
+      "market_adoption": {
+        "score": 9,
+        "weight": 0.2,
+        "reasoning": "Remix is the most widely used web-based IDE for Ethereum smart contract development, with massive adoption among developers and integration in tutorials/documentation. Dominant in its category.",
+        "raw_uncertainty": 0.5
+      },
+      "developer_ecosystem": {
+        "score": 10,
+        "weight": 0.15,
+        "reasoning": "Essential tool for writing, testing, and deploying smart contracts. Provides plugins, debugger, and compiler integration, accelerating Ethereum development for all skill levels.",
+        "raw_uncertainty": 0.5
+      },
+      "general_purpose_tools": {
+        "score": 1,
+        "weight": 0.1,
+        "reasoning": "Specialized blockchain IDE, not a general-purpose tool like programming languages or databases. Minimal dependency outside Ethereum development.",
+        "raw_uncertainty": 0.5
+      },
+      "security_infrastructure": {
+        "score": 7,
+        "weight": 0.1,
+        "reasoning": "Integrates security analysis tools (e.g., Slither) and debuggers that help prevent vulnerabilities. Critical for secure contract development but not core security infrastructure.",
+        "raw_uncertainty": 0.5
+      },
+      "defi_infrastructure": {
+        "score": 1,
+        "weight": 0.05,
+        "reasoning": "Used to build DeFi protocols but isn't financial infrastructure itself. No direct role in oracles, bridges, or liquidity mechanisms.",
+        "raw_uncertainty": 0.5
+      },
+      "data_analytics": {
+        "score": 1,
+        "weight": 0.05,
+        "reasoning": "Not a data indexing/analytics tool. While it can read blockchain state, this is incidental to its development focus.",
+        "raw_uncertainty": 0.5
+      },
+      "innovation_research": {
+        "score": 4,
+        "weight": 0.03,
+        "reasoning": "Innovative as a web-based IDE with plugin architecture, but primarily an application of existing tech rather than research-focused. Incremental improvements in UX/tooling.",
+        "raw_uncertainty": 0.5
+      },
+      "ecosystem_coordination": {
+        "score": 1,
+        "weight": 0.03,
+        "reasoning": "Supports standards (e.g., ERCs) via templates but doesn't drive standardization or governance. Not involved in EIP processes.",
+        "raw_uncertainty": 0.5
+      },
+      "community_trust": {
+        "score": 10,
+        "weight": 0.02,
+        "reasoning": "Official Ethereum Foundation project since 2016, battle-tested, actively maintained with high community trust and engagement.",
+        "raw_uncertainty": 0.5
+      },
+      "user_applications": {
+        "score": 9,
+        "weight": 0.02,
+        "reasoning": "Primary IDE for Ethereum developers. As a dominant development interface, it's a critical user-facing application for its target audience.",
+        "raw_uncertainty": 0.5
+      }
+    },
+    "overall_reasoning": "Remix is a foundational developer tool with massive adoption and ecosystem impact, but limited contributions to core protocol, DeFi, or research. Its strength lies in accelerating secure contract development."
+  },
+  {
+    "repository_url": "https://github.com/ethereum/solidity",
+    "repository_name": "solidity",
+    "target_score": 8.12,
+    "total_weight": 1.0,
+    "parsing_method": "perfect_json",
+    "parsing_success": true,
+    "parsing_warnings": [],
+    "criteria_scores": {
+      "core_protocol": {
+        "score": 10,
+        "weight": 0.25,
+        "reasoning": "Official Ethereum Foundation repository providing the primary smart contract language implementation. As the reference compiler for Ethereum's execution layer, it directly enables core protocol functionality.",
+        "raw_uncertainty": 0.5
+      },
+      "market_adoption": {
+        "score": 10,
+        "weight": 0.2,
+        "reasoning": "Dominant smart contract language with near-universal adoption across Ethereum dApps, DeFi protocols, and NFT standards. Powers >90% of all Ethereum smart contracts.",
+        "raw_uncertainty": 0.5
+      },
+      "developer_ecosystem": {
+        "score": 10,
+        "weight": 0.15,
+        "reasoning": "Foundational tool for all Ethereum smart contract development. Enables creation of development frameworks, testing tools, and educational resources. Essential for onboarding developers.",
+        "raw_uncertainty": 0.5
+      },
+      "general_purpose_tools": {
+        "score": 1,
+        "weight": 0.1,
+        "reasoning": "Domain-specific language for blockchain development, not a general-purpose tool. Minimal direct dependency outside Ethereum ecosystem.",
+        "raw_uncertainty": 0.5
+      },
+      "security_infrastructure": {
+        "score": 9,
+        "weight": 0.1,
+        "reasoning": "Compiler security directly impacts smart contract safety. Critical infrastructure for vulnerability prevention, though not a security tool per se.",
+        "raw_uncertainty": 0.5
+      },
+      "defi_infrastructure": {
+        "score": 8,
+        "weight": 0.05,
+        "reasoning": "Enables but does not constitute DeFi infrastructure. All major DeFi protocols depend on Solidity, though it's not a protocol itself.",
+        "raw_uncertainty": 0.5
+      },
+      "data_analytics": {
+        "score": 1,
+        "weight": 0.05,
+        "reasoning": "No direct role in data analysis or blockchain explorers. Smart contracts generate data but language doesn't provide analytics capabilities.",
+        "raw_uncertainty": 0.5
+      },
+      "innovation_research": {
+        "score": 8,
+        "weight": 0.03,
+        "reasoning": "Pioneered smart contract language design. Continuously integrates research (e.g., formal verification via SMTChecker, Yul intermediate language).",
+        "raw_uncertainty": 0.5
+      },
+      "ecosystem_coordination": {
+        "score": 7,
+        "weight": 0.03,
+        "reasoning": "Implements ERC standards but doesn't define them. Critical for standard adoption through compiler support.",
+        "raw_uncertainty": 0.5
+      },
+      "community_trust": {
+        "score": 10,
+        "weight": 0.02,
+        "reasoning": "Battle-tested since 2014, maintained by Ethereum Foundation. High community trust with 20k+ GitHub stars and active development.",
+        "raw_uncertainty": 0.5
+      },
+      "user_applications": {
+        "score": 1,
+        "weight": 0.02,
+        "reasoning": "Backend language, not user-facing. Enables applications but doesn't provide direct user interfaces.",
+        "raw_uncertainty": 0.5
+      }
+    },
+    "overall_reasoning": "Solidity is Ethereum's foundational smart contract language with maximum impact on core protocol, developer ecosystem, and adoption. Its criticality is offset by low scores in non-core domains like general tools and user applications."
+  },
+  {
+    "repository_url": "https://github.com/ethereum/sourcify",
+    "repository_name": "sourcify",
+    "target_score": 5.17,
+    "total_weight": 1.0,
+    "parsing_method": "perfect_json",
+    "parsing_success": true,
+    "parsing_warnings": [],
+    "criteria_scores": {
+      "core_protocol": {
+        "score": 1,
+        "weight": 0.25,
+        "reasoning": "Sourcify is a contract verification service, not a core protocol client or L2 implementation. It operates as auxiliary infrastructure rather than participating in consensus or execution.",
+        "raw_uncertainty": 0.5
+      },
+      "market_adoption": {
+        "score": 7,
+        "weight": 0.2,
+        "reasoning": "Widely integrated in block explorers (Etherscan, Blockscout) and developer tools. Processes >1M verifications monthly but doesn't directly handle value like DeFi protocols.",
+        "raw_uncertainty": 0.5
+      },
+      "developer_ecosystem": {
+        "score": 9,
+        "weight": 0.15,
+        "reasoning": "Essential for smart contract verification workflows. Provides critical metadata for debugging and auditing, directly integrated into Hardhat and Foundry development environments.",
+        "raw_uncertainty": 0.5
+      },
+      "general_purpose_tools": {
+        "score": 1,
+        "weight": 0.1,
+        "reasoning": "Specialized Ethereum tool for contract verification. Not a general-purpose programming language, database, or framework used beyond blockchain contexts.",
+        "raw_uncertainty": 0.5
+      },
+      "security_infrastructure": {
+        "score": 9,
+        "weight": 0.1,
+        "reasoning": "Foundational for contract transparency and audit verification. Enables trustless source code validation, preventing deployment of malicious bytecode. Critical security dependency.",
+        "raw_uncertainty": 0.5
+      },
+      "defi_infrastructure": {
+        "score": 4,
+        "weight": 0.05,
+        "reasoning": "Indirectly supports DeFi through contract verification but isn't a financial primitive like oracles or AMMs. Verification enables trust in protocols rather than processing transactions.",
+        "raw_uncertainty": 0.5
+      },
+      "data_analytics": {
+        "score": 8,
+        "weight": 0.05,
+        "reasoning": "Core component for blockchain explorers and analysis tools. Provides verified source code mappings essential for transaction decoding and smart contract analytics.",
+        "raw_uncertainty": 0.5
+      },
+      "innovation_research": {
+        "score": 3,
+        "weight": 0.03,
+        "reasoning": "Implements standardized verification processes (EIP-2678) without novel cryptography. Focuses on practical implementation rather than research breakthroughs.",
+        "raw_uncertainty": 0.5
+      },
+      "ecosystem_coordination": {
+        "score": 8,
+        "weight": 0.03,
+        "reasoning": "Reference implementation for contract metadata standards (EIP-2678). Maintains the official contract repository, enabling cross-tool compatibility.",
+        "raw_uncertainty": 0.5
+      },
+      "community_trust": {
+        "score": 9,
+        "weight": 0.02,
+        "reasoning": "Ethereum Foundation-backed since 2019. Actively maintained with high issue responsiveness. Industry-standard solution with broad community trust.",
+        "raw_uncertainty": 0.5
+      },
+      "user_applications": {
+        "score": 3,
+        "weight": 0.02,
+        "reasoning": "Primarily backend infrastructure. Powers verification in wallets/explorers but lacks direct user interfaces. End-users interact via integrated platforms.",
+        "raw_uncertainty": 0.5
+      }
+    },
+    "overall_reasoning": "Sourcify is critical infrastructure for Ethereum's security and transparency, enabling contract verification across the ecosystem. Its highest impact is in developer tooling, security, and data infrastructure, though it doesn't affect core protocol operations. Maintains strong adoption through EF backing and standardization."
+  },
+  {
+    "repository_url": "https://github.com/ethereum/web3.py",
+    "repository_name": "web3.py",
+    "target_score": 5.38,
+    "total_weight": 1.0,
+    "parsing_method": "perfect_json",
+    "parsing_success": true,
+    "parsing_warnings": [],
+    "criteria_scores": {
+      "core_protocol": {
+        "score": 2,
+        "weight": 0.25,
+        "reasoning": "Official Python library for Ethereum interaction, but not a core protocol implementation (e.g., execution/consensus client). It is a client interface tool rather than protocol-defining software.",
+        "raw_uncertainty": 0.5
+      },
+      "market_adoption": {
+        "score": 9,
+        "weight": 0.2,
+        "reasoning": "De facto standard for Python-based Ethereum development with extensive adoption (over 4k GitHub stars, used in major projects like ApeWorx). Dominant in its niche but not network-level infrastructure.",
+        "raw_uncertainty": 0.5
+      },
+      "developer_ecosystem": {
+        "score": 10,
+        "weight": 0.15,
+        "reasoning": "Essential Python library for Ethereum development, enabling dApp creation, contract interaction, and testing. Foundational for Python developers in the ecosystem.",
+        "raw_uncertainty": 0.5
+      },
+      "general_purpose_tools": {
+        "score": 1,
+        "weight": 0.1,
+        "reasoning": "Specialized Ethereum library, not a general-purpose tool. Minimal relevance to non-blockchain contexts.",
+        "raw_uncertainty": 0.5
+      },
+      "security_infrastructure": {
+        "score": 6,
+        "weight": 0.1,
+        "reasoning": "Handles cryptographic operations and transaction signing, making security important. However, not a dedicated security tool like an audit framework.",
+        "raw_uncertainty": 0.5
+      },
+      "defi_infrastructure": {
+        "score": 4,
+        "weight": 0.05,
+        "reasoning": "Enables DeFi development in Python but is not a protocol itself. Widely used as a building block for DeFi applications.",
+        "raw_uncertainty": 0.5
+      },
+      "data_analytics": {
+        "score": 5,
+        "weight": 0.05,
+        "reasoning": "Core tool for querying blockchain data in Python, supporting analytics and indexing tools. Fundamental for data access but not an analytics platform.",
+        "raw_uncertainty": 0.5
+      },
+      "innovation_research": {
+        "score": 2,
+        "weight": 0.03,
+        "reasoning": "Focuses on stable implementation of existing standards rather than novel research. Incorporates EIPs but doesn't drive cryptographic innovation.",
+        "raw_uncertainty": 0.5
+      },
+      "ecosystem_coordination": {
+        "score": 5,
+        "weight": 0.03,
+        "reasoning": "Implements Ethereum standards (EIPs) and is maintained by Ethereum Foundation, promoting consistency in Python tooling.",
+        "raw_uncertainty": 0.5
+      },
+      "community_trust": {
+        "score": 10,
+        "weight": 0.02,
+        "reasoning": "Battle-tested since 2016, officially maintained by Ethereum Foundation with high activity (1k+ commits, 200+ contributors). High trust in the ecosystem.",
+        "raw_uncertainty": 0.5
+      },
+      "user_applications": {
+        "score": 1,
+        "weight": 0.02,
+        "reasoning": "Backend library for developers, not a user-facing application. Indirectly enables end-user tools but has no direct UI impact.",
+        "raw_uncertainty": 0.5
+      }
+    },
+    "overall_reasoning": "web3.py is the cornerstone Python library for Ethereum development, providing essential infrastructure for dApp creation and blockchain interaction. Its high adoption and developer impact are offset by its specialization, as it doesn't contribute to core protocol, general tools, or end-user applications."
+  },
+  {
+    "repository_url": "https://github.com/ethereumjs/ethereumjs-monorepo",
+    "repository_name": "ethereumjs-monorepo",
+    "target_score": 6.31,
+    "total_weight": 1.0,
+    "parsing_method": "perfect_json",
+    "parsing_success": true,
+    "parsing_warnings": [],
+    "criteria_scores": {
+      "core_protocol": {
+        "score": 7,
+        "weight": 0.25,
+        "reasoning": "Provides JavaScript implementations of core Ethereum components (EVM, transactions, blocks) used in testing, tooling, and light clients. Alternative implementation with significant ecosystem utility but not a primary node client.",
+        "raw_uncertainty": 0.5
+      },
+      "market_adoption": {
+        "score": 8,
+        "weight": 0.2,
+        "reasoning": "Widely adopted in developer toolchains (e.g., Hardhat, Truffle), test environments, and browser-based dApps. High npm download counts but no direct mainnet node share.",
+        "raw_uncertainty": 0.5
+      },
+      "developer_ecosystem": {
+        "score": 9,
+        "weight": 0.15,
+        "reasoning": "Essential JavaScript/TypeScript library for Ethereum development, enabling testing, simulation, and dApp prototyping. Foundational for JS-based tooling and frameworks.",
+        "raw_uncertainty": 0.5
+      },
+      "general_purpose_tools": {
+        "score": 1,
+        "weight": 0.1,
+        "reasoning": "Ethereum-specific implementation, not a general-purpose tool like databases or web frameworks. Minimal relevance to non-blockchain contexts.",
+        "raw_uncertainty": 0.5
+      },
+      "security_infrastructure": {
+        "score": 7,
+        "weight": 0.1,
+        "reasoning": "Critical for smart contract testing and simulation, enabling security audits. Used in wallet implementations but not a core security primitive like cryptographic libraries.",
+        "raw_uncertainty": 0.5
+      },
+      "defi_infrastructure": {
+        "score": 2,
+        "weight": 0.05,
+        "reasoning": "Indirectly supports DeFi through development tooling but not a direct protocol, oracle, or financial primitive. Minimal direct impact.",
+        "raw_uncertainty": 0.5
+      },
+      "data_analytics": {
+        "score": 4,
+        "weight": 0.05,
+        "reasoning": "Used in block processing and chain analysis tools as a building block, but not a primary data indexing or analytics platform.",
+        "raw_uncertainty": 0.5
+      },
+      "innovation_research": {
+        "score": 6,
+        "weight": 0.03,
+        "reasoning": "Proactively implements new EIPs and features (e.g., Verkle trees), serving as a testbed for protocol upgrades. Supports research through accessible JS implementations.",
+        "raw_uncertainty": 0.5
+      },
+      "ecosystem_coordination": {
+        "score": 5,
+        "weight": 0.03,
+        "reasoning": "Implements Ethereum standards (EIPs) faithfully but doesn't drive standardization. Contributes to EIP discussions through practical feedback.",
+        "raw_uncertainty": 0.5
+      },
+      "community_trust": {
+        "score": 8,
+        "weight": 0.02,
+        "reasoning": "Mature project (since 2014), actively maintained with strong community backing. Used in production tooling but not as a standalone node.",
+        "raw_uncertainty": 0.5
+      },
+      "user_applications": {
+        "score": 1,
+        "weight": 0.02,
+        "reasoning": "Backend library for developers, not a user-facing application. Indirectly enables wallets/dApps but no direct end-user interface.",
+        "raw_uncertainty": 0.5
+      }
+    },
+    "overall_reasoning": "EthereumJS is a foundational JavaScript library suite critical for Ethereum development, testing, and tooling. It excels in developer ecosystem impact and protocol implementation for non-node environments but has limited direct roles in DeFi, user applications, or general-purpose tools."
+  },
+  {
+    "repository_url": "https://github.com/ethers-io/ethers.js",
+    "repository_name": "ethers.js",
+    "target_score": 5.789999999999999,
+    "total_weight": 1.0,
+    "parsing_method": "perfect_json",
+    "parsing_success": true,
+    "parsing_warnings": [],
+    "criteria_scores": {
+      "core_protocol": {
+        "score": 1,
+        "weight": 0.25,
+        "reasoning": "ethers.js is a library for interacting with Ethereum, not a core protocol implementation like clients or layer-2 solutions. It builds on top of existing protocols.",
+        "raw_uncertainty": 0.5
+      },
+      "market_adoption": {
+        "score": 10,
+        "weight": 0.2,
+        "reasoning": "Dominant JavaScript library for Ethereum interaction with 1.5M+ weekly npm downloads, used in 80%+ of dApps, and integrated into major frameworks like Hardhat.",
+        "raw_uncertainty": 0.5
+      },
+      "developer_ecosystem": {
+        "score": 10,
+        "weight": 0.15,
+        "reasoning": "Essential tool for Ethereum developers, providing wallet management, contract interaction, and RPC abstraction. Critical dependency for most JavaScript-based dApp development.",
+        "raw_uncertainty": 0.5
+      },
+      "general_purpose_tools": {
+        "score": 1,
+        "weight": 0.1,
+        "reasoning": "Specialized for blockchain interactions rather than general computing. Not a universal dependency like programming languages or databases.",
+        "raw_uncertainty": 0.5
+      },
+      "security_infrastructure": {
+        "score": 8,
+        "weight": 0.1,
+        "reasoning": "Handles sensitive operations like private key management and transaction signing. Security flaws would have widespread impact, but it's not a dedicated security tool.",
+        "raw_uncertainty": 0.5
+      },
+      "defi_infrastructure": {
+        "score": 7,
+        "weight": 0.05,
+        "reasoning": "Foundational for DeFi frontends and integrations (e.g., Uniswap, Aave) but not a DeFi protocol itself. Enables but doesn't implement financial logic.",
+        "raw_uncertainty": 0.5
+      },
+      "data_analytics": {
+        "score": 5,
+        "weight": 0.05,
+        "reasoning": "Provides data formatting/parsing utilities (ABI, BigNumber) but isn't a dedicated analytics tool like blockchain explorers or indexing solutions.",
+        "raw_uncertainty": 0.5
+      },
+      "innovation_research": {
+        "score": 4,
+        "weight": 0.03,
+        "reasoning": "Pragmatic implementation of standards with good API design, but doesn't introduce novel cryptography or consensus mechanisms. Focused on usability over research.",
+        "raw_uncertainty": 0.5
+      },
+      "ecosystem_coordination": {
+        "score": 6,
+        "weight": 0.03,
+        "reasoning": "Implements EIPs (e.g., EIP-1559) and token standards, but doesn't define new standards. Widely influences development patterns.",
+        "raw_uncertainty": 0.5
+      },
+      "community_trust": {
+        "score": 9,
+        "weight": 0.02,
+        "reasoning": "Maintained since 2016, battle-tested in production, with active development and strong community trust. Backed by Ethereum Foundation grants.",
+        "raw_uncertainty": 0.5
+      },
+      "user_applications": {
+        "score": 3,
+        "weight": 0.02,
+        "reasoning": "Enables user-facing dApps and wallets (e.g., MetaMask uses ethers-like APIs) but isn't an end-user application itself.",
+        "raw_uncertainty": 0.5
+      }
+    },
+    "overall_reasoning": "ethers.js is a foundational JavaScript library critical for Ethereum development, with massive adoption and developer ecosystem impact. While not a core protocol, its role in enabling dApps, DeFi, and tooling makes it indispensable. Scores highest in adoption and developer impact but lower in core protocol and general tooling."
+  },
+  {
+    "repository_url": "https://github.com/foundry-rs/foundry",
+    "repository_name": "foundry",
+    "target_score": 4.97,
+    "total_weight": 1.0,
+    "parsing_method": "perfect_json",
+    "parsing_success": true,
+    "parsing_warnings": [],
+    "criteria_scores": {
+      "core_protocol": {
+        "score": 1,
+        "weight": 0.25,
+        "reasoning": "Foundry is a development toolchain, not a core protocol implementation like execution/consensus clients or L2 protocols. It doesn't implement Ethereum's base layer functionality.",
+        "raw_uncertainty": 0.5
+      },
+      "market_adoption": {
+        "score": 8,
+        "weight": 0.2,
+        "reasoning": "Widely adopted by Ethereum developers (over 7k GitHub stars), used in major projects like Uniswap and MakerDAO. Significant adoption but not dominant like core clients.",
+        "raw_uncertainty": 0.5
+      },
+      "developer_ecosystem": {
+        "score": 10,
+        "weight": 0.15,
+        "reasoning": "Essential smart contract development framework (Forge), testing tool (Anvil), and interaction suite (Cast). Accelerates Ethereum development through fast testing and deployment workflows.",
+        "raw_uncertainty": 0.5
+      },
+      "general_purpose_tools": {
+        "score": 1,
+        "weight": 0.1,
+        "reasoning": "Specialized for Ethereum development (Solidity/Rust). Not a universal tool like programming languages or databases.",
+        "raw_uncertainty": 0.5
+      },
+      "security_infrastructure": {
+        "score": 8,
+        "weight": 0.1,
+        "reasoning": "Critical for security through built-in fuzz testing and vulnerability detection in Forge. Enables secure contract development but isn't audit infrastructure.",
+        "raw_uncertainty": 0.5
+      },
+      "defi_infrastructure": {
+        "score": 2,
+        "weight": 0.05,
+        "reasoning": "Used to build DeFi protocols but not a financial primitive itself (e.g., not a DEX or lending protocol). Indirect contributor.",
+        "raw_uncertainty": 0.5
+      },
+      "data_analytics": {
+        "score": 4,
+        "weight": 0.05,
+        "reasoning": "Cast provides chain data querying capabilities, but it's a developer utility rather than core analytics infrastructure like block explorers.",
+        "raw_uncertainty": 0.5
+      },
+      "innovation_research": {
+        "score": 7,
+        "weight": 0.03,
+        "reasoning": "Introduced Rust-based tooling with native fuzz testing, improving developer efficiency. Significant improvement but not breakthrough research.",
+        "raw_uncertainty": 0.5
+      },
+      "ecosystem_coordination": {
+        "score": 1,
+        "weight": 0.03,
+        "reasoning": "Supports existing standards (e.g., ERCs) but doesn't create or govern them. Not involved in EIP processes.",
+        "raw_uncertainty": 0.5
+      },
+      "community_trust": {
+        "score": 8,
+        "weight": 0.02,
+        "reasoning": "Backed by Paradigm, actively maintained since 2021, strong GitHub activity. Established but not battle-tested for decades.",
+        "raw_uncertainty": 0.5
+      },
+      "user_applications": {
+        "score": 1,
+        "weight": 0.02,
+        "reasoning": "Developer-focused toolchain. End-users don't interact with Foundry directly.",
+        "raw_uncertainty": 0.5
+      }
+    },
+    "overall_reasoning": "Foundry is a critical developer toolchain that significantly accelerates Ethereum smart contract development and testing. Its high impact comes from widespread adoption, security enhancements, and developer productivity tools, though it doesn't contribute to core protocol or end-user applications."
+  },
+  {
+    "repository_url": "https://github.com/grandinetech/grandine",
+    "repository_name": "grandine",
+    "target_score": 3.349999999999999,
+    "total_weight": 1.0,
+    "parsing_method": "perfect_json",
+    "parsing_success": true,
+    "parsing_warnings": [],
+    "criteria_scores": {
+      "core_protocol": {
+        "score": 7,
+        "weight": 0.25,
+        "reasoning": "Grandine is an Ethereum consensus client (CL client) written in Rust, directly implementing core protocol functionality. As an alternative client implementation, it contributes to client diversity but lacks the adoption or official status of primary clients like Lighthouse or Prysm.",
+        "raw_uncertainty": 0.5
+      },
+      "market_adoption": {
+        "score": 2,
+        "weight": 0.2,
+        "reasoning": "Minimal adoption observed; low GitHub stars (35), few contributors, and no significant network share. Not listed in major client diversity dashboards, indicating negligible validator usage.",
+        "raw_uncertainty": 0.5
+      },
+      "developer_ecosystem": {
+        "score": 3,
+        "weight": 0.15,
+        "reasoning": "As a consensus client, it indirectly supports developers by enabling node operations. However, it doesn't provide frameworks, libraries, or tools for dApp/smart contract development, limiting direct impact.",
+        "raw_uncertainty": 0.5
+      },
+      "general_purpose_tools": {
+        "score": 1,
+        "weight": 0.1,
+        "reasoning": "Not a general-purpose tool; it's blockchain-specific infrastructure with no broader utility outside Ethereum node operations.",
+        "raw_uncertainty": 0.5
+      },
+      "security_infrastructure": {
+        "score": 4,
+        "weight": 0.1,
+        "reasoning": "Consensus clients are inherently security-critical for Ethereum. However, low adoption reduces its current real-world impact. No unique security features or audits highlighted.",
+        "raw_uncertainty": 0.5
+      },
+      "defi_infrastructure": {
+        "score": 1,
+        "weight": 0.05,
+        "reasoning": "No relation to DeFi protocols, oracles, or financial infrastructure; purely a consensus layer component.",
+        "raw_uncertainty": 0.5
+      },
+      "data_analytics": {
+        "score": 1,
+        "weight": 0.05,
+        "reasoning": "Does not provide data indexing, analytics, or explorer capabilities. Focuses solely on block validation and consensus.",
+        "raw_uncertainty": 0.5
+      },
+      "innovation_research": {
+        "score": 2,
+        "weight": 0.03,
+        "reasoning": "Implements standard consensus specs without novel research contributions. Focus is on a Rust-based implementation rather than protocol innovation.",
+        "raw_uncertainty": 0.5
+      },
+      "ecosystem_coordination": {
+        "score": 1,
+        "weight": 0.03,
+        "reasoning": "Not involved in EIP development, token standards, or governance frameworks. Solely an implementation of existing specs.",
+        "raw_uncertainty": 0.5
+      },
+      "community_trust": {
+        "score": 2,
+        "weight": 0.02,
+        "reasoning": "New project (initial commit in 2023) with limited contributors and community engagement. Lacks battle-testing or significant institutional backing.",
+        "raw_uncertainty": 0.5
+      },
+      "user_applications": {
+        "score": 1,
+        "weight": 0.02,
+        "reasoning": "No user-facing elements; it's a backend node client for validators/operators, not end-users.",
+        "raw_uncertainty": 0.5
+      }
+    },
+    "overall_reasoning": "Grandine is a functional Ethereum consensus client that supports client diversity but has minimal real-world impact due to low adoption, newness, and narrow scope. Its primary value lies in being a Rust-based alternative CL implementation, but it lacks innovation, ecosystem integration, or maturity to significantly influence the Ethereum ecosystem currently."
+  },
+  {
+    "repository_url": "https://github.com/hyperledger-web3j/web3j",
+    "repository_name": "web3j",
+    "target_score": 4.109999999999999,
+    "total_weight": 1.0,
+    "parsing_method": "perfect_json",
+    "parsing_success": true,
+    "parsing_warnings": [],
+    "criteria_scores": {
+      "core_protocol": {
+        "score": 1,
+        "weight": 0.25,
+        "reasoning": "web3j is a client library for interacting with Ethereum nodes, not a core protocol implementation like execution/consensus clients or L2 protocols. It builds upon existing standards rather than defining core functionality.",
+        "raw_uncertainty": 0.5
+      },
+      "market_adoption": {
+        "score": 7,
+        "weight": 0.2,
+        "reasoning": "Widely adopted in Java-based enterprise Ethereum projects with 4.5k+ GitHub stars and Hyperledger backing. However, JavaScript alternatives (web3.js, ethers.js) dominate broader developer adoption.",
+        "raw_uncertainty": 0.5
+      },
+      "developer_ecosystem": {
+        "score": 9,
+        "weight": 0.15,
+        "reasoning": "Essential tool for Java/Android developers building Ethereum applications. Provides type-safe smart contract integration, transaction handling, and node communication, accelerating development in this ecosystem.",
+        "raw_uncertainty": 0.5
+      },
+      "general_purpose_tools": {
+        "score": 1,
+        "weight": 0.1,
+        "reasoning": "Specialized Ethereum library, not a general-purpose tool like databases or web frameworks. Minimal relevance outside blockchain contexts.",
+        "raw_uncertainty": 0.5
+      },
+      "security_infrastructure": {
+        "score": 4,
+        "weight": 0.1,
+        "reasoning": "Enables secure interactions with Ethereum nodes but isn't a core security tool like audited libraries or cryptographic systems. Potential vulnerabilities could impact dependent applications.",
+        "raw_uncertainty": 0.5
+      },
+      "defi_infrastructure": {
+        "score": 3,
+        "weight": 0.05,
+        "reasoning": "Used to build DeFi applications but not a protocol itself (e.g., not a DEX or lending platform). Indirectly supports financial infrastructure through Java integrations.",
+        "raw_uncertainty": 0.5
+      },
+      "data_analytics": {
+        "score": 2,
+        "weight": 0.05,
+        "reasoning": "Provides basic blockchain data querying capabilities but isn't a dedicated analytics tool, explorer, or indexing solution. Limited to client-level data access.",
+        "raw_uncertainty": 0.5
+      },
+      "innovation_research": {
+        "score": 2,
+        "weight": 0.03,
+        "reasoning": "Focuses on practical Java integration rather than novel research. Implements existing standards without breakthrough innovations in cryptography or consensus.",
+        "raw_uncertainty": 0.5
+      },
+      "ecosystem_coordination": {
+        "score": 4,
+        "weight": 0.03,
+        "reasoning": "Implements EIPs/ERCs but doesn't drive standardization. Supports ecosystem coordination through Java compatibility without defining new standards.",
+        "raw_uncertainty": 0.5
+      },
+      "community_trust": {
+        "score": 8,
+        "weight": 0.02,
+        "reasoning": "Mature project (since 2016) under Hyperledger governance. Strong maintenance with 150+ releases, 400+ contributors, and enterprise adoption indicating high trust.",
+        "raw_uncertainty": 0.5
+      },
+      "user_applications": {
+        "score": 1,
+        "weight": 0.02,
+        "reasoning": "Backend library for developers, not a user-facing application. Enables wallet/application development but has no direct end-user interface.",
+        "raw_uncertainty": 0.5
+      }
+    },
+    "overall_reasoning": "web3j is a high-impact developer tool for Java/Android Ethereum integration with strong enterprise adoption, but it doesn't contribute to core protocol, user applications, or general infrastructure. Its primary value lies in enabling Java ecosystem development."
+  },
+  {
+    "repository_url": "https://github.com/hyperledger/besu",
+    "repository_name": "besu",
+    "target_score": 5.809999999999999,
+    "total_weight": 1.0,
+    "parsing_method": "perfect_json",
+    "parsing_success": true,
+    "parsing_warnings": [],
+    "criteria_scores": {
+      "core_protocol": {
+        "score": 8,
+        "weight": 0.25,
+        "reasoning": "Besu is a major Ethereum execution client written in Java, directly implementing the core protocol. While not the dominant client (like Geth), it is a production-grade alternative used by enterprises and public validators, qualifying as a major implementation.",
+        "raw_uncertainty": 0.5
+      },
+      "market_adoption": {
+        "score": 6,
+        "weight": 0.2,
+        "reasoning": "Besu holds a moderate market share (estimated 5-10% of execution clients) with strong enterprise adoption. It powers networks like ConsenSys Quorum but lacks dominance in public Ethereum nodes compared to Geth.",
+        "raw_uncertainty": 0.5
+      },
+      "developer_ecosystem": {
+        "score": 7,
+        "weight": 0.15,
+        "reasoning": "As an execution client, Besu provides foundational infrastructure (JSON-RPC API) for dapp developers and node operators. It enables development but isn't a direct tool like frameworks (e.g., Hardhat), limiting its impact on daily developer workflows.",
+        "raw_uncertainty": 0.5
+      },
+      "general_purpose_tools": {
+        "score": 1,
+        "weight": 0.1,
+        "reasoning": "Besu is a blockchain-specific client and does not provide general-purpose tools (e.g., databases, languages). It relies on such tools but doesn't contribute to this category.",
+        "raw_uncertainty": 0.5
+      },
+      "security_infrastructure": {
+        "score": 8,
+        "weight": 0.1,
+        "reasoning": "As a production execution client, Besu is security-critical; vulnerabilities could cause chain splits or network instability. Its enterprise focus and audits enhance reliability, though its moderate market share reduces systemic risk compared to dominant clients.",
+        "raw_uncertainty": 0.5
+      },
+      "defi_infrastructure": {
+        "score": 1,
+        "weight": 0.05,
+        "reasoning": "Besu supports the underlying infrastructure for DeFi but isn't a DeFi protocol, oracle, or bridge. It has no direct role in financial applications.",
+        "raw_uncertainty": 0.5
+      },
+      "data_analytics": {
+        "score": 4,
+        "weight": 0.05,
+        "reasoning": "Besu provides blockchain data via APIs and supports tracing, enabling analytics tools. However, it isn't a dedicated analytics platform (e.g., block explorers), limiting its specialization.",
+        "raw_uncertainty": 0.5
+      },
+      "innovation_research": {
+        "score": 5,
+        "weight": 0.03,
+        "reasoning": "Besu implements standard Ethereum features with some enterprise innovations (e.g., privacy via Orion). It focuses on production stability over cutting-edge research, offering incremental rather than breakthrough advances.",
+        "raw_uncertainty": 0.5
+      },
+      "ecosystem_coordination": {
+        "score": 2,
+        "weight": 0.03,
+        "reasoning": "Besu adheres to EIPs but doesn\u2019t drive standards development. Hyperledger\u2019s governance supports ecosystem alignment, but its role is primarily implementation-focused.",
+        "raw_uncertainty": 0.5
+      },
+      "community_trust": {
+        "score": 9,
+        "weight": 0.02,
+        "reasoning": "Backed by Hyperledger/ConsenSys with years of production use, Besu is battle-tested in enterprises. Active maintenance and corporate support ensure high trust, though public node operator adoption lags behind Geth.",
+        "raw_uncertainty": 0.5
+      },
+      "user_applications": {
+        "score": 1,
+        "weight": 0.02,
+        "reasoning": "Besu is a backend node client, not a user-facing application (e.g., wallet or dapp). End-users rarely interact with it directly.",
+        "raw_uncertainty": 0.5
+      }
+    },
+    "overall_reasoning": "Besu is a critical Ethereum execution client with strong enterprise adoption and security contributions but moderate public network share. It excels in core protocol implementation and infrastructure reliability but has minimal impact in DeFi, user applications, or general tools. Its Java-based approach offers diversity in the client ecosystem."
+  },
+  {
+    "repository_url": "https://github.com/nethereum/nethereum",
+    "repository_name": "nethereum",
+    "target_score": 3.7700000000000005,
+    "total_weight": 1.0,
+    "parsing_method": "perfect_json",
+    "parsing_success": true,
+    "parsing_warnings": [],
+    "criteria_scores": {
+      "core_protocol": {
+        "score": 1,
+        "weight": 0.25,
+        "reasoning": "Nethereum is a .NET integration library, not a core protocol client or L2 implementation. It interfaces with existing clients but doesn't implement consensus or execution layers.",
+        "raw_uncertainty": 0.5
+      },
+      "market_adoption": {
+        "score": 6,
+        "weight": 0.2,
+        "reasoning": "Widely adopted in .NET enterprise environments with 2.5k+ GitHub stars, but has lower market share compared to JavaScript alternatives like ethers.js in the broader ecosystem.",
+        "raw_uncertainty": 0.5
+      },
+      "developer_ecosystem": {
+        "score": 8,
+        "weight": 0.15,
+        "reasoning": "Essential tool for .NET developers, providing SDK features for smart contract interaction, transaction management, and account handling. Significantly lowers Ethereum development barriers for this ecosystem.",
+        "raw_uncertainty": 0.5
+      },
+      "general_purpose_tools": {
+        "score": 2,
+        "weight": 0.1,
+        "reasoning": "Specialized Ethereum library rather than a general-purpose tool. Built on .NET framework but doesn't constitute foundational infrastructure like databases or runtimes.",
+        "raw_uncertainty": 0.5
+      },
+      "security_infrastructure": {
+        "score": 4,
+        "weight": 0.1,
+        "reasoning": "Provides cryptographic functions and transaction signing capabilities, but isn't a primary security tool like audit frameworks or wallet cores. Security impact is indirect through application usage.",
+        "raw_uncertainty": 0.5
+      },
+      "defi_infrastructure": {
+        "score": 3,
+        "weight": 0.05,
+        "reasoning": "Enables DeFi application development in .NET but isn't a protocol itself. Used as a building block rather than core financial infrastructure.",
+        "raw_uncertainty": 0.5
+      },
+      "data_analytics": {
+        "score": 2,
+        "weight": 0.05,
+        "reasoning": "Supports basic blockchain data queries but isn't a dedicated analytics tool. Lacks advanced features like indexing or MEV analysis.",
+        "raw_uncertainty": 0.5
+      },
+      "innovation_research": {
+        "score": 1,
+        "weight": 0.03,
+        "reasoning": "Primarily an integration library without novel research contributions. Focuses on practical implementation rather than cryptographic or protocol innovation.",
+        "raw_uncertainty": 0.5
+      },
+      "ecosystem_coordination": {
+        "score": 2,
+        "weight": 0.03,
+        "reasoning": "Implements existing standards (e.g., ERCs) but doesn't drive standardization. Contributes to .NET interoperability rather than ecosystem-wide coordination.",
+        "raw_uncertainty": 0.5
+      },
+      "community_trust": {
+        "score": 8,
+        "weight": 0.02,
+        "reasoning": "Established since 2015 with consistent maintenance, ConsenSys backing, and strong .NET community adoption. High trust within its niche.",
+        "raw_uncertainty": 0.5
+      },
+      "user_applications": {
+        "score": 1,
+        "weight": 0.02,
+        "reasoning": "Backend library for developers, not a direct user-facing application. Enables wallet/dApp creation but isn't an end-user product.",
+        "raw_uncertainty": 0.5
+      }
+    },
+    "overall_reasoning": "Nethereum is a critical enabler for .NET developers in the Ethereum ecosystem, providing essential integration capabilities. Its primary impact is in developer tooling rather than core protocol, infrastructure, or end-user applications. Strengths lie in ecosystem accessibility for enterprise .NET environments."
+  },
+  {
+    "repository_url": "https://github.com/nethermindeth/nethermind",
+    "repository_name": "nethermind",
+    "target_score": 6.789999999999999,
+    "total_weight": 1.0,
+    "parsing_method": "perfect_json",
+    "parsing_success": true,
+    "parsing_warnings": [],
+    "criteria_scores": {
+      "core_protocol": {
+        "score": 10,
+        "weight": 0.25,
+        "reasoning": "Nethermind is a major Ethereum execution client, implementing core protocol functionality essential for transaction processing and block validation. As a production-grade client with significant network usage, it qualifies as a major implementation.",
+        "raw_uncertainty": 0.5
+      },
+      "market_adoption": {
+        "score": 8,
+        "weight": 0.2,
+        "reasoning": "Holds ~10-15% of execution client market share among Ethereum validators, with substantial enterprise adoption. Significant but not dominant compared to Geth.",
+        "raw_uncertainty": 0.5
+      },
+      "developer_ecosystem": {
+        "score": 6,
+        "weight": 0.15,
+        "reasoning": "Provides critical JSON-RPC APIs for dApp development and .NET integration options, but isn't a primary smart contract development tool. Supports infrastructure rather than direct coding workflows.",
+        "raw_uncertainty": 0.5
+      },
+      "general_purpose_tools": {
+        "score": 1,
+        "weight": 0.1,
+        "reasoning": "Specialized blockchain client with no use cases outside Ethereum ecosystem. Not a general-purpose tool like databases or programming languages.",
+        "raw_uncertainty": 0.5
+      },
+      "security_infrastructure": {
+        "score": 9,
+        "weight": 0.1,
+        "reasoning": "As an execution client, it's security-critical infrastructure. Vulnerabilities could cause chain splits or network instability, but client diversity mitigates single-point risks.",
+        "raw_uncertainty": 0.5
+      },
+      "defi_infrastructure": {
+        "score": 1,
+        "weight": 0.05,
+        "reasoning": "Provides foundational layer for DeFi but doesn't implement protocols, oracles, or financial primitives directly. Minimal direct impact.",
+        "raw_uncertainty": 0.5
+      },
+      "data_analytics": {
+        "score": 7,
+        "weight": 0.05,
+        "reasoning": "Supports advanced tracing and data export features used by blockchain explorers and analytics tools, but isn't a primary data solution like The Graph.",
+        "raw_uncertainty": 0.5
+      },
+      "innovation_research": {
+        "score": 4,
+        "weight": 0.03,
+        "reasoning": "Focuses on performance optimizations (e.g., state sync speed) rather than novel research. Implements rather than pioneers cryptographic breakthroughs.",
+        "raw_uncertainty": 0.5
+      },
+      "ecosystem_coordination": {
+        "score": 3,
+        "weight": 0.03,
+        "reasoning": "Actively implements EIPs but doesn't drive standardization. Contributes to client diversity discussions without maintaining core standards.",
+        "raw_uncertainty": 0.5
+      },
+      "community_trust": {
+        "score": 8,
+        "weight": 0.02,
+        "reasoning": "Established since 2017, professionally maintained with corporate backing (Nethermind Ltd), regular updates, and strong validator trust. Battle-tested in production.",
+        "raw_uncertainty": 0.5
+      },
+      "user_applications": {
+        "score": 1,
+        "weight": 0.02,
+        "reasoning": "Backend node software with no direct end-user interface. Wallets/exchanges may use its RPCs, but it's not user-facing.",
+        "raw_uncertainty": 0.5
+      }
+    },
+    "overall_reasoning": "Nethermind is a critical Ethereum execution client with strong adoption and security importance. It excels in core protocol implementation and infrastructure but has limited impact in DeFi, user applications, or general tools. Its .NET foundation provides ecosystem diversity."
+  },
+  {
+    "repository_url": "https://github.com/nomicfoundation/hardhat",
+    "repository_name": "hardhat",
+    "target_score": 4.889999999999999,
+    "total_weight": 1.0,
+    "parsing_method": "perfect_json",
+    "parsing_success": true,
+    "parsing_warnings": [],
+    "criteria_scores": {
+      "core_protocol": {
+        "score": 1,
+        "weight": 0.25,
+        "reasoning": "Hardhat is a development environment, not a core protocol implementation like an execution or consensus client. It doesn't handle Ethereum's core protocol operations.",
+        "raw_uncertainty": 0.5
+      },
+      "market_adoption": {
+        "score": 9,
+        "weight": 0.2,
+        "reasoning": "Hardhat is the most widely used Ethereum development framework with extensive adoption. It dominates developer tooling with ~80% market share among Solidity developers and integrates with major projects.",
+        "raw_uncertainty": 0.5
+      },
+      "developer_ecosystem": {
+        "score": 10,
+        "weight": 0.15,
+        "reasoning": "As a comprehensive development framework, Hardhat is essential for compiling, testing, and deploying smart contracts. It accelerates Ethereum development and is used by the vast majority of dApp developers.",
+        "raw_uncertainty": 0.5
+      },
+      "general_purpose_tools": {
+        "score": 1,
+        "weight": 0.1,
+        "reasoning": "Hardhat is Ethereum-specific and not a general-purpose tool like programming languages or databases. It relies on Node.js but doesn't serve as a universal dependency.",
+        "raw_uncertainty": 0.5
+      },
+      "security_infrastructure": {
+        "score": 7,
+        "weight": 0.1,
+        "reasoning": "Hardhat's testing, debugging, and plugin ecosystem (e.g., security analysis tools) help prevent vulnerabilities. It's critical for developing secure contracts but isn't core security infrastructure like audited libraries.",
+        "raw_uncertainty": 0.5
+      },
+      "defi_infrastructure": {
+        "score": 1,
+        "weight": 0.05,
+        "reasoning": "Hardhat is used to build DeFi protocols but isn't financial infrastructure itself. It doesn't handle core DeFi operations like oracles or liquidity pools.",
+        "raw_uncertainty": 0.5
+      },
+      "data_analytics": {
+        "score": 1,
+        "weight": 0.05,
+        "reasoning": "Hardhat focuses on development workflows, not data analysis. While it can fork mainnet for testing, it doesn't provide analytics or indexing capabilities.",
+        "raw_uncertainty": 0.5
+      },
+      "innovation_research": {
+        "score": 5,
+        "weight": 0.03,
+        "reasoning": "Hardhat introduced practical innovations like Solidity console.log and mainnet forking, improving developer experience. However, it doesn't advance cryptographic research or novel protocols.",
+        "raw_uncertainty": 0.5
+      },
+      "ecosystem_coordination": {
+        "score": 3,
+        "weight": 0.03,
+        "reasoning": "Hardhat supports EIP standards but doesn't drive standardization. It facilitates implementation of standards rather than defining them.",
+        "raw_uncertainty": 0.5
+      },
+      "community_trust": {
+        "score": 9,
+        "weight": 0.02,
+        "reasoning": "Maintained by the Nomic Foundation since 2019, Hardhat is battle-tested with high activity (30k+ GitHub stars). It's the industry standard with strong corporate backing.",
+        "raw_uncertainty": 0.5
+      },
+      "user_applications": {
+        "score": 1,
+        "weight": 0.02,
+        "reasoning": "Hardhat is a developer tool, not an end-user application. End-users interact with dApps built using Hardhat, not with Hardhat itself.",
+        "raw_uncertainty": 0.5
+      }
+    },
+    "overall_reasoning": "Hardhat is foundational to Ethereum's developer ecosystem, driving efficiency and adoption through its dominant development framework. Its impact is strongest in developer tooling and security workflows, though it doesn't contribute to core protocol, DeFi, or user-facing layers."
+  },
+  {
+    "repository_url": "https://github.com/openzeppelin/openzeppelin-contracts",
+    "repository_name": "openzeppelin-contracts",
+    "target_score": 5.93,
+    "total_weight": 1.0,
+    "parsing_method": "perfect_json",
+    "parsing_success": true,
+    "parsing_warnings": [],
+    "criteria_scores": {
+      "core_protocol": {
+        "score": 1,
+        "weight": 0.25,
+        "reasoning": "Not a core protocol implementation (e.g., client or L2). Provides smart contract templates but doesn't implement Ethereum's consensus or execution layers.",
+        "raw_uncertainty": 0.5
+      },
+      "market_adoption": {
+        "score": 10,
+        "weight": 0.2,
+        "reasoning": "Dominant adoption: Used in >80% of major DeFi/NFT projects (Uniswap, Aave, etc.) with billions in TVL. Industry-standard for secure contract development.",
+        "raw_uncertainty": 0.5
+      },
+      "developer_ecosystem": {
+        "score": 10,
+        "weight": 0.15,
+        "reasoning": "Essential developer tool: Foundational library for Solidity development. Enables secure, standardized contract creation and accelerates Ethereum development lifecycle.",
+        "raw_uncertainty": 0.5
+      },
+      "general_purpose_tools": {
+        "score": 1,
+        "weight": 0.1,
+        "reasoning": "Ethereum-specific library, not a general-purpose tool like programming languages or databases. Minimal relevance to non-blockchain contexts.",
+        "raw_uncertainty": 0.5
+      },
+      "security_infrastructure": {
+        "score": 10,
+        "weight": 0.1,
+        "reasoning": "Security-critical infrastructure: Audited implementations prevent vulnerabilities. Widely trusted for key components like access control and token standards.",
+        "raw_uncertainty": 0.5
+      },
+      "defi_infrastructure": {
+        "score": 9,
+        "weight": 0.05,
+        "reasoning": "Systemic infrastructure: Underpins major DeFi protocols (e.g., Compound, MakerDAO) through reusable, secure components like ERC-20/ERC-721 implementations.",
+        "raw_uncertainty": 0.5
+      },
+      "data_analytics": {
+        "score": 1,
+        "weight": 0.05,
+        "reasoning": "No direct role in data analysis or blockchain explorers. Focused on contract logic, not data infrastructure.",
+        "raw_uncertainty": 0.5
+      },
+      "innovation_research": {
+        "score": 4,
+        "weight": 0.03,
+        "reasoning": "Primarily implements established standards (e.g., ERCs). Contributes incremental security improvements but not breakthrough research.",
+        "raw_uncertainty": 0.5
+      },
+      "ecosystem_coordination": {
+        "score": 8,
+        "weight": 0.03,
+        "reasoning": "Critical for standards adoption: Reference implementation for ERC standards. Accelerates ecosystem-wide compatibility.",
+        "raw_uncertainty": 0.5
+      },
+      "community_trust": {
+        "score": 10,
+        "weight": 0.02,
+        "reasoning": "Battle-tested since 2016. Backed by OpenZeppelin (audit leader), with high maintenance activity and community trust.",
+        "raw_uncertainty": 0.5
+      },
+      "user_applications": {
+        "score": 1,
+        "weight": 0.02,
+        "reasoning": "Backend library, not user-facing. Enables applications but doesn't provide direct user interfaces.",
+        "raw_uncertainty": 0.5
+      }
+    },
+    "overall_reasoning": "OpenZeppelin Contracts is a foundational security library with massive adoption across Ethereum's developer ecosystem. Its highest impact is in enabling secure smart contract development (market adoption, developer tools, security), though it doesn't contribute to core protocol or data infrastructure."
+  },
+  {
+    "repository_url": "https://github.com/paradigmxyz/reth",
+    "repository_name": "reth",
+    "target_score": 4.829999999999998,
+    "total_weight": 1.0,
+    "parsing_method": "perfect_json",
+    "parsing_success": true,
+    "parsing_warnings": [],
+    "criteria_scores": {
+      "core_protocol": {
+        "score": 8,
+        "weight": 0.25,
+        "reasoning": "Reth is a full Ethereum execution layer client implementing core protocol functionality. As a major alternative client written in Rust with modular architecture, it contributes to client diversity but isn't yet production-ready on mainnet.",
+        "raw_uncertainty": 0.5
+      },
+      "market_adoption": {
+        "score": 2,
+        "weight": 0.2,
+        "reasoning": "Currently in alpha stage with no significant mainnet adoption. Backed by Paradigm, it has developer interest but negligible network share among validators or nodes.",
+        "raw_uncertainty": 0.5
+      },
+      "developer_ecosystem": {
+        "score": 6,
+        "weight": 0.15,
+        "reasoning": "Provides essential infrastructure for node operators and client developers. Its modular design and Rust implementation offer new development patterns, but doesn't directly enable dApp creation like frameworks or libraries.",
+        "raw_uncertainty": 0.5
+      },
+      "general_purpose_tools": {
+        "score": 1,
+        "weight": 0.1,
+        "reasoning": "Specialized blockchain implementation without broader utility as a general-purpose tool. Relies on but doesn't contribute to universal dependencies.",
+        "raw_uncertainty": 0.5
+      },
+      "security_infrastructure": {
+        "score": 7,
+        "weight": 0.1,
+        "reasoning": "As an execution client, it's inherently security-critical infrastructure. Its Rust implementation emphasizes memory safety, but lack of mainnet deployment limits current real-world security impact.",
+        "raw_uncertainty": 0.5
+      },
+      "defi_infrastructure": {
+        "score": 1,
+        "weight": 0.05,
+        "reasoning": "Indirectly supports DeFi through base-layer functionality but isn't a DeFi protocol, oracle, or financial primitive itself.",
+        "raw_uncertainty": 0.5
+      },
+      "data_analytics": {
+        "score": 4,
+        "weight": 0.05,
+        "reasoning": "Provides execution layer data through its node implementation. Performance-focused architecture could benefit analytics, but doesn't specialize in data tooling.",
+        "raw_uncertainty": 0.5
+      },
+      "innovation_research": {
+        "score": 9,
+        "weight": 0.03,
+        "reasoning": "Introduces significant innovations: modular architecture, performance optimizations, and Rust implementation patterns that advance client design. Influences execution layer research.",
+        "raw_uncertainty": 0.5
+      },
+      "ecosystem_coordination": {
+        "score": 3,
+        "weight": 0.03,
+        "reasoning": "Implements existing standards but doesn't drive new EIPs or coordination efforts. Contributes to client diversity which supports ecosystem health.",
+        "raw_uncertainty": 0.5
+      },
+      "community_trust": {
+        "score": 5,
+        "weight": 0.02,
+        "reasoning": "Backed by reputable Paradigm with active development, but still pre-mainnet (alpha). Growing contributor community but lacks production track record.",
+        "raw_uncertainty": 0.5
+      },
+      "user_applications": {
+        "score": 1,
+        "weight": 0.02,
+        "reasoning": "Infrastructure component not directly user-facing. Enables node services but doesn't provide end-user interfaces like wallets or dApps.",
+        "raw_uncertainty": 0.5
+      }
+    },
+    "overall_reasoning": "Reth is a promising next-generation Ethereum execution client with strong technical foundations and innovation potential. Its high scores in core protocol and innovation reflect its architectural significance, but limited adoption and pre-production status reduce current ecosystem impact. Weighted score emphasizes its future importance over present usage."
+  },
+  {
+    "repository_url": "https://github.com/prysmaticlabs/prysm",
+    "repository_name": "prysm",
+    "target_score": 6.939999999999999,
+    "total_weight": 1.0,
+    "parsing_method": "perfect_json",
+    "parsing_success": true,
+    "parsing_warnings": [],
+    "criteria_scores": {
+      "core_protocol": {
+        "score": 10,
+        "weight": 0.25,
+        "reasoning": "Prysm is a major Go implementation of Ethereum's consensus protocol (beacon chain/validator client), directly enabling Ethereum's proof-of-stake operation. As one of the original and most widely adopted consensus clients, it qualifies as a major implementation under scoring guidance.",
+        "raw_uncertainty": 0.5
+      },
+      "market_adoption": {
+        "score": 9,
+        "weight": 0.2,
+        "reasoning": "Prysm consistently holds 30-45% of Ethereum's consensus client market share among validators, making it a dominant player. High node operator adoption and integration with staking services demonstrate significant network effects.",
+        "raw_uncertainty": 0.5
+      },
+      "developer_ecosystem": {
+        "score": 6,
+        "weight": 0.15,
+        "reasoning": "Primarily impacts node operators and infrastructure developers rather than dApp builders. Provides essential tooling for validator setup but isn't a core development framework like Hardhat or Foundry.",
+        "raw_uncertainty": 0.5
+      },
+      "general_purpose_tools": {
+        "score": 1,
+        "weight": 0.1,
+        "reasoning": "Highly specialized blockchain component with no use outside Ethereum consensus operations. Not a general-purpose library, framework, or tool.",
+        "raw_uncertainty": 0.5
+      },
+      "security_infrastructure": {
+        "score": 10,
+        "weight": 0.1,
+        "reasoning": "Critical security infrastructure: bugs could cause chain splits or network instability. As a battle-tested client securing billions in value, it's foundational to Ethereum's security model.",
+        "raw_uncertainty": 0.5
+      },
+      "defi_infrastructure": {
+        "score": 1,
+        "weight": 0.05,
+        "reasoning": "Indirectly supports DeFi by securing the network but isn't a DeFi protocol, oracle, or financial primitive. No direct impact on financial infrastructure.",
+        "raw_uncertainty": 0.5
+      },
+      "data_analytics": {
+        "score": 3,
+        "weight": 0.05,
+        "reasoning": "Provides beacon chain data via APIs but isn't an analytics tool or explorer. Minor secondary role in data accessibility for block explorers.",
+        "raw_uncertainty": 0.5
+      },
+      "innovation_research": {
+        "score": 5,
+        "weight": 0.03,
+        "reasoning": "Pioneered early proof-of-stake implementation but now focuses on protocol compliance rather than novel research. Contributes incremental optimizations to consensus mechanisms.",
+        "raw_uncertainty": 0.5
+      },
+      "ecosystem_coordination": {
+        "score": 3,
+        "weight": 0.03,
+        "reasoning": "Implements EIPs/standards but doesn't create them. Minor contributions to consensus specifications through client feedback.",
+        "raw_uncertainty": 0.5
+      },
+      "community_trust": {
+        "score": 9,
+        "weight": 0.02,
+        "reasoning": "Battle-tested since 2020 launch, backed by Prysmatic Labs. High community trust despite past incidents, with active maintenance (1k+ releases) and large validator userbase.",
+        "raw_uncertainty": 0.5
+      },
+      "user_applications": {
+        "score": 1,
+        "weight": 0.02,
+        "reasoning": "Backend infrastructure for validators, not a user-facing application. No direct end-user interaction like wallets or dApps.",
+        "raw_uncertainty": 0.5
+      }
+    },
+    "overall_reasoning": "Prysm is critically important as Ethereum's most adopted consensus client, directly securing the network and enabling proof-of-stake. Its high scores in core protocol and security reflect this centrality, though it has minimal impact in non-infrastructure areas like DeFi or user applications."
+  },
+  {
+    "repository_url": "https://github.com/psf/requests",
+    "repository_name": "requests",
+    "target_score": 5.08,
+    "total_weight": 1.0,
+    "parsing_method": "perfect_json",
+    "parsing_success": true,
+    "parsing_warnings": [],
+    "criteria_scores": {
+      "core_protocol": {
+        "score": 1,
+        "weight": 0.25,
+        "reasoning": "General HTTP library with no direct role in Ethereum protocol implementation, clients, or layer-2 solutions.",
+        "raw_uncertainty": 0.5
+      },
+      "market_adoption": {
+        "score": 8,
+        "weight": 0.2,
+        "reasoning": "Ubiquitous in Python ecosystem; indirectly supports Ethereum tools but lacks direct Ethereum market share metrics (e.g., node/validator adoption).",
+        "raw_uncertainty": 0.5
+      },
+      "developer_ecosystem": {
+        "score": 9,
+        "weight": 0.15,
+        "reasoning": "Foundational for Python-based Ethereum development (e.g., web3.py RPC calls); essential for HTTP interactions in tooling.",
+        "raw_uncertainty": 0.5
+      },
+      "general_purpose_tools": {
+        "score": 10,
+        "weight": 0.1,
+        "reasoning": "Universal Python HTTP library; critical dependency for countless applications including Ethereum toolchains.",
+        "raw_uncertainty": 0.5
+      },
+      "security_infrastructure": {
+        "score": 5,
+        "weight": 0.1,
+        "reasoning": "Vulnerabilities could impact Ethereum tools, but not purpose-built for security functions like audits or cryptography.",
+        "raw_uncertainty": 0.5
+      },
+      "defi_infrastructure": {
+        "score": 1,
+        "weight": 0.05,
+        "reasoning": "No direct relationship with DeFi protocols, oracles, or financial infrastructure.",
+        "raw_uncertainty": 0.5
+      },
+      "data_analytics": {
+        "score": 1,
+        "weight": 0.05,
+        "reasoning": "May facilitate data fetching for analytics tools but isn't blockchain-specific data infrastructure.",
+        "raw_uncertainty": 0.5
+      },
+      "innovation_research": {
+        "score": 1,
+        "weight": 0.03,
+        "reasoning": "Mature, stable library without novel Ethereum-focused research or cryptographic breakthroughs.",
+        "raw_uncertainty": 0.5
+      },
+      "ecosystem_coordination": {
+        "score": 1,
+        "weight": 0.03,
+        "reasoning": "Not involved in EIPs, token standards, or Ethereum governance mechanisms.",
+        "raw_uncertainty": 0.5
+      },
+      "community_trust": {
+        "score": 10,
+        "weight": 0.02,
+        "reasoning": "Highly mature (since 2011), PSF-backed, battle-tested with massive community trust and maintenance.",
+        "raw_uncertainty": 0.5
+      },
+      "user_applications": {
+        "score": 1,
+        "weight": 0.02,
+        "reasoning": "Backend library; not a direct user-facing application like wallets or dApps.",
+        "raw_uncertainty": 0.5
+      }
+    },
+    "overall_reasoning": "Requests is a foundational Python HTTP library critical for Ethereum development tooling (e.g., enabling RPC communications) but lacks direct Ethereum-specific innovations or protocol roles. Its value derives from universal adoption supporting the developer ecosystem."
+  },
+  {
+    "repository_url": "https://github.com/pydantic/pydantic",
+    "repository_name": "pydantic",
+    "target_score": 4.26,
+    "total_weight": 1.0,
+    "parsing_method": "perfect_json",
+    "parsing_success": true,
+    "parsing_warnings": [],
+    "criteria_scores": {
+      "core_protocol": {
+        "score": 1,
+        "weight": 0.25,
+        "reasoning": "Pydantic is a general-purpose Python data validation library with no direct role in Ethereum protocol implementation, client development, or layer 2 solutions.",
+        "raw_uncertainty": 0.5
+      },
+      "market_adoption": {
+        "score": 4,
+        "weight": 0.2,
+        "reasoning": "While widely adopted in Python ecosystems (including some Ethereum-adjacent tools), it lacks direct Ethereum network effects like validator share or protocol-specific TVL.",
+        "raw_uncertainty": 0.5
+      },
+      "developer_ecosystem": {
+        "score": 8,
+        "weight": 0.15,
+        "reasoning": "As a foundational Python validation library, it accelerates development of Ethereum tooling (e.g., backends, APIs) but isn't Ethereum-specific. Qualifies as a widely-used library.",
+        "raw_uncertainty": 0.5
+      },
+      "general_purpose_tools": {
+        "score": 10,
+        "weight": 0.1,
+        "reasoning": "Core dependency for Python data modeling used across web frameworks (FastAPI), data pipelines, and tooling. Universal dependency for Python-based Ethereum projects.",
+        "raw_uncertainty": 0.5
+      },
+      "security_infrastructure": {
+        "score": 5,
+        "weight": 0.1,
+        "reasoning": "Indirectly enhances security through robust data validation in applications, but not a primary security tool for smart contracts or cryptographic operations.",
+        "raw_uncertainty": 0.5
+      },
+      "defi_infrastructure": {
+        "score": 1,
+        "weight": 0.05,
+        "reasoning": "No direct relationship with DeFi protocols, oracles, or financial infrastructure. Potential indirect usage in backend systems only.",
+        "raw_uncertainty": 0.5
+      },
+      "data_analytics": {
+        "score": 3,
+        "weight": 0.05,
+        "reasoning": "Used for structuring data in analytics pipelines but not a core blockchain data tool (e.g., explorers, indexers). Limited Ethereum-specific impact.",
+        "raw_uncertainty": 0.5
+      },
+      "innovation_research": {
+        "score": 2,
+        "weight": 0.03,
+        "reasoning": "Focuses on practical data validation rather than blockchain research. No novel cryptographic or consensus contributions.",
+        "raw_uncertainty": 0.5
+      },
+      "ecosystem_coordination": {
+        "score": 1,
+        "weight": 0.03,
+        "reasoning": "Not involved in Ethereum standards (EIPs), token specifications, or governance frameworks.",
+        "raw_uncertainty": 0.5
+      },
+      "community_trust": {
+        "score": 9,
+        "weight": 0.02,
+        "reasoning": "Highly mature (since 2017), well-maintained, and trusted in Python ecosystems. Used in production by major organizations.",
+        "raw_uncertainty": 0.5
+      },
+      "user_applications": {
+        "score": 2,
+        "weight": 0.02,
+        "reasoning": "Backend library with no direct user-facing functionality (e.g., wallets, dApps). Indirectly supports application development.",
+        "raw_uncertainty": 0.5
+      }
+    },
+    "overall_reasoning": "Pydantic is a critical general-purpose Python tool that indirectly supports Ethereum development through data validation in backend systems and tooling. Its highest impact is in developer productivity and as a universal dependency, but it lacks direct Ethereum protocol relevance."
+  },
+  {
+    "repository_url": "https://github.com/readthedocs/sphinx_rtd_theme",
+    "repository_name": "sphinx_rtd_theme",
+    "target_score": 3.4,
+    "total_weight": 1.0,
+    "parsing_method": "perfect_json",
+    "parsing_success": true,
+    "parsing_warnings": [],
+    "criteria_scores": {
+      "core_protocol": {
+        "score": 1,
+        "weight": 0.25,
+        "reasoning": "Theme for documentation generation; no relation to Ethereum protocol, clients, or layer 2 implementations.",
+        "raw_uncertainty": 0.5
+      },
+      "market_adoption": {
+        "score": 4,
+        "weight": 0.2,
+        "reasoning": "Widely used for documentation across open-source projects (including Ethereum tools), but not Ethereum-specific. No direct impact on validators/TVL.",
+        "raw_uncertainty": 0.5
+      },
+      "developer_ecosystem": {
+        "score": 7,
+        "weight": 0.15,
+        "reasoning": "Essential for creating readable documentation (used by Ethereum projects like web3.py). Supports developer experience but isn't a core coding tool.",
+        "raw_uncertainty": 0.5
+      },
+      "general_purpose_tools": {
+        "score": 8,
+        "weight": 0.1,
+        "reasoning": "Widely adopted Sphinx theme for documentation across all tech stacks. Critical dependency for projects using ReadTheDocs.",
+        "raw_uncertainty": 0.5
+      },
+      "security_infrastructure": {
+        "score": 1,
+        "weight": 0.1,
+        "reasoning": "Documentation theme with no security role in Ethereum operations (e.g., no smart contract audits or key management).",
+        "raw_uncertainty": 0.5
+      },
+      "defi_infrastructure": {
+        "score": 1,
+        "weight": 0.05,
+        "reasoning": "No relation to DeFi protocols, oracles, or financial infrastructure.",
+        "raw_uncertainty": 0.5
+      },
+      "data_analytics": {
+        "score": 1,
+        "weight": 0.05,
+        "reasoning": "Not involved in blockchain data processing, analytics, or MEV.",
+        "raw_uncertainty": 0.5
+      },
+      "innovation_research": {
+        "score": 1,
+        "weight": 0.03,
+        "reasoning": "Standard documentation theme with no novel cryptography or consensus research contributions.",
+        "raw_uncertainty": 0.5
+      },
+      "ecosystem_coordination": {
+        "score": 1,
+        "weight": 0.03,
+        "reasoning": "Not involved in EIPs, token standards, or governance tooling.",
+        "raw_uncertainty": 0.5
+      },
+      "community_trust": {
+        "score": 9,
+        "weight": 0.02,
+        "reasoning": "Mature project (since 2013), backed by ReadTheDocs. High GitHub activity (4k+ stars) and trusted in open-source circles.",
+        "raw_uncertainty": 0.5
+      },
+      "user_applications": {
+        "score": 3,
+        "weight": 0.02,
+        "reasoning": "Indirectly supports end-user documentation readability but isn't a direct application like wallets or dApps.",
+        "raw_uncertainty": 0.5
+      }
+    },
+    "overall_reasoning": "sphinx_rtd_theme is a widely used documentation tool that indirectly supports Ethereum development through improved documentation experiences. It scores highest in general-purpose utility and developer ecosystem impact but has no direct role in core protocol, DeFi, security, or innovation. Its maturity and adoption make it a trusted ancillary tool."
+  },
+  {
+    "repository_url": "https://github.com/safe-global/safe-smart-account",
+    "repository_name": "safe-smart-account",
+    "target_score": 5.760000000000002,
+    "total_weight": 1.0,
+    "parsing_method": "perfect_json",
+    "parsing_success": true,
+    "parsing_warnings": [],
+    "criteria_scores": {
+      "core_protocol": {
+        "score": 1,
+        "weight": 0.25,
+        "reasoning": "Implements application-layer smart contract wallet functionality, not core Ethereum protocol elements like consensus or execution clients.",
+        "raw_uncertainty": 0.5
+      },
+      "market_adoption": {
+        "score": 10,
+        "weight": 0.2,
+        "reasoning": "Dominant smart account solution securing >$100B in assets, used by most major DAOs and institutions. Represents systemic infrastructure with network effects.",
+        "raw_uncertainty": 0.5
+      },
+      "developer_ecosystem": {
+        "score": 7,
+        "weight": 0.15,
+        "reasoning": "Provides core contracts for building on Safe ecosystem, but not a general-purpose development tool. Specialized impact through SDKs and plugin architecture.",
+        "raw_uncertainty": 0.5
+      },
+      "general_purpose_tools": {
+        "score": 1,
+        "weight": 0.1,
+        "reasoning": "Ethereum-specific smart contracts with no use outside blockchain context. Not a general-purpose tool.",
+        "raw_uncertainty": 0.5
+      },
+      "security_infrastructure": {
+        "score": 10,
+        "weight": 0.1,
+        "reasoning": "Security-critical infrastructure securing billions in assets. Audited battle-tested contracts form foundational wallet security layer.",
+        "raw_uncertainty": 0.5
+      },
+      "defi_infrastructure": {
+        "score": 8,
+        "weight": 0.05,
+        "reasoning": "Core treasury management infrastructure for DeFi protocols and DAOs, though not a DeFi protocol itself. Enables secure fund management.",
+        "raw_uncertainty": 0.5
+      },
+      "data_analytics": {
+        "score": 1,
+        "weight": 0.05,
+        "reasoning": "No inherent data/analytics capabilities. External tools index its contract interactions.",
+        "raw_uncertainty": 0.5
+      },
+      "innovation_research": {
+        "score": 8,
+        "weight": 0.03,
+        "reasoning": "Pioneered modular account abstraction with social recovery and plugin system. Significant influence on ERC-4337 standards.",
+        "raw_uncertainty": 0.5
+      },
+      "ecosystem_coordination": {
+        "score": 9,
+        "weight": 0.03,
+        "reasoning": "De facto standard for multisig wallets. Implements token standards but doesn't maintain core EIP repositories.",
+        "raw_uncertainty": 0.5
+      },
+      "community_trust": {
+        "score": 10,
+        "weight": 0.02,
+        "reasoning": "Battle-tested since 2018, backed by SafeDAO. High community trust with active maintenance and institutional adoption.",
+        "raw_uncertainty": 0.5
+      },
+      "user_applications": {
+        "score": 10,
+        "weight": 0.02,
+        "reasoning": "Core infrastructure for dominant smart wallet used by end-users and institutions. Enables key user applications.",
+        "raw_uncertainty": 0.5
+      }
+    },
+    "overall_reasoning": "Safe Smart Account is foundational security infrastructure with massive adoption (>$100B TVL) but not core protocol. Excels in security criticality, market dominance, and setting de facto standards for smart accounts. Weak in protocol/core tooling areas."
+  },
+  {
+    "repository_url": "https://github.com/scaffold-eth/scaffold-eth-2",
+    "repository_name": "scaffold-eth-2",
+    "target_score": 3.9999999999999996,
+    "total_weight": 1.0,
+    "parsing_method": "perfect_json",
+    "parsing_success": true,
+    "parsing_warnings": [],
+    "criteria_scores": {
+      "core_protocol": {
+        "score": 1,
+        "weight": 0.25,
+        "reasoning": "Scaffold-eth-2 is a development toolkit, not a core protocol implementation. It doesn't implement Ethereum clients, consensus mechanisms, or layer-2 protocols.",
+        "raw_uncertainty": 0.5
+      },
+      "market_adoption": {
+        "score": 6,
+        "weight": 0.2,
+        "reasoning": "Widely used for prototyping and education (8.5k+ GitHub stars), but doesn't directly drive network effects like client adoption or TVL. Popular in hackathons and tutorials.",
+        "raw_uncertainty": 0.5
+      },
+      "developer_ecosystem": {
+        "score": 9,
+        "weight": 0.15,
+        "reasoning": "Essential toolkit accelerating dApp development with integrated frontend/contract templates, testing, and deployment tools. Significantly lowers Ethereum development barriers.",
+        "raw_uncertainty": 0.5
+      },
+      "general_purpose_tools": {
+        "score": 3,
+        "weight": 0.1,
+        "reasoning": "Bundles general tools like React and Hardhat, but isn't a foundational dependency itself. Serves as a curated stack rather than a core infrastructure component.",
+        "raw_uncertainty": 0.5
+      },
+      "security_infrastructure": {
+        "score": 4,
+        "weight": 0.1,
+        "reasoning": "Includes security patterns and testing setups but isn't a security-critical tool like audited libraries or key management systems. Focuses on development safety.",
+        "raw_uncertainty": 0.5
+      },
+      "defi_infrastructure": {
+        "score": 2,
+        "weight": 0.05,
+        "reasoning": "Provides templates for DeFi apps but doesn't constitute financial infrastructure itself. Enables rather than implements protocols.",
+        "raw_uncertainty": 0.5
+      },
+      "data_analytics": {
+        "score": 1,
+        "weight": 0.05,
+        "reasoning": "No inherent data/analytics capabilities. May integrate with such tools but doesn't contribute to blockchain data pipelines.",
+        "raw_uncertainty": 0.5
+      },
+      "innovation_research": {
+        "score": 3,
+        "weight": 0.03,
+        "reasoning": "Innovates in developer experience and rapid prototyping, but doesn't advance core cryptography or consensus research. Focuses on practical tooling.",
+        "raw_uncertainty": 0.5
+      },
+      "ecosystem_coordination": {
+        "score": 2,
+        "weight": 0.03,
+        "reasoning": "Implements existing standards (e.g., ERC-20) in examples but doesn't drive new standards or governance mechanisms.",
+        "raw_uncertainty": 0.5
+      },
+      "community_trust": {
+        "score": 8,
+        "weight": 0.02,
+        "reasoning": "Highly trusted (8.5k+ stars, active maintenance), backed by Ethereum Foundation alumni. Established since 2021 with consistent updates.",
+        "raw_uncertainty": 0.5
+      },
+      "user_applications": {
+        "score": 2,
+        "weight": 0.02,
+        "reasoning": "Framework for building user applications (wallets/dApps), not an end-user product itself. Enables but doesn't directly provide user interfaces.",
+        "raw_uncertainty": 0.5
+      }
+    },
+    "overall_reasoning": "Scaffold-eth-2 is a high-impact developer toolkit that significantly accelerates Ethereum dApp development and education, though it doesn't contribute to core protocol, financial infrastructure, or data layers. Its primary value lies in ecosystem onboarding and development velocity."
+  },
+  {
+    "repository_url": "https://github.com/sigp/lighthouse",
+    "repository_name": "lighthouse",
+    "target_score": 7.139999999999999,
+    "total_weight": 1.0,
+    "parsing_method": "perfect_json",
+    "parsing_success": true,
+    "parsing_warnings": [],
+    "criteria_scores": {
+      "core_protocol": {
+        "score": 10,
+        "weight": 0.25,
+        "reasoning": "Lighthouse is a major Ethereum consensus client written in Rust, directly implementing the Beacon Chain protocol. As one of the primary clients powering Ethereum's proof-of-stake consensus, it qualifies as a major protocol implementation.",
+        "raw_uncertainty": 0.5
+      },
+      "market_adoption": {
+        "score": 8,
+        "weight": 0.2,
+        "reasoning": "Lighthouse consistently holds 15-25% of the consensus client market share among Ethereum validators, making it a top-tier client with substantial network effects and adoption.",
+        "raw_uncertainty": 0.5
+      },
+      "developer_ecosystem": {
+        "score": 6,
+        "weight": 0.15,
+        "reasoning": "Primarily used by node operators and validators rather than application developers. While essential for infrastructure, it doesn't directly provide dApp development tools.",
+        "raw_uncertainty": 0.5
+      },
+      "general_purpose_tools": {
+        "score": 1,
+        "weight": 0.1,
+        "reasoning": "Specialized blockchain consensus software with no significant use outside Ethereum-specific infrastructure.",
+        "raw_uncertainty": 0.5
+      },
+      "security_infrastructure": {
+        "score": 10,
+        "weight": 0.1,
+        "reasoning": "As a core consensus client, its security is paramount to Ethereum's integrity. Vulnerabilities could cause chain splits or network instability.",
+        "raw_uncertainty": 0.5
+      },
+      "defi_infrastructure": {
+        "score": 4,
+        "weight": 0.05,
+        "reasoning": "Indirectly supports DeFi by securing the network but isn't a direct component of financial protocols.",
+        "raw_uncertainty": 0.5
+      },
+      "data_analytics": {
+        "score": 5,
+        "weight": 0.05,
+        "reasoning": "Provides foundational consensus data to nodes but isn't an analytics tool itself. Used indirectly by data services.",
+        "raw_uncertainty": 0.5
+      },
+      "innovation_research": {
+        "score": 7,
+        "weight": 0.03,
+        "reasoning": "Implements cutting-edge consensus research with optimizations (e.g., sync protocols), but primarily follows rather than drives novel research.",
+        "raw_uncertainty": 0.5
+      },
+      "ecosystem_coordination": {
+        "score": 6,
+        "weight": 0.03,
+        "reasoning": "Actively implements EIPs/standards but doesn't define them. Contributes to client diversity efforts.",
+        "raw_uncertainty": 0.5
+      },
+      "community_trust": {
+        "score": 9,
+        "weight": 0.02,
+        "reasoning": "Maintained by Sigma Prime since 2018, battle-tested since Beacon Chain genesis, with strong community trust and active development.",
+        "raw_uncertainty": 0.5
+      },
+      "user_applications": {
+        "score": 1,
+        "weight": 0.02,
+        "reasoning": "Backend infrastructure for validators, not a user-facing application. Minimal direct user interaction.",
+        "raw_uncertainty": 0.5
+      }
+    },
+    "overall_reasoning": "Lighthouse is a critical Ethereum consensus client with high scores in core protocol and security due to its role in network validation. Strong market adoption and maturity boost its importance, though limited impact in user-facing and general-purpose categories lowers the weighted average."
+  },
+  {
+    "repository_url": "https://github.com/status-im/nimbus-eth2",
+    "repository_name": "nimbus-eth2",
+    "target_score": 6.74,
+    "total_weight": 1.0,
+    "parsing_method": "perfect_json",
+    "parsing_success": true,
+    "parsing_warnings": [],
+    "criteria_scores": {
+      "core_protocol": {
+        "score": 10,
+        "weight": 0.25,
+        "reasoning": "Nimbus is a production-grade Ethereum consensus client implementing the proof-of-stake protocol. As one of the five major clients powering the Beacon Chain, it is critical to Ethereum's core functionality. Falls under 'major client implementations' per scoring guidance.",
+        "raw_uncertainty": 0.5
+      },
+      "market_adoption": {
+        "score": 7,
+        "weight": 0.2,
+        "reasoning": "Holds ~8-10% of consensus client market share among Ethereum validators. Widely adopted by solo stakers and infrastructure providers due to its resource efficiency, but not dominant like Prysm/Lighthouse. Represents significant adoption.",
+        "raw_uncertainty": 0.5
+      },
+      "developer_ecosystem": {
+        "score": 6,
+        "weight": 0.15,
+        "reasoning": "Primarily enables node operation rather than direct dApp development. Provides essential infrastructure for developers needing lightweight nodes, but isn't a smart contract framework or library. Moderate indirect impact.",
+        "raw_uncertainty": 0.5
+      },
+      "general_purpose_tools": {
+        "score": 1,
+        "weight": 0.1,
+        "reasoning": "Specialized blockchain client with no role as a general-purpose tool. Built using Nim language but doesn't provide reusable non-blockchain utilities.",
+        "raw_uncertainty": 0.5
+      },
+      "security_infrastructure": {
+        "score": 10,
+        "weight": 0.1,
+        "reasoning": "As a consensus client, it is security-critical infrastructure. Vulnerabilities could compromise network integrity. Undergoes formal verification and is part of Ethereum's client diversity security strategy.",
+        "raw_uncertainty": 0.5
+      },
+      "defi_infrastructure": {
+        "score": 1,
+        "weight": 0.05,
+        "reasoning": "Provides base-layer consensus but no direct DeFi functionality (e.g., no oracle, AMM, or lending features). Indirectly supports DeFi through network security.",
+        "raw_uncertainty": 0.5
+      },
+      "data_analytics": {
+        "score": 4,
+        "weight": 0.05,
+        "reasoning": "Enables block/state data access via node operation but isn't an analytics tool itself. Used as data source for block explorers and indexers, providing moderate utility.",
+        "raw_uncertainty": 0.5
+      },
+      "innovation_research": {
+        "score": 8,
+        "weight": 0.03,
+        "reasoning": "Pioneered resource-efficient client design using Nim, enabling node operation on edge devices. Actively implements cutting-edge consensus research (e.g., single-slot finality).",
+        "raw_uncertainty": 0.5
+      },
+      "ecosystem_coordination": {
+        "score": 5,
+        "weight": 0.03,
+        "reasoning": "Implements Ethereum consensus specs but doesn't drive standards. Contributes to client diversity discussions, though not primarily a coordination tool like EIP repositories.",
+        "raw_uncertainty": 0.5
+      },
+      "community_trust": {
+        "score": 9,
+        "weight": 0.02,
+        "reasoning": "Maintained since 2018 by Status.im with consistent updates. Battle-tested in production since Beacon Chain launch, with strong community trust among stakers. Not foundation-backed but well-established.",
+        "raw_uncertainty": 0.5
+      },
+      "user_applications": {
+        "score": 1,
+        "weight": 0.02,
+        "reasoning": "Backend infrastructure with no direct end-user interface. Validator tools serve technical operators, not general users like wallets or NFT platforms.",
+        "raw_uncertainty": 0.5
+      }
+    },
+    "overall_reasoning": "Nimbus-eth2 is a critical consensus client essential for Ethereum's security and decentralization. Its high efficiency drives adoption among validators, though it has limited direct impact on DeFi or end-user applications. Scores highest in core protocol and security categories due to its foundational role."
+  },
+  {
+    "repository_url": "https://github.com/vyperlang/titanoboa",
+    "repository_name": "titanoboa",
+    "target_score": 1.9600000000000004,
+    "total_weight": 1.0,
+    "parsing_method": "perfect_json",
+    "parsing_success": true,
+    "parsing_warnings": [],
+    "criteria_scores": {
+      "core_protocol": {
+        "score": 1,
+        "weight": 0.25,
+        "reasoning": "Titanoboa is a testing tool for Vyper smart contracts, not a core protocol implementation like execution/consensus clients. Vyper itself is an alternative language, but this tool doesn't implement core Ethereum protocols.",
+        "raw_uncertainty": 0.5
+      },
+      "market_adoption": {
+        "score": 2,
+        "weight": 0.2,
+        "reasoning": "Limited adoption as a specialized tool for the smaller Vyper ecosystem. Vyper has niche usage compared to Solidity, and Titanoboa's GitHub metrics (200+ stars) indicate emerging but not widespread adoption.",
+        "raw_uncertainty": 0.5
+      },
+      "developer_ecosystem": {
+        "score": 4,
+        "weight": 0.15,
+        "reasoning": "Provides valuable REPL and testing capabilities for Vyper developers, accelerating contract development. However, impact is confined to the Vyper niche rather than the broader Ethereum developer ecosystem.",
+        "raw_uncertainty": 0.5
+      },
+      "general_purpose_tools": {
+        "score": 1,
+        "weight": 0.1,
+        "reasoning": "Specialized for Vyper/blockchain development. Not a general-purpose tool like databases or web frameworks; minimal dependency outside its domain.",
+        "raw_uncertainty": 0.5
+      },
+      "security_infrastructure": {
+        "score": 3,
+        "weight": 0.1,
+        "reasoning": "Indirectly supports security by enabling thorough testing of Vyper contracts, but isn't a dedicated security tool like audit frameworks or cryptographic libraries.",
+        "raw_uncertainty": 0.5
+      },
+      "defi_infrastructure": {
+        "score": 1,
+        "weight": 0.05,
+        "reasoning": "No direct role in DeFi protocols, oracles, or financial infrastructure. Purely a development tool without financial system integration.",
+        "raw_uncertainty": 0.5
+      },
+      "data_analytics": {
+        "score": 1,
+        "weight": 0.05,
+        "reasoning": "Not related to blockchain data analysis, indexing, or analytics. Focused solely on contract development workflows.",
+        "raw_uncertainty": 0.5
+      },
+      "innovation_research": {
+        "score": 2,
+        "weight": 0.03,
+        "reasoning": "Applies existing REPL concepts to Vyper but doesn't introduce novel cryptography or consensus mechanisms. Represents incremental tooling improvement.",
+        "raw_uncertainty": 0.5
+      },
+      "ecosystem_coordination": {
+        "score": 1,
+        "weight": 0.03,
+        "reasoning": "Doesn't contribute to EIPs, token standards, or governance frameworks. Solely a development utility without standardization role.",
+        "raw_uncertainty": 0.5
+      },
+      "community_trust": {
+        "score": 5,
+        "weight": 0.02,
+        "reasoning": "Hosted under vyperlang (Ethereum Foundation-affiliated) with consistent maintenance since 2022. Moderate community trust but limited production history compared to battle-tested tools.",
+        "raw_uncertainty": 0.5
+      },
+      "user_applications": {
+        "score": 1,
+        "weight": 0.02,
+        "reasoning": "CLI tool for developers, not an end-user application like wallets or NFT platforms. No direct user-facing functionality.",
+        "raw_uncertainty": 0.5
+      }
+    },
+    "overall_reasoning": "Titanoboa is a valuable specialized tool for Vyper developers, enhancing testing and development workflows. However, its impact is confined to a niche segment of the ecosystem, with minimal contributions to core protocols, financial infrastructure, or broad adoption. Scores reflect its role as a supportive utility rather than a foundational component."
+  },
+  {
+    "repository_url": "https://github.com/vyperlang/vyper",
+    "repository_name": "vyper",
+    "target_score": 6.289999999999999,
+    "total_weight": 1.0,
+    "parsing_method": "perfect_json",
+    "parsing_success": true,
+    "parsing_warnings": [],
+    "criteria_scores": {
+      "core_protocol": {
+        "score": 9,
+        "weight": 0.25,
+        "reasoning": "Vyper is an official Ethereum Foundation project and a core smart contract language implementation. While not the dominant language (Solidity holds that position), it serves as a critical alternative with Pythonic syntax and security-focused design.",
+        "raw_uncertainty": 0.5
+      },
+      "market_adoption": {
+        "score": 6,
+        "weight": 0.2,
+        "reasoning": "Vyper has significant adoption in high-profile DeFi protocols like Curve Finance, but overall usage lags far behind Solidity. It occupies a niche market share among Ethereum developers and deployed contracts.",
+        "raw_uncertainty": 0.5
+      },
+      "developer_ecosystem": {
+        "score": 8,
+        "weight": 0.15,
+        "reasoning": "As a smart contract language, Vyper directly enables Ethereum development by providing a security-focused alternative to Solidity. It is widely recognized and integrated into development toolchains, though less universally adopted than Solidity.",
+        "raw_uncertainty": 0.5
+      },
+      "general_purpose_tools": {
+        "score": 1,
+        "weight": 0.1,
+        "reasoning": "Vyper is a domain-specific language for Ethereum smart contracts and does not function as a general-purpose tool like Python or databases. It has minimal relevance in this category.",
+        "raw_uncertainty": 0.5
+      },
+      "security_infrastructure": {
+        "score": 8,
+        "weight": 0.1,
+        "reasoning": "Vyper's design prioritizes security (e.g., mitigating reentrancy risks) and is used in high-value DeFi contracts. It provides security-critical infrastructure by offering a safer language alternative for sensitive applications.",
+        "raw_uncertainty": 0.5
+      },
+      "defi_infrastructure": {
+        "score": 5,
+        "weight": 0.05,
+        "reasoning": "Vyper indirectly supports DeFi by enabling the development of protocols like Curve. However, it is not a DeFi protocol itself, limiting its direct impact on financial infrastructure.",
+        "raw_uncertainty": 0.5
+      },
+      "data_analytics": {
+        "score": 1,
+        "weight": 0.05,
+        "reasoning": "As a programming language, Vyper does not contribute to data indexing, analytics, or blockchain explorers. It has no meaningful role in this category.",
+        "raw_uncertainty": 0.5
+      },
+      "innovation_research": {
+        "score": 7,
+        "weight": 0.03,
+        "reasoning": "Vyper introduced innovative language design focused on security and auditability, influencing smart contract best practices. It represents a significant alternative approach but is not a primary research vehicle.",
+        "raw_uncertainty": 0.5
+      },
+      "ecosystem_coordination": {
+        "score": 1,
+        "weight": 0.03,
+        "reasoning": "Vyper implements existing Ethereum standards (e.g., ERCs) but does not drive new standards or coordination efforts. Its role in ecosystem governance is minimal.",
+        "raw_uncertainty": 0.5
+      },
+      "community_trust": {
+        "score": 9,
+        "weight": 0.02,
+        "reasoning": "As an Ethereum Foundation project since 2017, Vyper has strong institutional backing, active maintenance, and production-proven stability, fostering high community trust.",
+        "raw_uncertainty": 0.5
+      },
+      "user_applications": {
+        "score": 1,
+        "weight": 0.02,
+        "reasoning": "Vyper is a developer tool, not an end-user application. It enables building user-facing dApps but has no direct interface for non-developers.",
+        "raw_uncertainty": 0.5
+      }
+    },
+    "overall_reasoning": "Vyper is a critical Ethereum Foundation project providing a security-focused smart contract language. It excels in core protocol implementation and security but has limited adoption compared to Solidity. Its impact is strongest in enabling secure development rather than user applications or ecosystem standards."
+  },
+  {
+    "repository_url": "https://github.com/chainsafe/web3.js",
+    "repository_name": "web3.js",
+    "target_score": 5.470000000000001,
+    "total_weight": 1.0,
+    "parsing_method": "perfect_json",
+    "parsing_success": true,
+    "parsing_warnings": [],
+    "criteria_scores": {
+      "core_protocol": {
+        "score": 2,
+        "weight": 0.25,
+        "reasoning": "web3.js is a client library for interacting with Ethereum nodes via JSON-RPC, not a core protocol implementation like execution/consensus clients. It's an alternative implementation tool.",
+        "raw_uncertainty": 0.5
+      },
+      "market_adoption": {
+        "score": 9,
+        "weight": 0.2,
+        "reasoning": "Dominant JavaScript library for Ethereum interaction with 1.5M+ weekly npm downloads, integrated into major projects like MetaMask and Uniswap, though facing competition from ethers.js.",
+        "raw_uncertainty": 0.5
+      },
+      "developer_ecosystem": {
+        "score": 10,
+        "weight": 0.15,
+        "reasoning": "Essential JavaScript/TypeScript library for Ethereum dApp development, providing core functionality for transactions, contracts, and node interaction. Widely used in tutorials and frameworks.",
+        "raw_uncertainty": 0.5
+      },
+      "general_purpose_tools": {
+        "score": 1,
+        "weight": 0.1,
+        "reasoning": "Specialized blockchain library, not a general-purpose tool like programming languages or databases. Minimal relevance to non-Ethereum development.",
+        "raw_uncertainty": 0.5
+      },
+      "security_infrastructure": {
+        "score": 6,
+        "weight": 0.1,
+        "reasoning": "Handles cryptographic operations and transaction signing, making security important, but not a dedicated security tool like audit frameworks or cryptographic primitives.",
+        "raw_uncertainty": 0.5
+      },
+      "defi_infrastructure": {
+        "score": 5,
+        "weight": 0.05,
+        "reasoning": "Enables DeFi application development but isn't a DeFi protocol itself. Used as a foundational layer in many DeFi projects.",
+        "raw_uncertainty": 0.5
+      },
+      "data_analytics": {
+        "score": 4,
+        "weight": 0.05,
+        "reasoning": "Provides basic blockchain data querying capabilities but isn't a dedicated analytics tool like blockchain explorers or indexing protocols.",
+        "raw_uncertainty": 0.5
+      },
+      "innovation_research": {
+        "score": 3,
+        "weight": 0.03,
+        "reasoning": "Focuses on practical implementation rather than novel research. Incremental updates to support new EIPs, but no breakthrough innovations.",
+        "raw_uncertainty": 0.5
+      },
+      "ecosystem_coordination": {
+        "score": 5,
+        "weight": 0.03,
+        "reasoning": "Implements Ethereum standards (EIPs) but doesn't create them. Influential as a reference implementation for JavaScript developers.",
+        "raw_uncertainty": 0.5
+      },
+      "community_trust": {
+        "score": 8,
+        "weight": 0.02,
+        "reasoning": "Battle-tested since 2015, maintained by ChainSafe with Ethereum Foundation roots. High community trust despite recent maintenance challenges.",
+        "raw_uncertainty": 0.5
+      },
+      "user_applications": {
+        "score": 6,
+        "weight": 0.02,
+        "reasoning": "Backend library powering dApps/wallets (e.g., MetaMask), but not a direct user application. Critical indirect enabler for user experiences.",
+        "raw_uncertainty": 0.5
+      }
+    },
+    "overall_reasoning": "web3.js is a foundational JavaScript library for Ethereum development with massive adoption and developer impact. While not core protocol infrastructure, it enables nearly all web-based dApps. Scores highest in developer ecosystem and adoption, with limitations in core protocol and general tooling."
+  },
+  {
+    "repository_url": "https://github.com/wevm/viem",
+    "repository_name": "viem",
+    "target_score": 4.509999999999999,
+    "total_weight": 1.0,
+    "parsing_method": "perfect_json",
+    "parsing_success": true,
+    "parsing_warnings": [],
+    "criteria_scores": {
+      "core_protocol": {
+        "score": 1,
+        "weight": 0.25,
+        "reasoning": "Viem is a TypeScript library for Ethereum interactions, not a core protocol implementation like execution/consensus clients or L2 protocols.",
+        "raw_uncertainty": 0.5
+      },
+      "market_adoption": {
+        "score": 7,
+        "weight": 0.2,
+        "reasoning": "Rapidly growing adoption (5.5k+ GitHub stars, used in frameworks like Wagmi), but not yet dominant compared to ethers.js. Emerging adoption with strong momentum.",
+        "raw_uncertainty": 0.5
+      },
+      "developer_ecosystem": {
+        "score": 9,
+        "weight": 0.15,
+        "reasoning": "Essential low-level library providing stateless Ethereum primitives. Widely used for dApp development, testing, and tooling. Core infrastructure for modern Ethereum development.",
+        "raw_uncertainty": 0.5
+      },
+      "general_purpose_tools": {
+        "score": 1,
+        "weight": 0.1,
+        "reasoning": "Specialized Ethereum library, not a general-purpose tool like databases or programming languages.",
+        "raw_uncertainty": 0.5
+      },
+      "security_infrastructure": {
+        "score": 6,
+        "weight": 0.1,
+        "reasoning": "Provides secure RPC interactions and cryptographic utilities, but not a dedicated security tool like audit frameworks. Important for application security.",
+        "raw_uncertainty": 0.5
+      },
+      "defi_infrastructure": {
+        "score": 3,
+        "weight": 0.05,
+        "reasoning": "Enables DeFi development but isn't a protocol itself. Used as a foundational layer, not systemic infrastructure.",
+        "raw_uncertainty": 0.5
+      },
+      "data_analytics": {
+        "score": 4,
+        "weight": 0.05,
+        "reasoning": "Supports blockchain data fetching but isn't a dedicated analytics tool. Limited to RPC interactions.",
+        "raw_uncertainty": 0.5
+      },
+      "innovation_research": {
+        "score": 6,
+        "weight": 0.03,
+        "reasoning": "Introduces modular design and type safety improvements over alternatives, but not breakthrough research. Significant DX improvements.",
+        "raw_uncertainty": 0.5
+      },
+      "ecosystem_coordination": {
+        "score": 4,
+        "weight": 0.03,
+        "reasoning": "Implements EIP standards but doesn't drive new ones. Supports ecosystem interoperability.",
+        "raw_uncertainty": 0.5
+      },
+      "community_trust": {
+        "score": 7,
+        "weight": 0.02,
+        "reasoning": "Backed by established team (Wagmi creators), active maintenance, and growing community. Not yet battle-tested for years.",
+        "raw_uncertainty": 0.5
+      },
+      "user_applications": {
+        "score": 1,
+        "weight": 0.02,
+        "reasoning": "Developer library, not an end-user application. Enables wallet/dApp development but isn't user-facing.",
+        "raw_uncertainty": 0.5
+      }
+    },
+    "overall_reasoning": "Viem is a high-impact developer tool accelerating Ethereum dApp development with modern TypeScript primitives. Its core value lies in developer ecosystem enablement and emerging adoption, though it doesn't contribute to protocol/core infrastructure. Strengths in modularity and DX position it as a rising alternative to ethers.js."
+  }
+]

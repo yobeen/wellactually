@@ -1,0 +1,68 @@
+[
+  {
+    "repository_url": "https://github.com/openzeppelin/openzeppelin-contracts",
+    "repository_name": "openzeppelin Contracts",
+    "originality_category": "G",
+    "final_originality_score": 0.7426666666666667,
+    "assessment_confidence": 0.7,
+    "overall_reasoning_uncertainty": 0.17831978489540398,
+    "aggregate_uncertainty": 0.1758526095352216,
+    "criteria_uncertainties": {
+      "protocol_implementation": 0.17474024147170797,
+      "algorithmic_innovation": 0.1802342741716528,
+      "developer_experience": 0.17940614584875855,
+      "architectural_innovation": 0.1789139939817311,
+      "security_innovation": 0.1757079960169517,
+      "standards_leadership": 0.17045192579390744,
+      "cross_client_compatibility": 0.16806276605774687
+    },
+    "criteria_scores": {
+      "protocol_implementation": {
+        "score": 3,
+        "weight": 0.1,
+        "reasoning": "The library builds atop EVM fundamentals without implementing core protocol features from scratch. It focuses on application-layer abstractions rather than low-level protocol innovation, serving as a high-level toolkit rather than a protocol implementation.",
+        "raw_uncertainty": 0.17474024147170797
+      },
+      "algorithmic_innovation": {
+        "score": 6,
+        "weight": 0.08,
+        "reasoning": "While introducing gas-efficient patterns (e.g., ERC721Enumerable optimizations), most algorithms follow established practices. Notable exceptions include the pull payment pattern for security, but overall optimizations are incremental rather than groundbreaking.",
+        "raw_uncertainty": 0.1802342741716528
+      },
+      "developer_experience": {
+        "score": 9,
+        "weight": 0.15,
+        "reasoning": "Revolutionized Solidity development through modular, composable contracts with intuitive inheritance patterns. The library's standardized, audited interfaces became the industry's default starting point, significantly reducing boilerplate and security risks for developers.",
+        "raw_uncertainty": 0.17940614584875855
+      },
+      "architectural_innovation": {
+        "score": 8,
+        "weight": 0.15,
+        "reasoning": "Pioneered modular smart contract design with reusable components (e.g., AccessControl, ERC20). The upgradeability system via proxies introduced a novel architectural pattern for state preservation during upgrades, widely adopted despite not being fully original.",
+        "raw_uncertainty": 0.1789139939817311
+      },
+      "security_innovation": {
+        "score": 9,
+        "weight": 0.3,
+        "reasoning": "Defined security standards through battle-tested implementations like ReentrancyGuard and formal verification integrations. While not inventing new cryptography, it created security patterns that became ecosystem norms. Reduced vulnerabilities through standardized safemath before Solidity native checks.",
+        "raw_uncertainty": 0.1757079960169517
+      },
+      "standards_leadership": {
+        "score": 10,
+        "weight": 0.22,
+        "reasoning": "Core to multiple ERC standards evolution (ERC20, ERC721, ERC1155). Reference implementations directly shaped EIPs, with team members actively contributing to standardization processes. Became the de facto implementation for token contracts ecosystem-wide.",
+        "raw_uncertainty": 0.17045192579390744
+      },
+      "cross_client_compatibility": {
+        "score": 10,
+        "weight": 0.0,
+        "reasoning": "Purely Solidity-based implementation ensures EVM-wide compatibility by design. While not focused on cross-client innovation, its standards adherence promotes interoperability.",
+        "raw_uncertainty": 0.16806276605774687
+      }
+    },
+    "overall_reasoning": "OpenZeppelin Contracts represents foundational innovation in smart contract security and standardization. Its breakthrough contribution lies in establishing reusable, audited security patterns that became the Ethereum ecosystem's default building blocks. While not inventing core cryptographic primitives, it created novel security architectures (upgradeability system) and developer paradigms that defined industry standards. The library's profound ecosystem impact stems from making secure contract development accessible, directly influencing ERC evolution and setting security expectations. Its originality manifests in comprehensive implementation rigor rather than theoretical novelty, with scores weighted toward its standards leadership (10/10) and security pattern definition (9/10).",
+    "parsing_method": "json",
+    "parsing_success": true,
+    "parsing_warnings": []
+  }
+]

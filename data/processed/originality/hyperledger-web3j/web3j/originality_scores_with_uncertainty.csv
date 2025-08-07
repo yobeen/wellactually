@@ -1,0 +1,2 @@
+repository_url,repository_name,originality_category,originality_score,overall_reasoning_uncertainty,aggregate_uncertainty,assessment_confidence,parsing_success,parsing_method
+https://github.com/hyperledger-web3j/web3j,Web3j,D,0.45377777777777784,0.16120057343621488,0.1600395238756908,0.7,True,json

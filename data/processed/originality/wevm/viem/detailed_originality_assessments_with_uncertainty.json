@@ -1,0 +1,68 @@
+[
+  {
+    "repository_url": "https://github.com/wevm/viem",
+    "repository_name": "Viem",
+    "originality_category": "C",
+    "final_originality_score": 0.6635555555555557,
+    "assessment_confidence": 0.7,
+    "overall_reasoning_uncertainty": 0.17970175201825236,
+    "aggregate_uncertainty": 0.17719988214143087,
+    "criteria_uncertainties": {
+      "protocol_implementation": 0.17565146257494677,
+      "algorithmic_innovation": 0.17356307374747731,
+      "developer_experience": 0.17923368758046304,
+      "architectural_innovation": 0.17961207858722947,
+      "security_innovation": 0.17031429168653867,
+      "standards_leadership": 0.1720127464712886,
+      "cross_client_compatibility": 0.186264258898498
+    },
+    "criteria_scores": {
+      "protocol_implementation": {
+        "score": 7,
+        "weight": 0.12,
+        "reasoning": "Viem implements core Ethereum protocols (ABI encoding, RLP, transaction signing) from scratch with TypeScript-first design. However, it delegates heavy cryptographic operations to native WebCrypto/optimized libraries rather than full protocol reimplementation. Novel approaches include type-safe RPC abstraction and EIP-712 utilities.",
+        "raw_uncertainty": 0.17565146257494677
+      },
+      "algorithmic_innovation": {
+        "score": 6,
+        "weight": 0.1,
+        "reasoning": "Introduces tree-shakable architecture reducing bundle sizes by ~80% compared to alternatives. Implements novel serialization techniques for contract interactions and optimized state management. While performance-focused, no breakthrough algorithms emerged as ecosystem standards.",
+        "raw_uncertainty": 0.17356307374747731
+      },
+      "developer_experience": {
+        "score": 9,
+        "weight": 0.3,
+        "reasoning": "Revolutionary API design with type-safe RPC abstraction, auto-inferred contract types, and unified client architecture. Introduced composable actions pattern and wallet client separation. Set new standards for Ethereum TypeScript tooling, rapidly adopted by frameworks like Wagmi. Developer ergonomics significantly exceed ethers.js/web3.js paradigms.",
+        "raw_uncertainty": 0.17923368758046304
+      },
+      "architectural_innovation": {
+        "score": 8,
+        "weight": 0.15,
+        "reasoning": "Pioneered modular client architecture with transport-action separation (Public/Wallet clients). Plugin system for extending functionality via actions. Introduced novel abstraction layers between RPC protocols and application logic. This design influenced subsequent Ethereum libraries.",
+        "raw_uncertainty": 0.17961207858722947
+      },
+      "security_innovation": {
+        "score": 5,
+        "weight": 0.08,
+        "reasoning": "Enhanced security through type-safe patterns reducing runtime errors. Introduced configurable chain validation and EIP-712 utilities. While robust, no novel formal verification or cryptographic breakthroughs. Relies on battle-tested dependencies for core security.",
+        "raw_uncertainty": 0.17031429168653867
+      },
+      "standards_leadership": {
+        "score": 6,
+        "weight": 0.15,
+        "reasoning": "Proactive implementation of emerging EIPs (e.g., EIP-1193) and multi-chain standards. Authored ERC utilities but no foundational EIPs. More standards-adopting than standards-creating. Significant influence through implementation quality rather than protocol design.",
+        "raw_uncertainty": 0.1720127464712886
+      },
+      "cross_client_compatibility": {
+        "score": 7,
+        "weight": 0.1,
+        "reasoning": "Designed for multi-client RPC compatibility with automatic transport fallbacks. Supports Ethereum, Polygon, Arbitrum, etc. out-of-box. Comprehensive test suite against various nodes. While robust, doesn't introduce novel interoperability protocols.",
+        "raw_uncertainty": 0.186264258898498
+      }
+    },
+    "overall_reasoning": "Viem represents a paradigm shift in Ethereum TypeScript tooling through revolutionary API design and architectural innovations. Its type-safe, modular approach with client separation and tree-shaking capabilities set new industry standards for developer experience. While building upon Ethereum fundamentals, it introduced original patterns like composable actions and transport abstraction that influenced the ecosystem. The main innovations lie in developer ergonomics rather than protocol-level breakthroughs. It significantly advanced state-of-the-art for Ethereum interfaces but didn't create new cryptographic primitives or foundational standards.",
+    "parsing_method": "json",
+    "parsing_success": true,
+    "parsing_warnings": []
+  }
+]

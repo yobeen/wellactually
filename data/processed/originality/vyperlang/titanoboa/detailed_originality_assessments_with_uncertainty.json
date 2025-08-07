@@ -1,0 +1,68 @@
+[
+  {
+    "repository_url": "https://github.com/vyperlang/titanoboa",
+    "repository_name": "Titanoboa",
+    "originality_category": "H",
+    "final_originality_score": 0.4475555555555557,
+    "assessment_confidence": 0.7,
+    "overall_reasoning_uncertainty": 0.1557285132388202,
+    "aggregate_uncertainty": 0.15505599183161664,
+    "criteria_uncertainties": {
+      "protocol_implementation": 0.14935233199189943,
+      "algorithmic_innovation": 0.1536977735805367,
+      "developer_experience": 0.1558766116242622,
+      "architectural_innovation": 0.15769150828084635,
+      "security_innovation": 0.162392470689919,
+      "standards_leadership": 0.15455477114762645,
+      "cross_client_compatibility": 0.15030697375135751
+    },
+    "criteria_scores": {
+      "protocol_implementation": {
+        "score": 4,
+        "weight": 0.12,
+        "reasoning": "Titanoboa leverages existing EVM implementations (like py-evm) rather than building a full protocol stack from scratch. While it implements Vyper-specific execution logic, it doesn't introduce novel protocol-level innovations. Its value lies in Vyper specialization rather than low-level protocol reimagination.",
+        "raw_uncertainty": 0.14935233199189943
+      },
+      "algorithmic_innovation": {
+        "score": 3,
+        "weight": 0.15,
+        "reasoning": "The project focuses on practical execution rather than algorithmic breakthroughs. It implements standard EVM execution patterns with Vyper-specific adaptations but doesn't introduce novel data structures or performance optimizations beyond typical interpreter design. Gas metering and tracing follow conventional approaches.",
+        "raw_uncertainty": 0.1536977735805367
+      },
+      "developer_experience": {
+        "score": 8,
+        "weight": 0.25,
+        "reasoning": "Titanoboa delivers significant innovation through its Python-native REPL environment and pytest integration, enabling interactive debugging of Vyper contracts \u2013 a workflow improvement previously unavailable. Features like gas profiling, tracebacks, and state inspection provide unique DX enhancements specifically for Vyper developers, though not yet an ecosystem standard.",
+        "raw_uncertainty": 0.1558766116242622
+      },
+      "architectural_innovation": {
+        "score": 6,
+        "weight": 0.18,
+        "reasoning": "The architecture cleanly separates Vyper compilation from EVM execution using py-evm, with modular components for gas calculation and debugging. While well-designed, this follows established interpreter patterns rather than introducing novel architectural paradigms. Plugin systems for custom opcodes show thoughtful modularity but not ecosystem influence.",
+        "raw_uncertainty": 0.15769150828084635
+      },
+      "security_innovation": {
+        "score": 4,
+        "weight": 0.1,
+        "reasoning": "Primarily provides testing capabilities rather than novel security mechanisms. The traceback feature aids vulnerability detection during development, but doesn't introduce formal verification or advanced security primitives. Relies on standard pytest security practices.",
+        "raw_uncertainty": 0.162392470689919
+      },
+      "standards_leadership": {
+        "score": 3,
+        "weight": 0.1,
+        "reasoning": "As a Vyper-specific tool, it implements existing standards rather than creating new ones. While valuable to the Vyper ecosystem, it hasn't driven EIP development or cross-language standards. Contributions are confined to tooling rather than protocol extensions.",
+        "raw_uncertainty": 0.15455477114762645
+      },
+      "cross_client_compatibility": {
+        "score": 2,
+        "weight": 0.1,
+        "reasoning": "Designed specifically for Vyper contracts and py-evm compatibility. Doesn't target multi-client testing or interoperability features. Focuses on a specialized toolchain rather than broad ecosystem compatibility.",
+        "raw_uncertainty": 0.15030697375135751
+      }
+    },
+    "overall_reasoning": "Titanoboa demonstrates strong innovation in developer experience for Vyper programmers, filling a critical gap with its interactive REPL and testing environment. Its Python-native approach and debugging features represent meaningful workflow advancements. However, it builds upon existing EVM foundations without introducing groundbreaking algorithms, architectures, or standards. The originality lies in its domain-specific implementation \u2013 creating the first dedicated toolchain for Vyper contract iteration and testing \u2013 rather than fundamental technical innovations. While influential within the Vyper ecosystem, its impact remains specialized rather than ecosystem-wide.",
+    "parsing_method": "json",
+    "parsing_success": true,
+    "parsing_warnings": []
+  }
+]

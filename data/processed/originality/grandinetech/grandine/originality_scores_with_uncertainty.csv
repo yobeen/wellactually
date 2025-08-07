@@ -1,0 +1,2 @@
+repository_url,repository_name,originality_category,originality_score,overall_reasoning_uncertainty,aggregate_uncertainty,assessment_confidence,parsing_success,parsing_method
+https://github.com/grandinetech/grandine,Grandine,B,0.47244444444444456,0.182832842979472,0.18253855206151753,0.7,True,json

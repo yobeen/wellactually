@@ -686,7 +686,8 @@ class ComparisonHandler:
             # Level 1 (L1) thresholds - original values
             return {
                 "llama": 0.00000034,
-                "gpt4o": 0.00077255
+                "gpt4o": 0.00077255,
+                "mini": 0.00077255
             }
         else:
             # Level 3 (L3) thresholds - updated for mini and gpt4o
@@ -730,15 +731,19 @@ class ComparisonHandler:
                 
                 # Create individual comparison request for gpt-4.1-mini first
                 from src.api.core.requests import ComparisonRequest
+                simplified_mode = False if parent.lower() == "ethereum" else True
                 mini_request = ComparisonRequest(
                     repo_a=pair['repo_a'],
                     repo_b=pair['repo_b'],
                     parent=parent,
-                    parameters={**(parameters or {}), "model_id": "openai/gpt-4.1-mini", "temperature": 0.4, "simplified": True}
+                    parameters={**(parameters or {}), "model_id": "openai/gpt-4.1-mini", "temperature": 0.4, "simplified": simplified_mode}
                 )
                 
-                # Query gpt-4.1-mini first (only L3 comparisons for this method)
-                mini_response = await self.handle_l3_comparison(mini_request)
+                # Query gpt-4.1-mini first - route to appropriate handler based on parent
+                if parent.lower() == "ethereum":
+                    mini_response = await self.handle_l1_comparison(mini_request)
+                else:
+                    mini_response = await self.handle_l3_comparison(mini_request)
                 
                 mini_queries += 1
                 logger.info(f"  Mini uncertainty: {mini_response.choice_uncertainty}")
@@ -752,11 +757,14 @@ class ComparisonHandler:
                         repo_a=pair['repo_a'],
                         repo_b=pair['repo_b'],
                         parent=parent,
-                        parameters={**(parameters or {}), "model_id": "openai/gpt-4o", "temperature": 0.4, "simplified": True}
+                        parameters={**(parameters or {}), "model_id": "openai/gpt-4o", "temperature": 0.4, "simplified": simplified_mode}
                     )
                     
-                    # Query gpt-4o (only L3 comparisons for this method)
-                    gpt4o_response = await self.handle_l3_comparison(gpt4o_request)
+                    # Query gpt-4o - route to appropriate handler based on parent
+                    if parent.lower() == "ethereum":
+                        gpt4o_response = await self.handle_l1_comparison(gpt4o_request)
+                    else:
+                        gpt4o_response = await self.handle_l3_comparison(gpt4o_request)
                     
                     gpt4o_queries += 1
                     logger.info(f"  GPT-4o uncertainty: {gpt4o_response.choice_uncertainty}")
@@ -823,7 +831,7 @@ class ComparisonHandler:
                 "uncertainty_thresholds": {
                     "gpt-4.1-mini": MINI_THRESHOLD,
                     "gpt-4o": GPT4O_THRESHOLD,
-                    "level": "L3"
+                    "level": "L1" if parent.lower() == "ethereum" else "L3"
                 }
             }
         }

@@ -59,7 +59,8 @@ class CriteriaAssessmentPipeline:
     def run_full_assessment(self, model_id: str = "openai/gpt-4o", 
                           temperature: float = 0.0,
                           train_csv_path: str = "data/raw/train.csv",
-                          output_dir: str = None) -> Dict[str, Any]:
+                          output_dir: str = None,
+                          specific_repos: List[str] = None) -> Dict[str, Any]:
         """
         Run the complete criteria assessment pipeline.
         
@@ -68,6 +69,7 @@ class CriteriaAssessmentPipeline:
             temperature: Sampling temperature
             train_csv_path: Path to training CSV file
             output_dir: Directory to save results (if None, uses timestamped default)
+            specific_repos: List of specific repository URLs to assess (if None, assesses all repos from CSV)
             
         Returns:
             Dictionary with pipeline results and summary
@@ -86,8 +88,12 @@ class CriteriaAssessmentPipeline:
             
             # Step 1: Extract unique repositories
             logger.info("Step 1: Extracting unique repositories")
-            repo_urls = self.repo_extractor.extract_unique_repos(train_csv_path)
-            logger.info(f"Found {len(repo_urls)} unique repositories")
+            if specific_repos:
+                repo_urls = specific_repos
+                logger.info(f"Using {len(repo_urls)} specific repositories provided")
+            else:
+                repo_urls = self.repo_extractor.extract_unique_repos(train_csv_path)
+                logger.info(f"Found {len(repo_urls)} unique repositories")
             
             # Step 2: Assess each repository
             logger.info("Step 2: Assessing repositories with criteria")

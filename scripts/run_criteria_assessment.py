@@ -3,6 +3,7 @@
 """
 Standalone script to run criteria-based repository assessment.
 Evaluates repositories against 11 importance criteria and compares with human preferences.
+Supports assessment of single or multiple repositories.
 """
 
 import sys
@@ -63,7 +64,7 @@ def validate_environment():
 def main():
     """Main execution function."""
     parser = argparse.ArgumentParser(
-        description="Run criteria-based repository assessment",
+        description="Run criteria-based repository assessment on single or multiple repositories",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
@@ -75,6 +76,12 @@ Examples:
   
   # Custom input/output paths
   python scripts/run_criteria_assessment.py --train-csv "data/raw/train.csv" --output-dir "my_results"
+  
+  # Assess single repository
+  python scripts/run_criteria_assessment.py --repo https://github.com/ethereum/go-ethereum
+  
+  # Assess multiple repositories
+  python scripts/run_criteria_assessment.py --repo https://github.com/ethereum/go-ethereum https://github.com/prysmaticlabs/prysm
   
   # Verbose logging
   python scripts/run_criteria_assessment.py --verbose
@@ -92,8 +99,8 @@ Examples:
     parser.add_argument(
         "--temperature",
         type=float,
-        default=0.0,
-        help="Sampling temperature (default: 0.0)"
+        default=0.4,
+        help="Sampling temperature (default: 0.4)"
     )
     
     # Data paths
@@ -107,7 +114,8 @@ Examples:
     parser.add_argument(
         "--repo",
         type=str,
-        help="Single repository URL to assess (creates temporary CSV)"
+        nargs="*",
+        help="Repository URLs to assess (creates temporary CSV). Can specify multiple repos."
     )
     
     parser.add_argument(
@@ -152,27 +160,30 @@ Examples:
     logger.info(f"Loading configuration from {args.config}...")
     config = load_config(args.config)
     
-    # Handle single repo assessment
+    # Handle repo assessment
     temp_csv_path = None
     if args.repo:
-        # Create temporary CSV file with single repo entry
+        # Create temporary CSV file with repo entries
         temp_csv_fd, temp_csv_path = tempfile.mkstemp(suffix='.csv', text=True)
         try:
             with os.fdopen(temp_csv_fd, 'w', newline='') as f:
                 writer = csv.writer(f)
                 writer.writerow(['timestamp', 'juror', 'repo_a', 'repo_b', 'parent', 'choice', 'multiplier', 'reasoning'])
-                writer.writerow([
-                    datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%fZ'),
-                    'SingleRepoJuror',
-                    args.repo,
-                    args.repo,  # Use same repo for both to focus on individual assessment
-                    'single_repo',
-                    '1.0',
-                    '1.0',
-                    'Single repository assessment'
-                ])
+                
+                # Create entries for each repository
+                for i, repo in enumerate(args.repo):
+                    writer.writerow([
+                        datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%fZ'),
+                        f'RepoJuror_{i+1}',
+                        repo,
+                        repo,  # Use same repo for both to focus on individual assessment
+                        'repo_assessment',
+                        '1.0',
+                        '1.0',
+                        f'Repository assessment {i+1}'
+                    ])
             args.train_csv = temp_csv_path
-            logger.info(f"Created temporary CSV for single repo assessment: {temp_csv_path}")
+            logger.info(f"Created temporary CSV for {len(args.repo)} repository assessment(s): {temp_csv_path}")
         except Exception as e:
             print(f"Error creating temporary CSV: {e}")
             sys.exit(1)
@@ -215,7 +226,8 @@ Examples:
             model_id=args.model,
             temperature=args.temperature,
             train_csv_path=args.train_csv,
-            output_dir=args.output_dir  # Will use pipeline's timestamped default if None
+            output_dir=args.output_dir,  # Will use pipeline's timestamped default if None
+            specific_repos=args.repo  # Pass specific repositories if provided
         )
         
         # Print results summary

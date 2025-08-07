@@ -1,0 +1,81 @@
+{
+  "summary": {
+    "overall_reasoning": {
+      "mean": 0.1635922603276473,
+      "median": 0.1635922603276473,
+      "std": 0.0,
+      "min": 0.1635922603276473,
+      "max": 0.1635922603276473
+    },
+    "aggregate_criteria": {
+      "mean": 0.16334619021764807,
+      "median": 0.16334619021764807,
+      "std": 0.0,
+      "min": 0.16334619021764807,
+      "max": 0.16334619021764807
+    },
+    "parsing_success_rate": 1.0
+  },
+  "per_repository": {
+    "web3.js": {
+      "overall_reasoning_uncertainty": 0.1635922603276473,
+      "aggregate_uncertainty": 0.16334619021764807,
+      "criteria_uncertainties": {
+        "protocol_implementation": 0.1624572394852995,
+        "algorithmic_innovation": 0.1675322026829416,
+        "developer_experience": 0.1634331570282734,
+        "architectural_innovation": 0.16237191345221405,
+        "security_innovation": 0.16632883653489638,
+        "standards_leadership": 0.1601112406698141,
+        "cross_client_compatibility": 0.16389374061540005
+      },
+      "originality_score": 0.524,
+      "parsing_method": "json",
+      "parsing_success": true
+    }
+  },
+  "per_criterion": {
+    "protocol_implementation": {
+      "mean": 0.1624572394852995,
+      "median": 0.1624572394852995,
+      "std": 0.0,
+      "count": 1
+    },
+    "algorithmic_innovation": {
+      "mean": 0.1675322026829416,
+      "median": 0.1675322026829416,
+      "std": 0.0,
+      "count": 1
+    },
+    "developer_experience": {
+      "mean": 0.1634331570282734,
+      "median": 0.1634331570282734,
+      "std": 0.0,
+      "count": 1
+    },
+    "architectural_innovation": {
+      "mean": 0.16237191345221405,
+      "median": 0.16237191345221405,
+      "std": 0.0,
+      "count": 1
+    },
+    "security_innovation": {
+      "mean": 0.16632883653489638,
+      "median": 0.16632883653489638,
+      "std": 0.0,
+      "count": 1
+    },
+    "standards_leadership": {
+      "mean": 0.1601112406698141,
+      "median": 0.1601112406698141,
+      "std": 0.0,
+      "count": 1
+    },
+    "cross_client_compatibility": {
+      "mean": 0.16389374061540005,
+      "median": 0.16389374061540005,
+      "std": 0.0,
+      "count": 1
+    }
+  }
+}

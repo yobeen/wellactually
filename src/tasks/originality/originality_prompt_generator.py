@@ -30,7 +30,10 @@ class OriginalityPromptGenerator:
         try:
             with open(self.config_path, 'r') as f:
                 config = yaml.safe_load(f)
-            return config.get('originality_framework', {})
+            framework_config = config.get('originality_framework', {})
+            if not framework_config:
+                raise ValueError("No originality_framework section found in config")
+            return framework_config
         except Exception as e:
             raise ValueError(f"Failed to load originality framework config: {e}")
     
@@ -50,14 +53,19 @@ class OriginalityPromptGenerator:
             
             for repo in config.get('seed_repositories', []):
                 if repo.get('url') == repo_url:
+                    # Use originality_category if available, otherwise fall back to category
+                    category = repo.get('originality_category') or repo.get('category')
+                    weights = repo.get('originality_weights', {})
+                    
                     return {
-                        'category': repo.get('originality_category'),
-                        'weights': repo.get('originality_weights', {}),
+                        'category': category,
+                        'weights': weights,
                         'name': repo.get('name'),
                         'description': repo.get('description', ''),
                         'primary_language': repo.get('primary_language', ''),
                         'domain': repo.get('domain', ''),
-                        'key_functions': repo.get('key_functions', [])
+                        'key_functions': repo.get('key_functions', []),
+                        'repo_url': repo_url
                     }
             
             raise ValueError(f"Repository not found in configuration: {repo_url}")
@@ -79,11 +87,14 @@ class OriginalityPromptGenerator:
         category = repo_config['category']
         weights = repo_config['weights']
         
-        if not category or not weights:
-            raise ValueError(f"Missing originality configuration for repository: {repo_url}")
+        if not category:
+            raise ValueError(f"Missing originality category for repository: {repo_url}")
+        
+        if not weights:
+            raise ValueError(f"Missing originality weights for repository: {repo_url}. Available keys: {list(repo_config.keys())}")
         
         # Get category-specific configuration
-        category_config = self.framework_config['categories'].get(category, {})
+        category_config = self.framework_config.get('categories', {}).get(category, {})
         criteria_config = self.framework_config.get('criteria', {})
         
         # Build the prompt

@@ -1,0 +1,150 @@
+[
+  {
+    "repository_url": "https://github.com/a16z/helios",
+    "target_score": 3.63
+  },
+  {
+    "repository_url": "https://github.com/alloy-rs/alloy",
+    "target_score": 3.1500000000000004
+  },
+  {
+    "repository_url": "https://github.com/chainsafe/lodestar",
+    "target_score": 5.069999999999999
+  },
+  {
+    "repository_url": "https://github.com/consensys/teku",
+    "target_score": 6.3599999999999985
+  },
+  {
+    "repository_url": "https://github.com/erigontech/erigon",
+    "target_score": 6.46
+  },
+  {
+    "repository_url": "https://github.com/eth-infinitism/account-abstraction",
+    "target_score": 6.719999999999999
+  },
+  {
+    "repository_url": "https://github.com/ethereum-lists/chains",
+    "target_score": 5.000000000000001
+  },
+  {
+    "repository_url": "https://github.com/ethereum/fe",
+    "target_score": 3.78
+  },
+  {
+    "repository_url": "https://github.com/ethereum/go-ethereum",
+    "target_score": 8.02
+  },
+  {
+    "repository_url": "https://github.com/ethereum/py-evm",
+    "target_score": 6.109999999999999
+  },
+  {
+    "repository_url": "https://github.com/ethereum/remix-project",
+    "target_score": 4.9799999999999995
+  },
+  {
+    "repository_url": "https://github.com/ethereum/solidity",
+    "target_score": 8.12
+  },
+  {
+    "repository_url": "https://github.com/ethereum/sourcify",
+    "target_score": 5.17
+  },
+  {
+    "repository_url": "https://github.com/ethereum/web3.py",
+    "target_score": 5.38
+  },
+  {
+    "repository_url": "https://github.com/ethereumjs/ethereumjs-monorepo",
+    "target_score": 6.31
+  },
+  {
+    "repository_url": "https://github.com/ethers-io/ethers.js",
+    "target_score": 5.789999999999999
+  },
+  {
+    "repository_url": "https://github.com/foundry-rs/foundry",
+    "target_score": 4.97
+  },
+  {
+    "repository_url": "https://github.com/grandinetech/grandine",
+    "target_score": 3.349999999999999
+  },
+  {
+    "repository_url": "https://github.com/hyperledger-web3j/web3j",
+    "target_score": 4.109999999999999
+  },
+  {
+    "repository_url": "https://github.com/hyperledger/besu",
+    "target_score": 5.809999999999999
+  },
+  {
+    "repository_url": "https://github.com/nethereum/nethereum",
+    "target_score": 3.7700000000000005
+  },
+  {
+    "repository_url": "https://github.com/nethermindeth/nethermind",
+    "target_score": 6.789999999999999
+  },
+  {
+    "repository_url": "https://github.com/nomicfoundation/hardhat",
+    "target_score": 4.889999999999999
+  },
+  {
+    "repository_url": "https://github.com/openzeppelin/openzeppelin-contracts",
+    "target_score": 5.93
+  },
+  {
+    "repository_url": "https://github.com/paradigmxyz/reth",
+    "target_score": 4.829999999999998
+  },
+  {
+    "repository_url": "https://github.com/prysmaticlabs/prysm",
+    "target_score": 6.939999999999999
+  },
+  {
+    "repository_url": "https://github.com/psf/requests",
+    "target_score": 5.08
+  },
+  {
+    "repository_url": "https://github.com/pydantic/pydantic",
+    "target_score": 4.26
+  },
+  {
+    "repository_url": "https://github.com/readthedocs/sphinx_rtd_theme",
+    "target_score": 3.4
+  },
+  {
+    "repository_url": "https://github.com/safe-global/safe-smart-account",
+    "target_score": 5.760000000000002
+  },
+  {
+    "repository_url": "https://github.com/scaffold-eth/scaffold-eth-2",
+    "target_score": 3.9999999999999996
+  },
+  {
+    "repository_url": "https://github.com/sigp/lighthouse",
+    "target_score": 7.139999999999999
+  },
+  {
+    "repository_url": "https://github.com/status-im/nimbus-eth2",
+    "target_score": 6.74
+  },
+  {
+    "repository_url": "https://github.com/vyperlang/titanoboa",
+    "target_score": 1.9600000000000004
+  },
+  {
+    "repository_url": "https://github.com/vyperlang/vyper",
+    "target_score": 6.289999999999999
+  },
+  {
+    "repository_url": "https://github.com/chainsafe/web3.js",
+    "target_score": 5.470000000000001
+  },
+  {
+    "repository_url": "https://github.com/wevm/viem",
+    "target_score": 4.509999999999999
+  }
+]

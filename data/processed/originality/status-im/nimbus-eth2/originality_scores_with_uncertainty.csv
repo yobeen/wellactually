@@ -1,0 +1,2 @@
+repository_url,repository_name,originality_category,originality_score,overall_reasoning_uncertainty,aggregate_uncertainty,assessment_confidence,parsing_success,parsing_method
+https://github.com/status-im/nimbus-eth2,Nimbus,B,0.611111111111111,0.16881957080291693,0.16863485354928426,0.7,True,json

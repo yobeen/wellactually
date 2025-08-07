@@ -1,0 +1,2 @@
+repository_url,repository_name,originality_category,originality_score,overall_reasoning_uncertainty,aggregate_uncertainty,assessment_confidence,parsing_success,parsing_method
+https://github.com/sigp/lighthouse,Lighthouse,B,0.7008888888888888,0.16548300980942227,0.16273833768411652,0.7,True,json

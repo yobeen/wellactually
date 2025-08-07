@@ -1,0 +1,76 @@
+[
+  {
+    "repository_url": "https://github.com/ethereum-lists/chains",
+    "repository_name": "Ethereum Chains",
+    "originality_category": "I",
+    "final_originality_score": 0.4555555555555556,
+    "assessment_confidence": 0.5,
+    "overall_reasoning_uncertainty": 0.5,
+    "aggregate_uncertainty": 0.7,
+    "criteria_uncertainties": {
+      "protocol_implementation": 0.7,
+      "algorithmic_innovation": 0.7,
+      "developer_experience": 0.7,
+      "architectural_innovation": 0.7,
+      "security_innovation": 0.7,
+      "standards_leadership": 0.7,
+      "cross_client_compatibility": 0.7
+    },
+    "criteria_scores": {
+      "protocol_implementation": {
+        "score": 5,
+        "weight": 0.2,
+        "reasoning": "No reasoning provided - missing from response",
+        "raw_uncertainty": 0.7
+      },
+      "algorithmic_innovation": {
+        "score": 5,
+        "weight": 0.1,
+        "reasoning": "No reasoning provided - missing from response",
+        "raw_uncertainty": 0.7
+      },
+      "developer_experience": {
+        "score": 5,
+        "weight": 0.15,
+        "reasoning": "No reasoning provided - missing from response",
+        "raw_uncertainty": 0.7
+      },
+      "architectural_innovation": {
+        "score": 5,
+        "weight": 0.1,
+        "reasoning": "No reasoning provided - missing from response",
+        "raw_uncertainty": 0.7
+      },
+      "security_innovation": {
+        "score": 5,
+        "weight": 0.05,
+        "reasoning": "No reasoning provided - missing from response",
+        "raw_uncertainty": 0.7
+      },
+      "standards_leadership": {
+        "score": 5,
+        "weight": 0.2,
+        "reasoning": "No reasoning provided - missing from response",
+        "raw_uncertainty": 0.7
+      },
+      "cross_client_compatibility": {
+        "score": 5,
+        "weight": 0.2,
+        "reasoning": "No reasoning provided - missing from response",
+        "raw_uncertainty": 0.7
+      }
+    },
+    "overall_reasoning": "",
+    "parsing_method": "regex",
+    "parsing_success": true,
+    "parsing_warnings": [
+      "Missing assessment for protocol_implementation, using defaults",
+      "Missing assessment for algorithmic_innovation, using defaults",
+      "Missing assessment for developer_experience, using defaults",
+      "Missing assessment for architectural_innovation, using defaults",
+      "Missing assessment for security_innovation, using defaults",
+      "Missing assessment for standards_leadership, using defaults",
+      "Missing assessment for cross_client_compatibility, using defaults"
+    ]
+  }
+]

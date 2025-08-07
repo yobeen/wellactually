@@ -1,0 +1,68 @@
+[
+  {
+    "repository_url": "https://github.com/safe-global/safe-smart-account",
+    "repository_name": "Safe Smart Account",
+    "originality_category": "G",
+    "final_originality_score": 0.7711111111111112,
+    "assessment_confidence": 0.7,
+    "overall_reasoning_uncertainty": 0.17124277043695993,
+    "aggregate_uncertainty": 0.17284648960481666,
+    "criteria_uncertainties": {
+      "protocol_implementation": 0.17534422376411388,
+      "algorithmic_innovation": 0.1737232070850038,
+      "developer_experience": 0.17637208593994605,
+      "architectural_innovation": 0.18020493829293854,
+      "security_innovation": 0.169368138108718,
+      "standards_leadership": 0.1687146163366221,
+      "cross_client_compatibility": 0.165600739896452
+    },
+    "criteria_scores": {
+      "protocol_implementation": {
+        "score": 7,
+        "weight": 0.1,
+        "reasoning": "The Safe contracts implement core wallet functionality from scratch rather than wrapping existing solutions. It introduces novel features like modular guard contracts for transaction validation, batched transactions, and delegatecall-based module extensions. However, it relies on standard cryptographic primitives (ECDSA) and doesn't re-implement low-level protocol mechanics.",
+        "raw_uncertainty": 0.17534422376411388
+      },
+      "algorithmic_innovation": {
+        "score": 5,
+        "weight": 0.08,
+        "reasoning": "While optimized for gas efficiency in signature verification, the core algorithms follow established patterns for multisig wallets. The main innovation is in operational workflows (e.g., transaction batching) rather than breakthrough algorithms. Performance improvements are incremental rather than revolutionary.",
+        "raw_uncertainty": 0.1737232070850038
+      },
+      "developer_experience": {
+        "score": 8,
+        "weight": 0.15,
+        "reasoning": "Pioneered developer-friendly patterns like transaction simulation and modular contract architecture. The Safe SDK provides abstracted interfaces for wallet operations, and the contract's modular design enables composable security extensions. These patterns have influenced subsequent smart account implementations.",
+        "raw_uncertainty": 0.17637208593994605
+      },
+      "architectural_innovation": {
+        "score": 9,
+        "weight": 0.15,
+        "reasoning": "Introduced highly influential modular architecture with separation of core, modules, and guards. This allowed customizable security policies and upgradability without core contract changes. The proxy pattern implementation became a de facto standard for upgradeable smart contracts, significantly impacting ecosystem design patterns.",
+        "raw_uncertainty": 0.18020493829293854
+      },
+      "security_innovation": {
+        "score": 9,
+        "weight": 0.3,
+        "reasoning": "Defined new security paradigms for smart accounts: formalized multi-layer transaction validation (signatures + guard checks), session keys via modules, and configurable security thresholds. While building on existing multisig concepts, its formal verification approach and modular security model set new industry standards for account security.",
+        "raw_uncertainty": 0.169368138108718
+      },
+      "standards_leadership": {
+        "score": 10,
+        "weight": 0.22,
+        "reasoning": "The project originated ERC-4337 core concepts and directly influenced account abstraction standards. Its contract architecture became the foundation for numerous EIPs. As the most battle-tested smart account implementation with >$100B secured, it established de facto standards for secure smart contract wallets.",
+        "raw_uncertainty": 0.1687146163366221
+      },
+      "cross_client_compatibility": {
+        "score": 4,
+        "weight": 0.0,
+        "reasoning": "Primarily focused on EVM chains without significant cross-client innovations. Interoperability features exist but aren't groundbreaking in the context of cross-client compatibility.",
+        "raw_uncertainty": 0.165600739896452
+      }
+    },
+    "overall_reasoning": "The Safe Smart Account represents foundational innovation in smart contract wallet design. While multi-sig wallets existed previously, Safe introduced paradigm-shifting concepts: 1) Modular security architecture separating core logic from guards/modules, 2) Formalized transaction validation layers, 3) Standards-driven approach that directly shaped ERC-4337. Its greatest originality lies in creating extensible security primitives that became ecosystem standards. The proxy pattern implementation alone revolutionized upgradeable contract design. Though not the first multisig, it redefined secure account abstraction through rigorous formal verification and novel architectural patterns. Ecosystem impact is exceptional, securing over $100B in assets and influencing all subsequent smart account designs.",
+    "parsing_method": "json",
+    "parsing_success": true,
+    "parsing_warnings": []
+  }
+]
